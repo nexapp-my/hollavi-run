@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="80sp"
+        android:background="@color/hollaviBlue">
+
+        <com.groomify.hollavirun.view.ProfilePictureView
+            android:id="@+id/user_profile_picture"
+            android:layout_width="50sp"
+            android:layout_height="50sp"
+            android:layout_margin="15sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="User name"
+            android:id="@+id/textView"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/user_profile_picture"
+            android:layout_toEndOf="@+id/user_profile_picture"
+            android:layout_margin="15sp"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Rank 1088"
+            android:id="@+id/textView2"
+            android:layout_alignBottom="@+id/user_profile_picture"
+            android:layout_alignLeft="@+id/textView"
+            android:layout_alignStart="@+id/textView"
+            android:textColor="@color/hollaviFontLightBlue" />
+
+
+    </RelativeLayout>
+</LinearLayout>
