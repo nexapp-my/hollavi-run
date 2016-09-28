@@ -20,5 +20,11 @@
 
     <string name="facebook_app_id">1774142012858175</string>
     <string name="fb_login_protocol_scheme">fb1774142012858175</string>
+    <string name="title_activity_onboarding">OnboardingActivity</string>
 
+
+    <string name="onboarding_header">COMPLETE CHALLENGES</string>
+    <string name="onboarding_what_is">What is Groomify Run? We are changing the way you run with the help of technology. Log in or sign up now, let us show you what you can do with tech.</string>
+    <string name="onboarding_menu_signup">SIGN UP</string>
+    <string name="onboarding_menu_login">LOG IN</string>
 </resources>

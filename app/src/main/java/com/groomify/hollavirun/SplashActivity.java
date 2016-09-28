@@ -37,7 +37,7 @@ public class SplashActivity extends AppCompatActivity {
     private final static String TAG = SplashActivity.class.getSimpleName();
 
     CallbackManager callbackManager;
-    private final static long SPLASH_DISPLAY_LENGTH = 3000;
+    private final static long SPLASH_DISPLAY_LENGTH = 1000;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,11 +56,18 @@ public class SplashActivity extends AppCompatActivity {
                 if(AccessToken.getCurrentAccessToken() != null && Profile.getCurrentProfile() != null){
                     launchWelcomeScreen();
                 }else{
-                    launchLoginScreen();
+                    //launchLoginScreen();
+                    launchOnboardingScreen();
                 }
             }
         }, SPLASH_DISPLAY_LENGTH);
 
+    }
+
+    private void launchOnboardingScreen(){
+        Intent intent = new Intent(SplashActivity.this, OnboardingActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void launchLoginScreen(){

@@ -2,12 +2,12 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:drawable="@color/splashScreenBGColour"/>
+        android:drawable="@android:color/white"/>
 
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/hollavi_logo"/>
+            android:src="@drawable/ic_groomify_logo_large"/>
     </item>
 
 </layer-list>

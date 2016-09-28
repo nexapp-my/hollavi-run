@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.groomify.hollavirun.OnboardingActivity"
+    android:id="@+id/onboardingMainLayout">
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/groomifyLogoIView"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="80sp"
+        android:src="@drawable/ic_groomify_logo_large" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/onboarding_header"
+        android:id="@+id/textView"
+        android:layout_below="@+id/groomifyLogoIView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="75sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:textSize="13dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/onboarding_what_is"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20sp"
+        android:textColor="@android:color/black"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:textSize="12dp"
+        android:gravity="center_horizontal" />
+
+    <include android:id="@+id/myid1" layout="@layout/onboarding_bar_bottom" />
+
+</RelativeLayout>

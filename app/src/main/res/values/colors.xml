@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+
+    <color name="rustyRed">#c82918</color>
+    <color name="clickedRustyRed">#b12415</color>
+
+    <!-- old ui from here -->
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
@@ -10,7 +16,8 @@
     <color name="hollaviFontLightBlue">#27C194</color>
     <color name="hollaviFontBlue">#185C5C</color>
 
-
-
+    <color name="hollaviDeepBackground">#0E1F31</color>
+    <color name="hollaviListItemBackground">#000B23</color>
     <color name="black_overlay">#66000000</color>
+    <!-- old ui end  here -->
 </resources>

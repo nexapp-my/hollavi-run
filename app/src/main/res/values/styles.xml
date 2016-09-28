@@ -1,14 +1,36 @@
 <resources>
 
+    <style name="GroomifyAppTheme" parent="Theme.AppCompat.Light">
+        <item name="android:background">@android:color/white</item>
+        <item name="toolbarStyle">@style/Widget.Toolbar</item>
+
+
+    </style>
+
+    <style name="GroomifyAppActionBarTheme" parent="GroomifyAppTheme">
+        <item name="android:actionBarStyle">@style/GroomifyAppActionBarTheme.ActionBar</item>
+        <item name="android:actionMenuTextColor">@color/rustyRed</item>
+    </style>
+
+    <style name="GroomifyAppActionBarTheme.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">@android:color/white</item>
+        <item name="android:titleTextStyle">@style/GroomifyAppActionBarTheme.Text</item>
+    </style>
+
+    <style name="GroomifyAppActionBarTheme.Text" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/rustyRed</item>
+    </style>
+
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/white</item>
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/hollaviBlue</item>
         <item name="colorPrimaryDark">@color/splashScreenBGColour</item>
         <item name="colorAccent">@color/hollaviFontLightBlue</item>
         <item name="android:actionBarStyle">@style/MyActionBar</item>
+        <item name="android:textStyle"></item>
     </style>
-
 
 
     <style name="MyActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
@@ -64,5 +86,22 @@
         <item name="tabSelectedTextColor">@color/hollaviFontLightBlue</item>
 
         <!--<item name="tabTextAppearance">@style/MyCustomTabText</item>-->
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    
+    
+    <style name="OnboardingFooterBar">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@color/rustyRed</item>
+    </style>
+
+
+
+
+    <style name="Widget.Toolbar" parent="@style/Widget.AppCompat.Toolbar">
+        <item name="contentInsetStart">0dp</item>
     </style>
 </resources>

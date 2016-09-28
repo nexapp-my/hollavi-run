@@ -17,6 +17,10 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.groomify.hollavirun.fragment.ChatFragment;
 import com.groomify.hollavirun.fragment.MainFragment;
@@ -60,6 +64,16 @@ public class MainActivity extends AppCompatActivity   {
                 Log.i(TAG, "Logout bye bye.");
 
                 LoginManager.getInstance().logOut();
+
+                new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/permissions/", null, HttpMethod.DELETE, new GraphRequest
+                        .Callback() {
+                    @Override
+                    public void onCompleted(GraphResponse graphResponse) {
+
+                        LoginManager.getInstance().logOut();
+
+                    }
+                }).executeAsync();
 
                 launchLoginScreen();
 

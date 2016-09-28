@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/footer" android:layout_width="fill_parent"
+    android:layout_height="49sp" android:orientation="horizontal"
+    android:layout_alignParentBottom="true"
+    android:background="@color/rustyRed">
+
+    <Button android:id="@+id/signup_button" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:layout_weight="1"
+        android:text="@string/onboarding_menu_signup"
+        android:background="@drawable/groomify_button_state"
+        style="@style/OnboardingFooterBar" />
+    <View
+        android:layout_width="1pt"
+        android:layout_height="24sp"
+        android:background="@android:color/white"
+        android:layout_gravity="center_vertical" />
+
+    <Button android:id="@+id/login_button" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:layout_weight="1"
+        android:text="@string/onboarding_menu_login"
+        android:background="@drawable/groomify_button_state"
+        style="@style/OnboardingFooterBar" />
+</LinearLayout>
