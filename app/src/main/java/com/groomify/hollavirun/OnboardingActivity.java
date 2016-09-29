@@ -38,8 +38,7 @@ public class OnboardingActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 Log.i(TAG, "Login button on click");
-                Toast toast = Toast.makeText(OnboardingActivity.this, "Login clicked", Toast.LENGTH_LONG);
-                toast.show();
+                launchWelcomeScreen();
             }
         });
 
@@ -51,4 +50,9 @@ public class OnboardingActivity extends AppCompatActivity {
         //finish();
     }
 
+    private void launchWelcomeScreen(){
+        Intent intent = new Intent(OnboardingActivity.this, WelcomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
 }

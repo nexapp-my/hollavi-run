@@ -27,4 +27,14 @@
     <string name="onboarding_what_is">What is Groomify Run? We are changing the way you run with the help of technology. Log in or sign up now, let us show you what you can do with tech.</string>
     <string name="onboarding_menu_signup">SIGN UP</string>
     <string name="onboarding_menu_login">LOG IN</string>
+
+    <string name="welcome_description">Before we begin, why not upload a display picture so that we can get to know you better?</string>
+
+    <string name="team_select_header">PICK A TEAM</string>
+    <string name="team_select_description">Enter your email to receive instructions on how to reset your password.</string>
+
+    <string name="team_select_one">A</string>
+    <string name="team_select_two">B</string>
+    <string name="team_select_three">C</string>
+
 </resources>

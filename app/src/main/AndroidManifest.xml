@@ -56,16 +56,15 @@
         <activity
             android:name=".OnboardingActivity"
             android:theme="@style/GroomifyAppTheme" />
-
-        <activity android:name=".SignUpActivity"
-            android:parentActivityName="com.groomify.hollavirun.OnboardingActivity"
+        <activity
+            android:name=".SignUpActivity"
+            android:parentActivityName=".OnboardingActivity"
             android:theme="@style/GroomifyAppActionBarTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.groomify.hollavirun.OnboardingActivity" />
         </activity>
-
-
+        <activity android:name=".TeamSelectActivity"></activity>
     </application>
 
 </manifest>

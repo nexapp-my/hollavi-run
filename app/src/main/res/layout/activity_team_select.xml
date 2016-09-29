@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".TeamSelectActivity">
+
+    <include layout="@layout/menu_bar_top"
+        android:id="@+id/include"></include>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/team_select_header"
+        android:id="@+id/textView3"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="170dp"
+        android:textColor="@color/rustyRed"
+        android:textStyle="bold"
+        android:textSize="18sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/team_select_description"
+        android:id="@+id/textView4"
+        android:layout_below="@+id/textView3"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp"
+        android:gravity="center_horizontal"
+        android:layout_marginLeft="32dp" />
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView4"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="38dp"
+        android:id="@+id/relativeLayout">
+
+        <TextView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:text="@string/team_select_one"
+            android:id="@+id/text_view_team_one"
+            android:gravity="center"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            android:layout_marginLeft="20dp"
+            android:background="@drawable/team_select_text_view_background" />
+
+        <TextView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:text="@string/team_select_two"
+            android:id="@+id/text_view_team_two"
+            android:gravity="center"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            android:background="@drawable/team_select_text_view_background"
+            android:layout_weight="2"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:text="@string/team_select_three"
+            android:id="@+id/text_view_team_three"
+            android:gravity="center"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            android:background="@drawable/team_select_text_view_background"
+            android:layout_weight="3"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="20dp" />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Let&apos;s go"
+        android:id="@+id/text_view_lets_go"
+        android:layout_below="@+id/relativeLayout"
+        android:layout_centerHorizontal="true"
+        android:textSize="17sp"
+        android:textColor="@color/rustyRed"
+        android:layout_marginTop="40dp" />
+
+</RelativeLayout>

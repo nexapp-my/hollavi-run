@@ -4,6 +4,9 @@
 
     <color name="rustyRed">#c82918</color>
     <color name="clickedRustyRed">#b12415</color>
+    <color name="primaryTextColour">#AAAAAA</color>
+    <color name="borderColour">#E9E9E9</color>
+
 
     <!-- old ui from here -->
     <color name="colorPrimary">#3F51B5</color>
