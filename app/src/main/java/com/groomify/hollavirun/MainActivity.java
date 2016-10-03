@@ -6,25 +6,21 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.AccessToken;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
-import com.facebook.login.LoginManager;
+import com.facebook.Profile;
 import com.groomify.hollavirun.fragment.ChatFragment;
 import com.groomify.hollavirun.fragment.MainFragment;
 import com.groomify.hollavirun.fragment.MissionFragment;
+import com.groomify.hollavirun.view.ProfilePictureView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +32,13 @@ public class MainActivity extends AppCompatActivity   {
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
-    private Toolbar toolbar;
+   /* private Toolbar toolbar;
     private TabLayout tabLayout;
-    private ViewPager viewPager;
+    private ViewPager viewPager;*/
+
+    private ImageView menuBarLogo;
+    private TextView menuBarGreetingText;
+    private ProfilePictureView pictureView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +46,51 @@ public class MainActivity extends AppCompatActivity   {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        if(getSupportActionBar() != null)
+            getSupportActionBar().hide();
+
+        if(menuBarLogo == null)
+            menuBarLogo = (ImageView) findViewById(R.id.menu_bar_gromify_logo);
+
+        if(menuBarGreetingText == null)
+            menuBarGreetingText = (TextView) findViewById(R.id.menu_bar_greeting_text);
+
+        if(pictureView == null)
+            pictureView = (ProfilePictureView) findViewById(R.id.menu_bar_profile_picture);
+
+
+        menuBarLogo.setVisibility(ImageView.INVISIBLE);
+        menuBarGreetingText.setVisibility(TextView.VISIBLE);
+        pictureView.setVisibility(View.VISIBLE);
+
+
+
+        if (savedInstanceState == null) {
+            Fragment newFragment = new MainFragment();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.add(R.id.main_placeholder, newFragment).commit();
+
+        }
+
+        if(Profile.getCurrentProfile() != null){
+
+            menuBarGreetingText.setText("Good Morning, " +Profile.getCurrentProfile().getName());
+
+            pictureView.setProfileId(Profile.getCurrentProfile().getId());
+            pictureView.setDrawingCacheEnabled(true);
+            Log.i(TAG, "Action bar profile picture loaded");
+
+
+        }
+
+        /*getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setCustomView(R.layout.action_bar_hollavi);
+*/
 
 
 
-
-        ImageButton imageButton = (ImageButton) findViewById(R.id.imageButton);
+       /* ImageButton imageButton = (ImageButton) findViewById(R.id.imageButton);
         imageButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -78,7 +115,7 @@ public class MainActivity extends AppCompatActivity   {
                 launchLoginScreen();
 
             }
-        });
+        });*/
 
         /*toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -86,17 +123,17 @@ public class MainActivity extends AppCompatActivity   {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 */
 
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
+      /*  viewPager = (ViewPager) findViewById(R.id.viewpager);
 
         Log.i(TAG, "Is view page there? --->"+viewPager);
 
         setupViewPager(viewPager);
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
+        tabLayout.setupWithViewPager(viewPager);*/
     }
 
-    private void setupViewPager(ViewPager viewPager) {
+   /* private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new MissionFragment(), "Mission");
         adapter.addFragment(new MainFragment(), "Main");
@@ -132,7 +169,7 @@ public class MainActivity extends AppCompatActivity   {
         public CharSequence getPageTitle(int position) {
             return mFragmentTitleList.get(position);
         }
-    }
+    }*/
 
 
     private void launchLoginScreen(){

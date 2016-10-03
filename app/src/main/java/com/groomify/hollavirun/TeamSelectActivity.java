@@ -1,5 +1,6 @@
 package com.groomify.hollavirun;
 
+import android.content.Intent;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -64,8 +65,17 @@ public class TeamSelectActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.i(TAG, "Lets go clicked. Run run run.");
+                launchMainActivity();
             }
         });
+
+    }
+
+    private void launchMainActivity(){
+        Intent intent = new Intent(TeamSelectActivity.this, MainActivity.class);
+
+        startActivity(intent);
+        finish();
 
     }
 

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="49dp"
+        android:layout_weight="1">
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_menu_home"
+            android:layout_marginTop="7dp"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="Home"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="2dp"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="49dp"
+        android:layout_weight="1">
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_menu_missions"
+            android:layout_marginTop="7dp"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="Missions"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="2dp"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="49dp"
+        android:layout_weight="1">
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_menu_camera"
+            android:layout_marginTop="7dp"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="Camera"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="2dp"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="49dp"
+        android:layout_weight="1">
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_menu_news"
+            android:layout_marginTop="7dp"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="News Feed"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="2dp"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="49dp"
+        android:layout_weight="1">
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_menu_sos"
+            android:layout_marginTop="7dp"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="SOS"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="2dp"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
+
+    <!--<Button
+        android:layout_weight="1"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_menu_home"
+        android:background="@android:color/transparent"
+        android:text="Home"
+        android:drawableTop="@drawable/ic_menu_home"
+        android:gravity="bottom|center_horizontal"/>-->
+    <!--<Button
+        android:layout_weight="1"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_menu_mission"
+        android:background="@android:color/transparent"
+        android:text="Home"
+        android:drawableTop="@drawable/ic_menu_missions"
+        android:gravity="bottom|center_horizontal"/>
+    <Button
+        android:layout_weight="1"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_menu_camera"
+        android:background="@android:color/transparent"
+        android:text="Home"
+        android:drawableTop="@drawable/ic_menu_camera"
+        android:gravity="bottom|center_horizontal"/>
+    <Button
+        android:layout_weight="1"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_menu_news_feed"
+        android:background="@android:color/transparent"
+        android:text="Home"
+        android:drawableTop="@drawable/ic_menu_news"
+        android:gravity="bottom|center_horizontal"/>
+    <Button
+        android:layout_weight="1"
+        android:layout_width="49dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_menu_sos"
+        android:background="@android:color/transparent"
+        android:text="Home"
+        android:drawableTop="@drawable/ic_menu_sos"
+        android:gravity="bottom|center_horizontal"/>-->
+</LinearLayout>
