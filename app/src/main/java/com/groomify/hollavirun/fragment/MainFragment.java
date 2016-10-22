@@ -38,10 +38,17 @@ public class MainFragment  extends ListFragment {
     private ArrayList<MissionCard> missionCards;
     private HorizontalAdapter horizontalAdapter;
 
+    public static View mainFragment;
+    public boolean isFirstTimeInitialized = true;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
+
+        if(!isFirstTimeInitialized){
+            return;
+        }
+
 
         Log.i(TAG, "Inside the main fragment!!!!");
 
@@ -71,6 +78,8 @@ public class MainFragment  extends ListFragment {
         missionCards.add(new MissionCard("04", "INFLATABLE CASTLE", decodeSampledBitmapFromResource(getContext().getResources(), R.drawable.mission_sample_cod, 128, 128)));
         missionCards.add(new MissionCard("05", "DON't TEXT & DRIVE", decodeSampledBitmapFromResource(getContext().getResources(), R.drawable.mission_sample_ffantasy, 128, 128)));
         missionCards.add(new MissionCard("06", "UPSIDE DOWN WORLD", null));
+
+        isFirstTimeInitialized = false;
 /*
 
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(),
@@ -120,8 +129,12 @@ public class MainFragment  extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        if(mainFragment != null){
+            return mainFragment;
+        }
         // Inflate the layout for this fragment
-        View mainFragment = inflater.inflate(R.layout.fragment_main, container, false);
+        mainFragment = inflater.inflate(R.layout.fragment_main, container, false);
 //
 //        View profileRankingView = inflater.inflate(R.layout.item_profile_ranking,container,false);
 //

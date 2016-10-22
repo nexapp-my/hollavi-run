@@ -1,0 +1,57 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.groomify.hollavirun.fragment.RankingListFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+   <!-- <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/hello_blank_fragment" />-->
+
+    <include layout="@layout/item_profile_ranking"
+        android:id="@+id/profile_ranking_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/profile_ranking_item"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+        <TextView
+            android:text="TOP 5 OVERALL RANKINGS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/top_5_header_tv"
+            android:textSize="12sp"
+            android:textColor="@color/hollaviListItemBackground"
+            android:textAllCaps="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="31dp"
+            android:layout_marginLeft="11dp" />
+
+        <ListView android:id="@id/android:list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:divider="#00000000"
+            android:drawSelectorOnTop="false"
+            android:layout_marginTop="56dp" />
+
+        <TextView android:id="@id/android:empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="No data"
+            android:gravity="fill_vertical|center_horizontal"
+            android:layout_marginTop="56dp" />
+    </RelativeLayout>
+
+
+
+
+</RelativeLayout>

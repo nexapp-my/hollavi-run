@@ -24,8 +24,9 @@
         android:id="@+id/main_placeholder"
         android:paddingTop="49dp"
         android:paddingBottom="49dp">
-
+<!--
         <include layout="@layout/fragment_main"/>
+        <include layout="@layout/fragment_mission"/>-->
     </FrameLayout>
 
     <!-- <LinearLayout

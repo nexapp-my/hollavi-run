@@ -4,7 +4,7 @@
 
     <color name="rustyRed">#c82918</color>
     <color name="clickedRustyRed">#b12415</color>
-    <color name="primaryTextColour">#AAAAAA</color>
+    <color name="primaryTextColour">#aaaaaa</color>
     <color name="borderColour">#E9E9E9</color>
 
 
@@ -22,5 +22,7 @@
     <color name="hollaviDeepBackground">#0E1F31</color>
     <color name="hollaviListItemBackground">#000B23</color>
     <color name="black_overlay">#66000000</color>
+    <color name="ranking_item_background">#F2F2F2</color>
+
     <!-- old ui end  here -->
 </resources>

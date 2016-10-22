@@ -37,4 +37,7 @@
     <string name="team_select_two">B</string>
     <string name="team_select_three">C</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

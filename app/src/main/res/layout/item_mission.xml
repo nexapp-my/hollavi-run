@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/mission_item_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:text="SELFIE WITH STRANGERS"
+        android:layout_alignTop="@+id/mission_item_number"
+        android:layout_toRightOf="@+id/mission_item_number"
+        android:layout_toEndOf="@+id/mission_item_number"
+        android:layout_marginTop="20dp"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/mission_item_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:text="01"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:paddingLeft="27dp"
+        android:paddingTop="22dp"
+        android:paddingBottom="22dp"
+        android:paddingRight="34dp" />
+
+    <TextView
+        android:id="@+id/mission_item_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:text="Take 3 selfies with your fellow runners"
+        android:textColor="@color/primaryTextColour"
+        android:layout_alignBaseline="@+id/mission_item_number"
+        android:layout_alignBottom="@+id/mission_item_number"
+        android:layout_toRightOf="@+id/mission_item_number"
+        android:layout_toEndOf="@+id/mission_item_number"
+        android:textSize="12sp"
+        android:fontFamily="sans-serif" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/primaryTextColour"
+        android:layout_weight="0"
+        android:layout_marginTop="19dp"
+        android:layout_below="@+id/mission_item_desc"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginLeft="110dp" />
+</RelativeLayout>

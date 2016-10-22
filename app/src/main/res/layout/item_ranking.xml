@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="36dp"
+    xmlns:tools="http://schemas.android.com/tools">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="#1"
+            android:id="@+id/item_ranking_no"
+
+            android:textColor="@color/rustyRed"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_marginLeft="11dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="12dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="User name"
+            android:id="@+id/item_ranking_name"
+            tools:text="James Weir"
+            android:textColor="@color/hollaviListItemBackground"
+            android:textAllCaps="false"
+            android:layout_alignTop="@id/item_ranking_no"
+            android:layout_toRightOf="@id/item_ranking_no"
+            android:layout_toEndOf="@id/item_ranking_no"
+            android:layout_marginLeft="20dp" />
+
+        <TextView
+            android:text="ID: A0127"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/item_ranking_user_id"
+            android:layout_alignBaseline="@id/item_ranking_name"
+            android:layout_alignBottom="@id/item_ranking_name"
+            android:layout_toRightOf="@id/item_ranking_name"
+            android:layout_toEndOf="@id/item_ranking_name"
+            android:layout_marginLeft="8dp" />
+
+        <TextView
+            android:text="6 m 0 s"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/item_ranking_time"
+            android:layout_alignBaseline="@id/item_ranking_user_id"
+            android:layout_alignBottom="@id/item_ranking_user_id"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="12pt" />
+
+
+</RelativeLayout>

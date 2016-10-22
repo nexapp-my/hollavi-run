@@ -6,7 +6,8 @@
     <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="49dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:id="@+id/menu_home">
         <ImageView
             android:layout_width="25dp"
             android:layout_height="25dp"
@@ -27,7 +28,8 @@
     <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="49dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:id="@+id/menu_mission">
         <ImageView
             android:layout_width="25dp"
             android:layout_height="25dp"
@@ -48,7 +50,8 @@
     <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="49dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:id="@+id/menu_camera">
         <ImageView
             android:layout_width="25dp"
             android:layout_height="25dp"
@@ -69,7 +72,8 @@
     <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="49dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:id="@+id/menu_news_feed">
         <ImageView
             android:layout_width="25dp"
             android:layout_height="25dp"
@@ -91,7 +95,8 @@
     <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="49dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:id="@+id/menu_sos">
         <ImageView
             android:layout_width="25dp"
             android:layout_height="25dp"

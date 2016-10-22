@@ -1,44 +1,44 @@
 package com.groomify.hollavirun;
 
-import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.facebook.AccessToken;
 import com.facebook.Profile;
-import com.groomify.hollavirun.fragment.ChatFragment;
 import com.groomify.hollavirun.fragment.MainFragment;
 import com.groomify.hollavirun.fragment.MissionFragment;
+import com.groomify.hollavirun.fragment.MissionListFragment;
+import com.groomify.hollavirun.fragment.RankingListFragment;
+import com.groomify.hollavirun.fragment.dummy.MissionContent;
 import com.groomify.hollavirun.view.ProfilePictureView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Valkyrie1988 on 9/17/2016.
  */
-public class MainActivity extends AppCompatActivity   {
+public class MainActivity extends AppCompatActivity
+implements
+        MissionListFragment.OnListFragmentInteractionListener,
+        RankingListFragment.OnFragmentInteractionListener{
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
-   /* private Toolbar toolbar;
-    private TabLayout tabLayout;
-    private ViewPager viewPager;*/
+
 
     private ImageView menuBarLogo;
     private TextView menuBarGreetingText;
     private ProfilePictureView pictureView;
+    public Fragment currentFragment;
+    public int currentMenuIndex = 0;
+
+
+    public MainFragment mainFragment = new MainFragment();
+    public MissionFragment missionFragment = new MissionFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,11 +64,14 @@ public class MainActivity extends AppCompatActivity   {
         pictureView.setVisibility(View.VISIBLE);
 
 
+        //TODO load all the fragments here.
+
+
 
         if (savedInstanceState == null) {
-            Fragment newFragment = new MainFragment();
+            currentFragment = new MainFragment();
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.add(R.id.main_placeholder, newFragment).commit();
+            ft.add(R.id.main_placeholder, currentFragment).commit();
 
         }
 
@@ -80,101 +83,67 @@ public class MainActivity extends AppCompatActivity   {
             pictureView.setDrawingCacheEnabled(true);
             Log.i(TAG, "Action bar profile picture loaded");
 
-
         }
 
-        /*getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setCustomView(R.layout.action_bar_hollavi);
-*/
+        initializeMenuBarListener();
+
+    }
+
+    int[] menusId = {
+            R.id.menu_home,
+            R.id.menu_mission,
+            R.id.menu_camera,
+            R.id.menu_news_feed,
+            R.id.menu_sos
+    };
+
+   /* Fragment[] fragments = {
+            new MainFragment(),
+            new MissionFragment()
+    };*/
 
 
+    private void initializeMenuBarListener(){
 
-       /* ImageButton imageButton = (ImageButton) findViewById(R.id.imageButton);
-        imageButton.setOnClickListener(new View.OnClickListener() {
+        View homeMenu = findViewById(menusId[0]);
 
+        homeMenu.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Profile Clicked!",
-                        Toast.LENGTH_LONG).show();
+            public void onClick(View v) {
+                if(currentMenuIndex != 0 ){
 
-                Log.i(TAG, "Logout bye bye.");
-
-                LoginManager.getInstance().logOut();
-
-                new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/permissions/", null, HttpMethod.DELETE, new GraphRequest
-                        .Callback() {
-                    @Override
-                    public void onCompleted(GraphResponse graphResponse) {
-
-                        LoginManager.getInstance().logOut();
-
-                    }
-                }).executeAsync();
-
-                launchLoginScreen();
-
+                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                    ft.remove(currentFragment).add(R.id.main_placeholder, mainFragment).commit();
+                    currentFragment = mainFragment;
+                    currentMenuIndex = 0;
+                }
             }
-        });*/
+        });
 
-        /*toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        View missionMenu = findViewById(menusId[1]);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-*/
+        missionMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(currentMenuIndex != 1){
 
-      /*  viewPager = (ViewPager) findViewById(R.id.viewpager);
+                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                    ft.remove(currentFragment).add(R.id.main_placeholder,  missionFragment).commit();
+                    currentFragment = missionFragment;
+                    currentMenuIndex = 1;
+                }
+            }
+        });
 
-        Log.i(TAG, "Is view page there? --->"+viewPager);
-
-        setupViewPager(viewPager);
-
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);*/
     }
 
-   /* private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new MissionFragment(), "Mission");
-        adapter.addFragment(new MainFragment(), "Main");
-        adapter.addFragment(new ChatFragment(), "Chat");
-        //adapter.addFragment(new ChatFragment(), "Chat");
-        viewPager.setAdapter(adapter);
+    @Override
+    public void onListFragmentInteraction(MissionContent.MissionItem item) {
+
     }
 
-    class ViewPagerAdapter extends FragmentPagerAdapter {
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
+    @Override
+    public void onFragmentInteraction(Uri uri) {
 
-        public ViewPagerAdapter(FragmentManager manager) {
-            super(manager);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
-    }*/
-
-
-    private void launchLoginScreen(){
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivity(intent);
-        finish();
     }
 }
