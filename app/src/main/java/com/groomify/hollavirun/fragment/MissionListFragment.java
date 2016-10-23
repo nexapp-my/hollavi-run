@@ -1,6 +1,7 @@
 package com.groomify.hollavirun.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -9,7 +10,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
+import android.widget.Toast;
 
+import com.groomify.hollavirun.MissionDetailsActivity;
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.adapter.MissionArrayAdapter;
 import com.groomify.hollavirun.adapter.MyMissionRecyclerViewAdapter;
@@ -126,5 +130,16 @@ public class MissionListFragment extends ListFragment {
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
         void onListFragmentInteraction(MissionItem item);
+    }
+
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+        Toast.makeText(getContext(),"Clicked on mission "+position, Toast.LENGTH_SHORT );
+
+        Intent intent = new Intent(getContext(), MissionDetailsActivity.class);
+        startActivity(intent);
+
     }
 }

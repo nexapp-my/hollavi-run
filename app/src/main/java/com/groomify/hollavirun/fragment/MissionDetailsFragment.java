@@ -1,28 +1,30 @@
 package com.groomify.hollavirun.fragment;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
+import com.groomify.hollavirun.QRActivity;
 import com.groomify.hollavirun.R;
-import com.groomify.hollavirun.adapter.MissionArrayAdapter;
-import com.groomify.hollavirun.adapter.RankingArrayAdapter;
-import com.groomify.hollavirun.entities.Ranking;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link RankingListFragment.OnFragmentInteractionListener} interface
+ * {@link MissionDetailsFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link RankingListFragment#newInstance} factory method to
+ * Use the {@link MissionDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RankingListFragment extends ListFragment {
+public class MissionDetailsFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -34,16 +36,11 @@ public class RankingListFragment extends ListFragment {
 
     private OnFragmentInteractionListener mListener;
 
-    Ranking[] rankings = {
-            new Ranking(1, "Ceric", "10001", "1 m 0 s"),
-            new Ranking(2, "Calvin Koh", "10001", "1 m 0 s"),
-            new Ranking(3, "CMonz", "10001", "1 m 0 s"),
-            new Ranking(4, "Jeffrey", "10001", "1 m 0 s"),
-            new Ranking(5, "Ken", "10001", "1 m 0 s")
+    public static final int QR_REQUEST = 111;
 
-    };
+    private static final String TAG = MissionDetailsFragment.class.getSimpleName();
 
-    public RankingListFragment() {
+    public MissionDetailsFragment() {
         // Required empty public constructor
     }
 
@@ -53,11 +50,11 @@ public class RankingListFragment extends ListFragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment RankingListFragment.
+     * @return A new instance of fragment MissionDetailsFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static RankingListFragment newInstance(String param1, String param2) {
-        RankingListFragment fragment = new RankingListFragment();
+    public static MissionDetailsFragment newInstance(String param1, String param2) {
+        MissionDetailsFragment fragment = new MissionDetailsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -72,15 +69,54 @@ public class RankingListFragment extends ListFragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
-        setListAdapter(new RankingArrayAdapter(this.getContext(), rankings));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_ranking_list, container, false);
+
+
+        View view = inflater.inflate(R.layout.fragment_mission_details, container, false);
+
+        Button scanQRButton = (Button) view.findViewById(R.id.scan_qr_button);
+
+        scanQRButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "Scan QR button clicked", Toast.LENGTH_SHORT);
+                requestQRCodeScan(v);
+            }
+        });
+
+        return view;
+    }
+
+
+    public void requestQRCodeScan(View v) {
+        Intent qrScanIntent = new Intent(getContext(), QRActivity.class);
+        startActivityForResult(qrScanIntent, QR_REQUEST);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i(TAG, "Yes it is called back");
+        if (requestCode == QR_REQUEST) {
+            Log.i(TAG, "Yes it is QR request.");
+            String result;
+            if (resultCode == Activity.RESULT_OK) {
+                result = data.getStringExtra(QRActivity.EXTRA_QR_RESULT);
+                Log.i(TAG, "Yes it is success: "+ result);
+                Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT);
+            } else {
+                result = "Error";
+            }
+            Toast.makeText(getContext(), result, Toast.LENGTH_SHORT);
+            /*mResultTextView.setText(result);
+            mResultTextView.setVisibility(View.VISIBLE);*/
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -96,7 +132,7 @@ public class RankingListFragment extends ListFragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-/*            throw new RuntimeException(context.toString()
+            /*throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");*/
         }
     }

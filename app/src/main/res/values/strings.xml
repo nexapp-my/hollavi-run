@@ -28,6 +28,7 @@
     <string name="onboarding_menu_signup">SIGN UP</string>
     <string name="onboarding_menu_login">LOG IN</string>
 
+
     <string name="welcome_description">Before we begin, why not upload a display picture so that we can get to know you better?</string>
 
     <string name="team_select_header">PICK A TEAM</string>
@@ -36,6 +37,8 @@
     <string name="team_select_one">A</string>
     <string name="team_select_two">B</string>
     <string name="team_select_three">C</string>
+
+    <string name="mission_detail_scan_qr_btn">SCAN QR TO ACTIVATE</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

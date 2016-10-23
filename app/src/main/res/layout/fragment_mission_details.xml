@@ -1,0 +1,94 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="50dp"
+    tools:context="com.groomify.hollavirun.fragment.MissionDetailsFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="180dp"
+        app:srcCompat="@drawable/selfie"
+        android:id="@+id/imageView2"
+        android:adjustViewBounds="false"
+        android:cropToPadding="false"
+        android:scaleType="centerCrop"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="20dp" />
+
+
+    <TextView
+        android:id="@+id/mission_item_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:text="01"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        android:layout_below="@+id/imageView2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="20dp" />
+
+    <TextView
+        android:id="@+id/mission_item_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:text="SELFIE WITH STRANGERS"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:layout_alignTop="@+id/mission_item_number"
+        android:layout_toRightOf="@+id/mission_item_number"
+        android:layout_toEndOf="@+id/mission_item_number"
+        android:layout_marginTop="18dp"
+        android:layout_marginLeft="17dp" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/primaryTextColour"
+        android:layout_weight="0"
+        android:layout_below="@+id/mission_item_number"
+        android:layout_toRightOf="@+id/mission_item_number"
+        android:layout_toEndOf="@+id/mission_item_number"
+        android:layout_marginLeft="17dp" />
+
+    <TextView
+        android:id="@+id/mission_item_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:text="It’s simple, all you need to do is take 3 selfies with your fellow runners."
+        android:textSize="12sp"
+        android:fontFamily="sans-serif"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="81dp"
+        android:layout_marginRight="20dp"
+        android:paddingTop="10dp" />
+
+    <Button android:id="@+id/scan_qr_button" android:layout_width="201dp"
+        android:layout_height="36dp" android:layout_weight="1"
+        android:text="@string/mission_detail_scan_qr_btn"
+        android:background="@drawable/groomify_button_state"
+        style="@style/OnboardingFooterBar"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="12dp" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/primaryTextColour"
+        android:layout_weight="0"
+        android:layout_above="@+id/scan_qr_button"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+</RelativeLayout>
