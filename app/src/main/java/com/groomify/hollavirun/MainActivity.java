@@ -1,17 +1,24 @@
 package com.groomify.hollavirun;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.Profile;
 import com.groomify.hollavirun.fragment.MainFragment;
@@ -31,6 +38,8 @@ implements
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
+    private static final int REQUEST_IMAGE_CAPTURE = 101;
+    private static final int PERMISSIONS_REQUEST = 100;
 
 
     private ImageView menuBarLogo;
@@ -161,8 +170,47 @@ implements
             }
         });
 
+        View cameraButton = findViewById(menusId[2]);
+
+        cameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isPermissionGranted()){
+                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                    }
+                }else{
+                    requestPermission();
+                }
+            }
+        });
+
     }
 
+
+
+    private boolean isPermissionGranted() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    recreate();
+                }
+            } else {
+                Toast.makeText(this, "This application needs Camera permission to read QR codes", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+    }
     @Override
     public void onListFragmentInteraction(MissionContent.MissionItem item) {
 

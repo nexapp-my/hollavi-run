@@ -1,11 +1,13 @@
 package com.groomify.hollavirun;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.util.Log;
@@ -25,6 +27,7 @@ import com.facebook.login.LoginResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -41,6 +44,33 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        boolean exitApp = false;
+        try {
+            if(!isOnline()){
+                exitApp = true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            exitApp = true;
+        }
+
+        if(exitApp){
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setCancelable(false)
+                    .setTitle("No internet access")
+                    .setMessage("No internet access, please ensure you are connected to internet")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            android.os.Process.killProcess(android.os.Process.myPid());
+                            System.exit(1);
+                        }
+
+                    }).show();
+        }
 
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(SplashActivity.this);
@@ -115,5 +145,21 @@ public class SplashActivity extends AppCompatActivity {
         } catch (NoSuchAlgorithmException e) {
             Log.e(TAG,"Failed to print key hash.", e);
         }
+    }
+
+
+    public boolean isOnline() throws IOException {
+
+        Runtime runtime = Runtime.getRuntime();
+        try {
+
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+
+        } catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+
+        return false;
     }
 }
