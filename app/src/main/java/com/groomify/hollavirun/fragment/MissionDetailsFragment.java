@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.groomify.hollavirun.QRActivity;
@@ -39,6 +40,14 @@ public class MissionDetailsFragment extends Fragment {
     public static final int QR_REQUEST = 111;
 
     private static final String TAG = MissionDetailsFragment.class.getSimpleName();
+
+    ImageView imgPlaceHolderOne;
+    ImageView imgPlaceHolderTwo;
+    ImageView imgPlaceHolderThree;
+
+    Button scanQRButton;
+
+    boolean unlocked = false;
 
     public MissionDetailsFragment() {
         // Required empty public constructor
@@ -69,6 +78,8 @@ public class MissionDetailsFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+
     }
 
     @Override
@@ -79,7 +90,7 @@ public class MissionDetailsFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_mission_details, container, false);
 
-        Button scanQRButton = (Button) view.findViewById(R.id.scan_qr_button);
+        scanQRButton = (Button) view.findViewById(R.id.scan_qr_button);
 
         scanQRButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,9 +100,28 @@ public class MissionDetailsFragment extends Fragment {
             }
         });
 
+        imgPlaceHolderOne = (ImageView) view.findViewById(R.id.add_pic_placeholder1);
+        imgPlaceHolderTwo = (ImageView) view.findViewById(R.id.add_pic_placeholder2);
+        imgPlaceHolderThree = (ImageView) view.findViewById(R.id.add_pic_placeholder3);
+
+        toggleMissionPanel();
+
         return view;
     }
 
+    private void toggleMissionPanel(){
+        if(!unlocked){
+            imgPlaceHolderOne.setVisibility(View.INVISIBLE);
+            imgPlaceHolderTwo.setVisibility(View.INVISIBLE);
+            imgPlaceHolderThree.setVisibility(View.INVISIBLE);
+            scanQRButton.setText("SCAN QR TO ACTIVE");
+        }else{
+            imgPlaceHolderOne.setVisibility(View.VISIBLE);
+            imgPlaceHolderTwo.setVisibility(View.VISIBLE);
+            imgPlaceHolderThree.setVisibility(View.VISIBLE);
+            scanQRButton.setText("MISSION COMPLETE");
+        }
+    }
 
     public void requestQRCodeScan(View v) {
         Intent qrScanIntent = new Intent(getContext(), QRActivity.class);
@@ -105,6 +135,8 @@ public class MissionDetailsFragment extends Fragment {
             Log.i(TAG, "Yes it is QR request.");
             String result;
             if (resultCode == Activity.RESULT_OK) {
+                unlocked = true;
+                toggleMissionPanel();
                 result = data.getStringExtra(QRActivity.EXTRA_QR_RESULT);
                 Log.i(TAG, "Yes it is success: "+ result);
                 Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT);
@@ -116,7 +148,7 @@ public class MissionDetailsFragment extends Fragment {
             mResultTextView.setVisibility(View.VISIBLE);*/
         }
 
-        super.onActivityResult(requestCode, resultCode, data);
+        //super.onActivityResult(requestCode, resultCode, data);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

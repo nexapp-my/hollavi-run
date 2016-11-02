@@ -1,9 +1,12 @@
 package com.groomify.hollavirun;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -85,6 +88,14 @@ implements
 
         }
 
+        pictureView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent sosIntent = new Intent(v.getContext(), ProfileActivity.class);
+                startActivity(sosIntent);
+            }
+        });
+
         initializeMenuBarListener();
 
     }
@@ -135,6 +146,21 @@ implements
             }
         });
 
+
+        View sosMenu = findViewById(menusId[4]);
+
+        sosMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //if(currentMenuIndex != 4){
+                    Intent sosIntent = new Intent(v.getContext(), SOSActivity.class);
+                    startActivity(sosIntent);
+
+                    currentMenuIndex = 4;
+                //}
+            }
+        });
+
     }
 
     @Override
@@ -145,5 +171,23 @@ implements
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle("Exit Application")
+                .setMessage("Are you sure you want to exit Groomify?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 }

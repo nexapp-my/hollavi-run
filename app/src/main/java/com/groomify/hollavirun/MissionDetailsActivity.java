@@ -9,9 +9,11 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.groomify.hollavirun.fragment.MissionDetailsFragment;
@@ -27,16 +29,30 @@ public class MissionDetailsActivity extends AppCompatActivity {
     private final static String TAG = MissionDetailsActivity.class.getSimpleName();
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    private Toolbar toolbar;
 
     public static final int QR_REQUEST = 111;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mission_details);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
 
-       /* if(getSupportActionBar() != null)
-            getSupportActionBar().hide();*/
+/*        if(getSupportActionBar() != null)
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setDisplayUseLogoEnabled(true);
+            getSupportActionBar().setLogo(R.drawable.ic_chevron_left);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);*/
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
 
@@ -50,6 +66,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
         tabLayout.setSelectedTabIndicatorColor(getResources().getColor((R.color.rustyRed)));
         tabLayout.setSelectedTabIndicatorHeight((int) (3 * getResources().getDisplayMetrics().density));
         tabLayout.setTabTextColors(getResources().getColor((R.color.primaryTextColour)), getResources().getColor((R.color.rustyRed)));
+
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -59,6 +76,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
             String result;
             if (resultCode == RESULT_OK) {
                 result = data.getStringExtra(QRActivity.EXTRA_QR_RESULT);
+
             } else {
                 result = "Error";
             }

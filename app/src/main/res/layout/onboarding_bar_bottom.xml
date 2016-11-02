@@ -4,7 +4,10 @@
     android:layout_alignParentBottom="true"
     android:background="@color/rustyRed">
 
-    <Button android:id="@+id/signup_button" android:layout_width="wrap_content"
+
+
+
+    <!--<Button android:id="@+id/signup_button" android:layout_width="wrap_content"
         android:layout_height="wrap_content" android:layout_weight="1"
         android:text="@string/onboarding_menu_signup"
         android:background="@drawable/groomify_button_state"
@@ -19,5 +22,5 @@
         android:layout_height="wrap_content" android:layout_weight="1"
         android:text="@string/onboarding_menu_login"
         android:background="@drawable/groomify_button_state"
-        style="@style/OnboardingFooterBar" />
+        style="@style/OnboardingFooterBar" />-->
 </LinearLayout>

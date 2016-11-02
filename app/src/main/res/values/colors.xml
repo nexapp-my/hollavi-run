@@ -7,6 +7,8 @@
     <color name="primaryTextColour">#aaaaaa</color>
     <color name="borderColour">#E9E9E9</color>
 
+    <color name="facebookButtonBlue">#06579F</color>
+    <color name="facebookButtonBlueClicked">#054e8f</color>
 
     <!-- old ui from here -->
     <color name="colorPrimary">#3F51B5</color>
@@ -23,6 +25,14 @@
     <color name="hollaviListItemBackground">#000B23</color>
     <color name="black_overlay">#66000000</color>
     <color name="ranking_item_background">#F2F2F2</color>
+
+    <color name="viewfinder_mask">#60000000</color>
+    <color name="viewfinder_laser">#ffcc0000</color>
+    <color name="viewfinder_border">#ffafed44</color>
+
+    <color name="sos_border_line">#979797</color>
+
+    <color name="transparent_grey">#99000000</color>
 
     <!-- old ui end  here -->
 </resources>

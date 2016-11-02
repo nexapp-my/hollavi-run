@@ -58,9 +58,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".WelcomeActivity" />
-        <activity
-            android:name=".OnboardingActivity"
-            android:theme="@style/GroomifyAppTheme" />
+        <activity android:name=".OnboardingActivity" />
         <activity
             android:name=".SignUpActivity"
             android:parentActivityName=".OnboardingActivity"
@@ -70,14 +68,13 @@
                 android:value="com.groomify.hollavirun.OnboardingActivity" />
         </activity>
         <activity android:name=".TeamSelectActivity" />
-        <activity android:name=".MissionDetailsActivity" >
-
-        </activity>
-        <activity android:name=".QRActivity"
-            android:label="@string/app_name"
-            android:launchMode="singleTask"/>
-
-
+        <activity android:name=".MissionDetailsActivity" />
+        <activity
+            android:name=".QRActivity"
+            android:label=""
+            android:launchMode="singleTask" />
+        <activity android:name=".SOSActivity" />
+        <activity android:name=".ProfileActivity"></activity>
     </application>
 
 </manifest>

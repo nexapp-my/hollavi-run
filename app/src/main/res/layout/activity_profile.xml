@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_profile"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.groomify.hollavirun.ProfileActivity">
+
+    <TextView
+        android:text="Profile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView12"
+        android:layout_weight="-1"
+        tools:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="20dp" />
+
+    <ImageView
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        app:srcCompat="@drawable/ic_close"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/close_profile_button"
+        android:layout_margin="20dp" />
+
+    <TextView
+        android:text="ID: A717"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView12"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/textView13"
+        android:layout_marginRight="20dp"
+        android:textColor="@color/primaryTextColour" />
+
+    <com.groomify.hollavirun.view.ProfilePictureView
+        android:id="@+id/profile_fb_profile_picture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView13"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:text="Name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/profile_fb_profile_picture"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/user_display_name"
+        android:textSize="20sp"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:text="Malaysia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/country_text_view"
+        android:layout_below="@id/user_display_name"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="3dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/sos_border_line"
+        android:layout_gravity="center_vertical"
+        android:layout_below="@id/country_text_view"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="16dp"
+        android:id="@+id/border_line_1" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/border_line_1"
+        android:layout_centerHorizontal="true">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp" android:layout_weight="1">
+            <TextView
+                android:id="@+id/total_mission_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="3"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5dp"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="MISSIONS"
+                android:textSize="9sp"
+                android:layout_below="@+id/total_mission_text_view"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5dp" />
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp" android:layout_weight="1">
+            <TextView
+                android:id="@+id/total_runs_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="1"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="5dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="RUNS"
+                android:textSize="9sp"
+                android:layout_below="@+id/total_runs_text_view"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5dp" />
+        </RelativeLayout>
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/sos_border_line"
+        android:layout_gravity="center_vertical"
+        android:layout_below="@id/country_text_view"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="60dp"
+        android:id="@+id/border_line_2" />
+
+    <RelativeLayout
+        android:id="@+id/select_edit_my_profile"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_weight="-1"
+        android:layout_marginLeft="16dp"
+        tools:background="@drawable/drawable_profile_edit_bg"
+        android:layout_below="@+id/border_line_2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="25.5dp">
+
+        <TextView
+            android:text="Edit my profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/textView11"
+            android:textColor="@android:color/black"
+            android:layout_marginLeft="16dp" />
+
+        <ImageView
+            android:layout_width="13dp"
+            android:layout_height="13dp"
+            app:srcCompat="@drawable/ic_arrow_right"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/imageView5"
+            android:layout_marginRight="16dp" />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/select_select_a_run"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_weight="-1"
+        tools:background="@drawable/drawable_profile_edit_bg"
+        android:layout_below="@+id/select_edit_my_profile"
+        android:layout_alignLeft="@+id/select_edit_my_profile"
+        android:layout_alignStart="@+id/select_edit_my_profile"
+        android:layout_alignRight="@+id/select_edit_my_profile"
+        android:layout_alignEnd="@+id/select_edit_my_profile">
+
+        <TextView
+            android:text="Select a run"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/textView16"
+            android:textColor="@android:color/black"
+            android:layout_marginLeft="16dp" />
+
+        <ImageView
+            android:layout_width="13dp"
+            android:layout_height="13dp"
+            app:srcCompat="@drawable/ic_arrow_right"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="16dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/select_sponsors_and_partner"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_weight="-1"
+        tools:background="@drawable/drawable_profile_edit_bg"
+        android:layout_below="@+id/select_select_a_run"
+        android:layout_alignLeft="@+id/select_select_a_run"
+        android:layout_alignStart="@+id/select_select_a_run"
+        android:layout_alignRight="@+id/select_select_a_run"
+        android:layout_alignEnd="@+id/select_select_a_run">
+
+        <TextView
+            android:text="@string/sponsors_partners"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:textColor="@android:color/black"
+            android:layout_marginLeft="16dp" />
+
+        <ImageView
+            android:layout_width="13dp"
+            android:layout_height="13dp"
+            app:srcCompat="@drawable/ic_arrow_right"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="16dp" />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/select_logout"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_weight="-1"
+        tools:background="@drawable/drawable_profile_edit_bg"
+        android:layout_below="@+id/select_sponsors_and_partner"
+        android:layout_alignLeft="@+id/select_sponsors_and_partner"
+        android:layout_alignStart="@+id/select_sponsors_and_partner"
+        android:layout_alignRight="@+id/select_sponsors_and_partner"
+        android:layout_alignEnd="@+id/select_sponsors_and_partner">
+
+        <TextView
+            android:text="Log out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:textColor="@android:color/black"
+            android:layout_marginLeft="16dp" />
+
+        <ImageView
+            android:layout_width="13dp"
+            android:layout_height="13dp"
+            app:srcCompat="@drawable/ic_arrow_right"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="16dp" />
+    </RelativeLayout>
+
+</RelativeLayout>

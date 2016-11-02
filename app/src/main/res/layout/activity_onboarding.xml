@@ -6,7 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.groomify.hollavirun.OnboardingActivity"
-    android:id="@+id/onboardingMainLayout">
+    android:id="@+id/onboardingMainLayout"
+    android:background="@drawable/drawable_onboarding_bg"
+    >
 
 
     <ImageView
@@ -15,8 +17,8 @@
         android:id="@+id/groomifyLogoIView"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="80sp"
-        android:src="@drawable/ic_groomify_logo_large" />
+        android:layout_marginTop="125dp"
+        android:background="@drawable/ic_groomify_logo_large" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -27,8 +29,9 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="75sp"
         android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:textSize="13dp" />
+        android:textColor="@android:color/white"
+        android:textSize="13dp"
+        android:background="@android:color/transparent" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -38,12 +41,30 @@
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20sp"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         android:layout_marginLeft="32dp"
         android:layout_marginRight="32dp"
         android:textSize="12dp"
-        android:gravity="center_horizontal" />
+        android:gravity="center_horizontal"
+        android:background="@android:color/transparent" />
 
-    <include android:id="@+id/myid1" layout="@layout/onboarding_bar_bottom" />
+    <!--<include android:id="@+id/myid1" layout="@layout/onboarding_bar_bottom" />-->
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/facebook_login_button"
+        android:text=""
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
+
+    <Button android:id="@+id/login_button" android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:text="@string/onboarding_menu_login"
+        android:background="@drawable/facebook_button_state"
+        style="@style/OnboardingFooterBar"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>
