@@ -1,32 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:orientation="horizontal"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:keepScreenOn="true"
-    android:background="@color/transparent_grey"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".QRActivity">
 
-    <TextView
-        android:text="Locate and contain the QR code within the box"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:id="@+id/textView7"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:gravity="center_horizontal"
-        android:layout_marginTop="30dp" />
 
-    <com.groomify.hollavirun.camera.CameraSourcePreview
-        android:id="@+id/cameraSourcePreview"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="false"
-        android:layout_below="@+id/textView7"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_margin="30dp" />
+        android:layout_height="match_parent"
+        android:background="@color/transparent_grey"
+        >
 
-</RelativeLayout>
+        <!--<android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            app:navigationIcon="@drawable/ic_chevron_left"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="wrap_content" />-->
+
+        <TextView
+            android:text="Locate and contain the QR code within the box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:id="@+id/textView7"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="80dp"
+            android:textColor="@android:color/white" />
+
+        <com.groomify.hollavirun.camera.CameraSourcePreview
+            android:id="@+id/cameraSourcePreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="false"
+            android:layout_below="@+id/textView7"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_margin="30dp" />
+
+        <TextView
+            android:text="Cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/cancel_text_view"
+            android:layout_margin="12dp"
+            android:textSize="17sp"
+            android:textColor="@android:color/white" />
+
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            app:srcCompat="@drawable/ic_qr_help"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/qr_help_image_view"
+            android:layout_margin="12dp" />
+
+    </RelativeLayout>
+
+</LinearLayout>

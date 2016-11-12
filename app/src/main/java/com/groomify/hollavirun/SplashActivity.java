@@ -2,6 +2,7 @@ package com.groomify.hollavirun;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
@@ -23,6 +24,7 @@ import com.facebook.Profile;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.groomify.hollavirun.constants.AppConstant;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +43,8 @@ public class SplashActivity extends AppCompatActivity {
 
     CallbackManager callbackManager;
     private final static long SPLASH_DISPLAY_LENGTH = 2000;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,32 +74,62 @@ public class SplashActivity extends AppCompatActivity {
                         }
 
                     }).show();
-        }
-
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        AppEventsLogger.activateApp(SplashActivity.this);
-        printKeyHash();
+        }else{
+            FacebookSdk.sdkInitialize(getApplicationContext());
+            AppEventsLogger.activateApp(SplashActivity.this);
+            printKeyHash();
 
         /* New Handler to start the Menu-Activity
          * and close this Splash-Screen after some seconds.*/
-        new Handler().postDelayed(new Runnable(){
-            @Override
-            public void run() {
+            new Handler().postDelayed(new Runnable(){
+                @Override
+                public void run() {
 
-                //TODO another mechanism to determine user authenticated if user is not login with facebook.
-                if(AccessToken.getCurrentAccessToken() != null && Profile.getCurrentProfile() != null){
-                    launchWelcomeScreen();
-                }else{
-                    //launchLoginScreen();
-                    launchOnboardingScreen();
+                    //TODO another mechanism to determine user authenticated if user is not login with facebook.
+                    if(AccessToken.getCurrentAccessToken() != null && Profile.getCurrentProfile() != null){
+
+                        SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+                        boolean profileUpdated = settings.getBoolean(AppConstant.PREFS_PROFILE_PIC_UPDATED, false);
+                        boolean teamSelected = settings.getBoolean(AppConstant.PREFS_TEAM_SELECTED, false);
+                        boolean runSelected = settings.getBoolean(AppConstant.PREFS_RUN_SELECTED, true);
+
+                        Log.i(TAG,"profileUpdated: "+profileUpdated+", teamSelected: "+teamSelected+", runSelected: "+runSelected);
+                        //launchWelcomeScreen();
+
+                        if(profileUpdated && teamSelected && runSelected){
+                            launchMainScreen();
+                        }else if (!teamSelected){
+                            launchTeamSelectionScreen();
+                        }
+                        else{
+                            launchWelcomeScreen();
+                        }
+
+                    }else{
+                        launchOnboardingScreen();
+                    }
                 }
-            }
-        }, SPLASH_DISPLAY_LENGTH);
+            }, SPLASH_DISPLAY_LENGTH);
+        }
+
+
 
     }
 
+    private void launchTeamSelectionScreen(){
+        Intent intent = new Intent(this, TeamSelectActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     private void launchOnboardingScreen(){
-        Intent intent = new Intent(SplashActivity.this, OnboardingActivity.class);
+        Intent intent = new Intent(this, OnboardingActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void launchMainScreen(){
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
     }

@@ -12,6 +12,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.vision.CameraSource;
@@ -19,6 +22,8 @@ import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.groomify.hollavirun.camera.CameraSourcePreview;
+
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 
@@ -36,6 +41,9 @@ public class QRActivity extends AppCompatActivity {
     private CameraSource mCameraSource;
     private CameraSourcePreview mPreview;
 
+    private TextView cancelTextView;
+    private ImageView qrHelpImageView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -50,6 +58,29 @@ public class QRActivity extends AppCompatActivity {
         } else {
             requestPermission();
         }
+
+        if(cancelTextView == null){
+            cancelTextView = (TextView) findViewById(R.id.cancel_text_view);
+        }
+
+        cancelTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                QRActivity.this.onBackPressed();
+            }
+        });
+
+        if(qrHelpImageView == null){
+            qrHelpImageView = (ImageView) findViewById(R.id.qr_help_image_view);
+        }
+
+        qrHelpImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO launch help activity
+                Toast.makeText(QRActivity.this, "Having trouble finding QR codes? Here is a picture to show you what it looks like.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -138,10 +169,12 @@ public class QRActivity extends AppCompatActivity {
     }
 
     private void returnData(String data) {
+        Log.i(TAG, "Return data: "+data);
         if (data != null) {
             Intent resultIntent = new Intent();
             resultIntent.putExtra(EXTRA_QR_RESULT, data);
             setResult(RESULT_OK, resultIntent);
+            Log.i(TAG, "Putting OK: "+data);
         } else {
             setResult(RESULT_CANCELED);
         }

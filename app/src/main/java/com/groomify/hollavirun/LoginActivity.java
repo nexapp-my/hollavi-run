@@ -73,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
                 else {
                     Profile profile = Profile.getCurrentProfile();
                     Log.v("facebook - profile", profile.getFirstName());
+
                     launchWelcomeScreen();
                 }
             }

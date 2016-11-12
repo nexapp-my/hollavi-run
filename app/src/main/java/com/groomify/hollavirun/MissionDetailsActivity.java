@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.fragment.MissionDetailsFragment;
 import com.groomify.hollavirun.fragment.MissionFragment;
 import com.groomify.hollavirun.fragment.MissionListFragment;
@@ -34,9 +35,22 @@ public class MissionDetailsActivity extends AppCompatActivity {
     public static final int QR_REQUEST = 111;
 
 
+    Mission mission = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
+
+        Bundle extras = getIntent().getExtras().getBundle("EXTRA_MISSION");
+        if (extras != null) {
+            mission = extras.getParcelable("MISSION");
+            //The key argument here must match that used in the other activity
+        }
+
+        Log.i(TAG, "Mission from main screen: "+mission.toString());
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mission_details);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -88,7 +102,8 @@ public class MissionDetailsActivity extends AppCompatActivity {
 
     private void setupViewPager(ViewPager viewPager) {
         MissionDetailsActivity.ViewPagerAdapter adapter = new MissionDetailsActivity.ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new MissionDetailsFragment(), "DETAILS");
+        MissionDetailsFragment missionDetailFragment = MissionDetailsFragment.newInstance(mission);
+        adapter.addFragment(missionDetailFragment, "DETAILS");
         adapter.addFragment(new RankingListFragment(), "RANKINGS");
         viewPager.setAdapter(adapter);
     }

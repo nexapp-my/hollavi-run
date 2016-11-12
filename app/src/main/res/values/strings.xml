@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Hollavi Run</string>
+    <string name="app_name">Groomify</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>

@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="180dp"
         app:srcCompat="@drawable/selfie"
-        android:id="@+id/mission_one_image_view"
+        android:id="@+id/mission_banner_image_view"
         android:adjustViewBounds="false"
         android:cropToPadding="false"
         android:scaleType="centerCrop"
@@ -28,7 +28,7 @@
         android:text="01"
         android:textSize="40sp"
         android:textStyle="bold"
-        android:layout_below="@+id/mission_one_image_view"
+        android:layout_below="@+id/mission_banner_image_view"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginLeft="16dp"
@@ -76,9 +76,9 @@
         android:textSize="12sp"
         android:fontFamily="sans-serif"
         android:paddingTop="10dp"
-        android:layout_below="@+id/mission_item_title"
-        android:layout_alignLeft="@+id/mission_item_title"
-        android:layout_alignStart="@+id/mission_item_title" />
+        android:layout_below="@id/mission_item_title"
+        android:layout_alignLeft="@id/mission_item_title"
+        android:layout_alignStart="@id/mission_item_title" />
 
     <View
         android:id="@+id/mission_detail_separator"

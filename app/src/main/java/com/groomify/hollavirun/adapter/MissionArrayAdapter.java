@@ -41,7 +41,7 @@ public class MissionArrayAdapter extends ArrayAdapter<Mission> {
 
         if(values != null && values[position] != null){
             Mission mission = values[position];
-            missionNumberTextView.setText(mission.getMissionNumber());
+            missionNumberTextView.setText(mission.getMissionNumberString());
             missionTitleTextView.setText(mission.getMissionTitle());
             missionDescTextView.setText(mission.getMissionDesc());
         }

@@ -1,6 +1,7 @@
 package com.groomify.hollavirun;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,6 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.groomify.hollavirun.constants.AppConstant;
 
 public class TeamSelectActivity extends AppCompatActivity {
 
@@ -35,6 +38,10 @@ public class TeamSelectActivity extends AppCompatActivity {
         if(teamSelectionThreeTextView== null){
             teamSelectionThreeTextView = (TextView) findViewById(R.id.text_view_team_three);
         }
+
+        teamSelectionOneTextView.setTextColor(ContextCompat.getColor(this,R.color.primaryTextColour));
+        teamSelectionTwoTextView.setTextColor(ContextCompat.getColor(this,R.color.primaryTextColour));
+        teamSelectionThreeTextView.setTextColor(ContextCompat.getColor(this,R.color.primaryTextColour));
 
         if(letsGoTextView== null){
             letsGoTextView = (TextView) findViewById(R.id.text_view_lets_go);
@@ -65,6 +72,13 @@ public class TeamSelectActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.i(TAG, "Lets go clicked. Run run run.");
+
+                SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("team_selected", true);
+
+                // Commit the edits!
+                editor.commit();
                 launchMainActivity();
             }
         });
@@ -75,8 +89,7 @@ public class TeamSelectActivity extends AppCompatActivity {
         Intent intent = new Intent(TeamSelectActivity.this, MainActivity.class);
 
         startActivity(intent);
-        finish();
-
+        this.finish();
     }
 
     private void toggleTeamSelection(int currentTeam){

@@ -1,9 +1,13 @@
 package com.groomify.hollavirun;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,7 +30,12 @@ import com.groomify.hollavirun.fragment.MissionFragment;
 import com.groomify.hollavirun.fragment.MissionListFragment;
 import com.groomify.hollavirun.fragment.RankingListFragment;
 import com.groomify.hollavirun.fragment.dummy.MissionContent;
+import com.groomify.hollavirun.utils.ProfileImageUtils;
 import com.groomify.hollavirun.view.ProfilePictureView;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 /**
  * Created by Valkyrie1988 on 9/17/2016.
@@ -40,11 +49,12 @@ implements
 
     private static final int REQUEST_IMAGE_CAPTURE = 101;
     private static final int PERMISSIONS_REQUEST = 100;
+    private static final int REQUEST_PROFILE_LOGOUT = 102;
 
 
     private ImageView menuBarLogo;
     private TextView menuBarGreetingText;
-    private ProfilePictureView pictureView;
+    private ImageView pictureView;
     public Fragment currentFragment;
     public int currentMenuIndex = 0;
 
@@ -68,7 +78,9 @@ implements
             menuBarGreetingText = (TextView) findViewById(R.id.menu_bar_greeting_text);
 
         if(pictureView == null)
-            pictureView = (ProfilePictureView) findViewById(R.id.menu_bar_profile_picture);
+            pictureView = (ImageView) findViewById(R.id.menu_bar_profile_picture);
+
+
 
 
         menuBarLogo.setVisibility(ImageView.INVISIBLE);
@@ -88,24 +100,46 @@ implements
         }
 
         if(Profile.getCurrentProfile() != null){
-
             menuBarGreetingText.setText("Good Morning, " +Profile.getCurrentProfile().getName());
 
-            pictureView.setProfileId(Profile.getCurrentProfile().getId());
-            pictureView.setDrawingCacheEnabled(true);
-            Log.i(TAG, "Action bar profile picture loaded");
+
+            //pictureView.setProfileId(Profile.getCurrentProfile().getId());
+            //pictureView.setDrawingCacheEnabled(true);
+            //Log.i(TAG, "Action bar profile picture loaded");
 
         }
 
         pictureView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent sosIntent = new Intent(v.getContext(), ProfileActivity.class);
-                startActivity(sosIntent);
+                Intent profileIntent = new Intent(v.getContext(), ProfileActivity.class);
+                startActivityForResult(profileIntent, REQUEST_PROFILE_LOGOUT);
             }
         });
 
         initializeMenuBarListener();
+        loadProfileImageFromStorage();
+
+    }
+
+    private void loadProfileImageFromStorage()
+    {
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        // Create imageDir
+
+        try {
+            File f = new File(directory,"profile.jpg");
+            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
+            Bitmap optimizedProfilePic = ProfileImageUtils.processOptimizedRoundBitmap(30, 30, b);
+            pictureView.setImageBitmap(optimizedProfilePic);
+            Log.i(TAG, "Action bar profile picture loaded");
+        }
+        catch (FileNotFoundException e)
+        {
+            Log.e(TAG, "Unable to find profile picture.", e);
+        }
 
     }
 
@@ -188,7 +222,30 @@ implements
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            String result;
+            if (resultCode == RESULT_OK) {
+                result = data.getStringExtra(QRActivity.EXTRA_QR_RESULT);
 
+            } else {
+                result = "Error";
+            }
+            Toast.makeText(this, result, Toast.LENGTH_SHORT);
+
+        }else if(requestCode == REQUEST_PROFILE_LOGOUT){
+            if(resultCode == ProfileActivity.RESULT_REQUIRE_LOGOUT){
+
+                Intent intent = new Intent(MainActivity.this, OnboardingActivity.class);
+                startActivity(intent);
+                finish();
+
+                Toast.makeText(this, "Logging out", Toast.LENGTH_SHORT).show();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     private boolean isPermissionGranted() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
@@ -206,8 +263,8 @@ implements
                     recreate();
                 }
             } else {
-                Toast.makeText(this, "This application needs Camera permission to read QR codes", Toast.LENGTH_SHORT).show();
-                finish();
+                Toast.makeText(this, "This application needs Camera permission to take photo", Toast.LENGTH_SHORT).show();
+                //finish();
             }
         }
     }
@@ -225,7 +282,6 @@ implements
     public void onBackPressed() {
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle("Exit Application")
                 .setMessage("Are you sure you want to exit Groomify?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener()
                 {

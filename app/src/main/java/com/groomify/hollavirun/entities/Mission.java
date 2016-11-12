@@ -1,26 +1,80 @@
 package com.groomify.hollavirun.entities;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Valkyrie1988 on 10/23/2016.
  */
 
-public class Mission {
-    private String missionNumber;
+public class Mission implements Parcelable {
+    private int missionNumber;
+    private String missionNumberString;
     private String missionTitle;
     private String missionDesc;
+    private int missionImageId;
+    private boolean unlocked;
 
-    public Mission(String missionNumber, String missionTitle, String missionDesc) {
+    public Mission(int missionNumber, String missionNumberString, String missionTitle, String missionDesc, int missionImageId, boolean unlocked) {
+        this.missionDesc = missionDesc;
+        this.missionImageId = missionImageId;
         this.missionNumber = missionNumber;
+        this.missionNumberString = missionNumberString;
         this.missionTitle = missionTitle;
+        this.unlocked = unlocked;
+    }
+
+    protected Mission(Parcel in) {
+        missionNumber = in.readInt();
+        missionNumberString = in.readString();
+        missionTitle = in.readString();
+        missionDesc = in.readString();
+        missionImageId = in.readInt();
+        unlocked = in.readByte() != 0;
+    }
+
+    public static final Creator<Mission> CREATOR = new Creator<Mission>() {
+        @Override
+        public Mission createFromParcel(Parcel in) {
+            return new Mission(in);
+        }
+
+        @Override
+        public Mission[] newArray(int size) {
+            return new Mission[size];
+        }
+    };
+
+    public String getMissionDesc() {
+        return missionDesc;
+    }
+
+    public void setMissionDesc(String missionDesc) {
         this.missionDesc = missionDesc;
     }
 
-    public String getMissionNumber() {
+    public int getMissionImageId() {
+        return missionImageId;
+    }
+
+    public void setMissionImageId(int missionImageId) {
+        this.missionImageId = missionImageId;
+    }
+
+    public int getMissionNumber() {
         return missionNumber;
     }
 
-    public void setMissionNumber(String missionNumber) {
+    public void setMissionNumber(int missionNumber) {
         this.missionNumber = missionNumber;
+    }
+
+    public String getMissionNumberString() {
+        return missionNumberString;
+    }
+
+    public void setMissionNumberString(String missionNumberString) {
+        this.missionNumberString = missionNumberString;
     }
 
     public String getMissionTitle() {
@@ -31,11 +85,38 @@ public class Mission {
         this.missionTitle = missionTitle;
     }
 
-    public String getMissionDesc() {
-        return missionDesc;
+    public boolean isUnlocked() {
+        return unlocked;
     }
 
-    public void setMissionDesc(String missionDesc) {
-        this.missionDesc = missionDesc;
+    public void setUnlocked(boolean unlocked) {
+        this.unlocked = unlocked;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(missionNumber);
+        dest.writeString(missionNumberString);
+        dest.writeString(missionTitle);
+        dest.writeString(missionDesc);
+        dest.writeInt(missionImageId);
+        dest.writeByte((byte) (unlocked ? 1 : 0));
+    }
+
+    @Override
+    public String toString() {
+        return "Mission{" +
+                "missionDesc='" + missionDesc + '\'' +
+                ", missionNumber=" + missionNumber +
+                ", missionNumberString='" + missionNumberString + '\'' +
+                ", missionTitle='" + missionTitle + '\'' +
+                ", missionImageId=" + missionImageId +
+                ", unlocked=" + unlocked +
+                '}';
     }
 }
