@@ -42,7 +42,7 @@ public class SplashActivity extends AppCompatActivity {
     private final static String TAG = SplashActivity.class.getSimpleName();
 
     CallbackManager callbackManager;
-    private final static long SPLASH_DISPLAY_LENGTH = 2000;
+    private final static long SPLASH_DISPLAY_LENGTH = 0;
 
 
     @Override

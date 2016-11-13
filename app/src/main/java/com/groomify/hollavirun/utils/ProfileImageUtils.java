@@ -29,7 +29,7 @@ public class ProfileImageUtils {
         int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
 
         // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inJustDecodeBounds = true;
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
@@ -56,7 +56,7 @@ public class ProfileImageUtils {
         int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
 
         // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inJustDecodeBounds = true;
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
@@ -69,38 +69,6 @@ public class ProfileImageUtils {
         return bitmap;
     }
 
-    public static Bitmap cropBitmap(int targetW, int targetH, String path){
-        Bitmap bitmap = BitmapFactory.decodeFile(path);
-        return cropBitmap(targetW, targetH, bitmap);
-    }
 
-    public static Bitmap cropBitmap(int targetW, int targetH, Bitmap originalBitmap){
-
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-
-        //BitmapFactory.decodeFile(imagePath, bmOptions);
-
-        int photoW = originalBitmap.getWidth();//bmOptions.outWidth;
-        int photoH = originalBitmap.getHeight();//bmOptions.outHeight;
-
-        int squareSize = Math.min(photoH, photoW);
-
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        //Bitmap bitmap = BitmapFactory.decodeFile(imagePath, bmOptions);
-
-        Bitmap bitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
-        bitmap  = ThumbnailUtils.extractThumbnail(bitmap, squareSize, squareSize);
-
-        return bitmap;
-    }
 
 }

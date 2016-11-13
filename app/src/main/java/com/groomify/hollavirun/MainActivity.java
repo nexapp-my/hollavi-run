@@ -58,6 +58,14 @@ implements
     public Fragment currentFragment;
     public int currentMenuIndex = 0;
 
+    private View homeMenu;
+    private View missionMenu;
+    private View cameraButton;
+    private View sosMenu;
+    private View couponMenu;
+
+    private ImageView homeMenuIcon;
+    private ImageView missionMenuIcon;
 
     public MainFragment mainFragment = new MainFragment();
     public MissionFragment missionFragment = new MissionFragment();
@@ -119,6 +127,7 @@ implements
 
         initializeMenuBarListener();
         loadProfileImageFromStorage();
+        toggleMenuState();
 
     }
 
@@ -147,7 +156,7 @@ implements
             R.id.menu_home,
             R.id.menu_mission,
             R.id.menu_camera,
-            R.id.menu_news_feed,
+            R.id.menu_coupons,
             R.id.menu_sos
     };
 
@@ -159,7 +168,11 @@ implements
 
     private void initializeMenuBarListener(){
 
-        View homeMenu = findViewById(menusId[0]);
+        homeMenuIcon = (ImageView) findViewById(R.id.menu_home_image_view);
+        missionMenuIcon = (ImageView) findViewById(R.id.menu_mission_image_view);
+
+
+        homeMenu = findViewById(menusId[0]);
 
         homeMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -170,11 +183,12 @@ implements
                     ft.remove(currentFragment).add(R.id.main_placeholder, mainFragment).commit();
                     currentFragment = mainFragment;
                     currentMenuIndex = 0;
+                    toggleMenuState();
                 }
             }
         });
 
-        View missionMenu = findViewById(menusId[1]);
+        missionMenu = findViewById(menusId[1]);
 
         missionMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,12 +199,13 @@ implements
                     ft.remove(currentFragment).add(R.id.main_placeholder,  missionFragment).commit();
                     currentFragment = missionFragment;
                     currentMenuIndex = 1;
+                    toggleMenuState();
                 }
             }
         });
 
 
-        View sosMenu = findViewById(menusId[4]);
+        sosMenu = findViewById(menusId[4]);
 
         sosMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -204,7 +219,7 @@ implements
             }
         });
 
-        View cameraButton = findViewById(menusId[2]);
+        cameraButton = findViewById(menusId[2]);
 
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -220,6 +235,28 @@ implements
             }
         });
 
+        couponMenu = findViewById(menusId[3]);
+        couponMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "Coupon clicked", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+    private void toggleMenuState(){
+        homeMenuIcon.setImageResource(R.drawable.ic_menu_home);
+        missionMenuIcon.setImageResource(R.drawable.ic_menu_missions);
+
+        switch (currentMenuIndex){
+            case 0:
+                homeMenuIcon.setImageResource(R.drawable.ic_menu_home_filled);
+                break;
+            case 1:
+                missionMenuIcon.setImageResource(R.drawable.ic_menu_mission_filled);
+                break;
+        }
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.groomify.hollavirun.utils;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 
 /**
  * Created by Valkyrie1988 on 11/12/2016.
@@ -47,5 +48,41 @@ public class BitmapUtils {
         }
 
         return inSampleSize;
+    }
+
+    public static Bitmap cropBitmap(int targetW, int targetH, String path){
+        Bitmap bitmap = BitmapFactory.decodeFile(path);
+        return cropBitmap(targetW, targetH, bitmap);
+    }
+
+    public static Bitmap cropBitmap(int targetW, int targetH, Bitmap originalBitmap){
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+
+        //BitmapFactory.decodeFile(imagePath, bmOptions);
+
+        //int photoW = originalBitmap.getWidth();//bmOptions.outWidth;
+        //int photoH = originalBitmap.getHeight();//bmOptions.outHeight;
+
+        int squareSize = Math.min(targetH, targetW);
+
+        // Determine how much to scale down the image
+        //int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+
+        //BitmapUtils.calculateInSampleSize(bmOptions, targetW, targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = true;
+        bmOptions.inSampleSize =  BitmapUtils.calculateInSampleSize(bmOptions, targetW, targetH);;
+        bmOptions.inPurgeable = true;
+
+        //Bitmap bitmap = BitmapFactory.decodeFile(imagePath, bmOptions);
+        Bitmap bitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
+        originalBitmap.recycle();
+        bitmap  = ThumbnailUtils.extractThumbnail(bitmap, squareSize, squareSize);
+
+        return bitmap;
     }
 }

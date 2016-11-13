@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.groomify.hollavirun.QRActivity;
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.entities.Mission;
+import com.groomify.hollavirun.utils.BitmapUtils;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
 
 import java.io.File;
@@ -222,10 +223,8 @@ public class MissionDetailsFragment extends Fragment {
             scanQRButton.setText("MISSION COMPLETE");
             if(checkIsMissionReadyToSubmit()){
                 scanQRButton.setEnabled(true);
-                scanQRButton.setAlpha(.5f);
             }else{
                 scanQRButton.setEnabled(false);
-                scanQRButton.setAlpha(1f);
             }
 
         }
@@ -449,7 +448,7 @@ public class MissionDetailsFragment extends Fragment {
         int targetW = missionSubmissionImageView.getWidth();
         int targetH = missionSubmissionImageView.getHeight();
 
-        Bitmap processedBitmap = ProfileImageUtils.cropBitmap(targetH,targetW,bitmap);
+        Bitmap processedBitmap = BitmapUtils.cropBitmap(targetH,targetW,bitmap);
 
         missionSubmissionImageView.setImageBitmap(processedBitmap);
 
@@ -474,7 +473,7 @@ public class MissionDetailsFragment extends Fragment {
         int targetW = missionSubmissionImageView.getWidth();
         int targetH = missionSubmissionImageView.getHeight();
 
-        Bitmap bitmap = ProfileImageUtils.cropBitmap(targetH,targetW,mCurrentPhotoPath);
+        Bitmap bitmap = BitmapUtils.cropBitmap(targetH,targetW,mCurrentPhotoPath);
 
         missionSubmissionImageView.setImageBitmap(bitmap);
 

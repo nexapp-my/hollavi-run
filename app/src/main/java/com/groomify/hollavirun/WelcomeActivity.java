@@ -35,6 +35,7 @@ import android.widget.Toast;
 import com.facebook.AccessToken;
 import com.facebook.Profile;
 import com.groomify.hollavirun.constants.AppConstant;
+import com.groomify.hollavirun.utils.BitmapUtils;
 import com.groomify.hollavirun.utils.PathUtils;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
 import com.groomify.hollavirun.view.ProfilePictureView;
@@ -260,14 +261,14 @@ public class WelcomeActivity extends AppCompatActivity {
                 setPic();
                 Bitmap temp = BitmapFactory.decodeFile(mCurrentPhotoPath);
 
-               profilePictureBitmap = ProfileImageUtils.cropBitmap(300,300, temp);
+               profilePictureBitmap = BitmapUtils.cropBitmap(300,300, temp);
 
             }else if (requestCode == REQUEST_PICTURE_FROM_GALLERY && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
                 Uri uri = data.getData();
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
 
-                profilePictureBitmap = ProfileImageUtils.cropBitmap(300,300, bitmap);
+                profilePictureBitmap = BitmapUtils.cropBitmap(300,300, bitmap);
 
                 setPicFromBitmap(bitmap);
 
