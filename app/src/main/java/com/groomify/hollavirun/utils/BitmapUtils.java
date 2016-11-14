@@ -80,7 +80,7 @@ public class BitmapUtils {
 
         //Bitmap bitmap = BitmapFactory.decodeFile(imagePath, bmOptions);
         Bitmap bitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
-        originalBitmap.recycle();
+        //originalBitmap.recycle();
         bitmap  = ThumbnailUtils.extractThumbnail(bitmap, squareSize, squareSize);
 
         return bitmap;

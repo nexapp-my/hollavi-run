@@ -23,7 +23,7 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!--<item name="android:windowBackground">@android:color/white</item>-->
+        <item name="android:windowBackground">@android:color/white</item>
         <!-- Customize your theme here. -->
         <!--<item name="colorPrimary">@color/hollaviBlue</item>
         <item name="colorPrimaryDark">@color/splashScreenBGColour</item>

@@ -44,12 +44,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".LoginActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_login"
-            android:screenOrientation="portrait"
-            android:theme="@style/FullscreenTheme">
+        <activity android:name=".WelcomeActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".OnboardingActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -59,8 +55,6 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-        <activity android:name=".WelcomeActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".OnboardingActivity" android:screenOrientation="portrait"/>
        <!-- <activity
             android:name=".SignUpActivity"
             android:parentActivityName=".OnboardingActivity"
@@ -87,6 +81,10 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <provider android:authorities="com.facebook.app.FacebookContentProvider1066614556786691"
+            android:name="com.facebook.FacebookContentProvider"
+            android:exported="true"/>
     </application>
 
 

@@ -267,10 +267,10 @@ public class WelcomeActivity extends AppCompatActivity {
 
                 Uri uri = data.getData();
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-
+                setPicFromBitmap(bitmap);
                 profilePictureBitmap = BitmapUtils.cropBitmap(300,300, bitmap);
 
-                setPicFromBitmap(bitmap);
+
 
             }
         }catch (Exception e){

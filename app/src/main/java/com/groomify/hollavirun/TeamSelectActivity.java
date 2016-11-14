@@ -110,6 +110,10 @@ public class TeamSelectActivity extends AppCompatActivity {
             default:
                 break;
         }
+    }
 
+    @Override
+    public void onBackPressed() {
+        Log.i(TAG, "onBackPressed. Do nothing.");
     }
 }

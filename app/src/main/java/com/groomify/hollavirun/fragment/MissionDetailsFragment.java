@@ -27,6 +27,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareDialog;
 import com.groomify.hollavirun.QRActivity;
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.entities.Mission;
@@ -86,6 +92,10 @@ public class MissionDetailsFragment extends Fragment {
 
     boolean[] missionFilled = {false, false, false};
 
+    ShareDialog shareDialog;
+    CallbackManager callbackManager;
+
+
     public MissionDetailsFragment() {
         // Required empty public constructor
     }
@@ -106,6 +116,27 @@ public class MissionDetailsFragment extends Fragment {
             mission = getArguments().getParcelable(PARAM_MISSION);
             unlocked = mission.isUnlocked();
         }
+
+        callbackManager = CallbackManager.Factory.create();
+        shareDialog = new ShareDialog(this);
+        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+                MissionDetailsFragment.this.getActivity().onBackPressed();
+                Toast.makeText(MissionDetailsFragment.this.getActivity(), "Mission shared :)", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancel() {
+                Toast.makeText(MissionDetailsFragment.this.getActivity(), "Post cancel :(", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Toast.makeText(MissionDetailsFragment.this.getActivity(), "Failed to share facebook post: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     @Override
@@ -123,7 +154,19 @@ public class MissionDetailsFragment extends Fragment {
             public void onClick(View v) {
                 if(unlocked){
                     if(checkIsMissionReadyToSubmit()){
-                        MissionDetailsFragment.this.getActivity().onBackPressed();
+                        //MissionDetailsFragment.this.getActivity().onBackPressed();
+                        Log.i(TAG, "Preparing to submit the mission.");
+                        if (ShareDialog.canShow(ShareLinkContent.class)){
+                            ShareLinkContent linkContent = new ShareLinkContent.Builder()
+                                    .setContentTitle("Welcome to groomify")
+                                    .setContentDescription(
+                                            "Mission "+mission.getMissionNumber()+", "+mission.getMissionTitle()+" completed.")
+                                    .setImageUrl(Uri.parse("https://static.wixstatic.com/media/318669_facfd24b3dce4767907d5f55cc80b12e.jpg"))
+                                    .setContentUrl(Uri.parse("http://www.groomify.com/"))
+                                    .build();
+
+                            shareDialog.show(linkContent);
+                        }
                     }
                 }else{
                     Toast.makeText(getContext(), "Scan QR to unlock mission.", Toast.LENGTH_SHORT).show();
@@ -238,6 +281,7 @@ public class MissionDetailsFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.i(TAG, "onActivityResult, requestCode: "+requestCode+", resultCode: "+resultCode+", data:"+data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == QR_REQUEST) {
             String result = "";
@@ -276,6 +320,7 @@ public class MissionDetailsFragment extends Fragment {
         if(checkIsMissionReadyToSubmit()){
             scanQRButton.setEnabled(true);
         }
+
 
     }
 
@@ -418,7 +463,9 @@ public class MissionDetailsFragment extends Fragment {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "GROOMIFY_" + timeStamp + "_";
-        File storageDir = this.getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        //File storageDir = this.getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File storageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DCIM), "Groomify");
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */

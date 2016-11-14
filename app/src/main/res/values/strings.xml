@@ -19,6 +19,7 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
     <string name="facebook_app_id">1066614556786691</string>
+    <string name="facebook_authority_id">com.facebook.app.FacebookContentProvider1066614556786691</string>
     <!--1774142012858175-->
 
     <string name="fb_login_protocol_scheme">fb1066614556786691</string>

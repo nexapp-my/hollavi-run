@@ -3,6 +3,7 @@ package com.groomify.hollavirun.utils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
+import android.util.Log;
 
 import com.groomify.hollavirun.view.ProfilePictureView;
 
@@ -18,18 +19,18 @@ public class ProfileImageUtils {
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imagePath, bmOptions);
+        Bitmap originalBitmap = BitmapFactory.decodeFile(imagePath, bmOptions);
 
         int photoW = bmOptions.outWidth;
         int photoH = bmOptions.outHeight;
 
-        int squareSize = Math.min(photoH, photoW);
 
         // Determine how much to scale down the image
         int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+        int squareSize = Math.min(targetH, targetW);
 
         // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = true;
+        bmOptions.inJustDecodeBounds = false;
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
@@ -65,7 +66,7 @@ public class ProfileImageUtils {
         Bitmap bitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
         bitmap  = ThumbnailUtils.extractThumbnail(bitmap, squareSize, squareSize);
         bitmap = ProfilePictureView.getRoundedBitmap(bitmap);
-        originalBitmap.recycle();
+
         return bitmap;
     }
 
