@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.groomify.hollavirun.fragment.MainFragment;
 import com.groomify.hollavirun.fragment.MissionFragment;
@@ -77,6 +78,9 @@ implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if(!FacebookSdk.isInitialized()){
+            FacebookSdk.sdkInitialize(getApplicationContext());
+        }
         Log.i(TAG,  "In the Main activity.");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -202,6 +206,8 @@ implements
                 if(currentMenuIndex != 1){
 
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                    missionFragment = new MissionFragment();
+
                     ft.remove(currentFragment).add(R.id.main_placeholder,  missionFragment).commit();
                     currentFragment = missionFragment;
                     currentMenuIndex = 1;

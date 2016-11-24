@@ -37,9 +37,9 @@ public class MissionFragment  extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        if(missionFragment != null){
+        /*if(missionFragment != null){
             return missionFragment;
-        }
+        }*/
 
         missionFragment = inflater.inflate(R.layout.fragment_mission, container, false);
 
@@ -113,9 +113,10 @@ public class MissionFragment  extends Fragment {
 
 
     private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getActivity().getSupportFragmentManager());
+        ViewPagerAdapter adapter = new ViewPagerAdapter(this.getChildFragmentManager());
         adapter.addFragment(new MissionListFragment(), "MISSION LIST");
         adapter.addFragment(new RankingListFragment(), "RANKINGS");
+
         viewPager.setAdapter(adapter);
     }
 

@@ -14,4 +14,7 @@ public class AppConstant {
     public static final String PREFS_TEAM_SELECTED = "team_selected";
 
 
+    public static final String PREFS_EMERGENCY_CONTACT_NAME = "emergency_contact_name";
+    public static final String PREFS_EMERGENCY_CONTACT_NUM = "emergency_contact_num";
+
 }
