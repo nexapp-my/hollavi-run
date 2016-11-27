@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,6 +29,7 @@ import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
+import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.fragment.MainFragment;
 import com.groomify.hollavirun.fragment.MissionFragment;
 import com.groomify.hollavirun.fragment.MissionListFragment;
@@ -273,6 +275,7 @@ implements
             @Override
             public void onClick(View v) {
                 Toast.makeText(MainActivity.this, "Coupon clicked", Toast.LENGTH_SHORT).show();
+
             }
         });
 
@@ -343,6 +346,20 @@ implements
 
         }else if(requestCode == REQUEST_PROFILE_LOGOUT){
             if(resultCode == ProfileActivity.RESULT_REQUIRE_LOGOUT){
+
+                SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.remove(AppConstant.PREFS_USER_LOGGGED_IN);
+                editor.remove(AppConstant.PREFS_PROFILE_PIC_UPDATED);
+                editor.remove(AppConstant.PREFS_TEAM_SELECTED);
+                editor.remove(AppConstant.PREFS_RUN_SELECTED);
+                editor.remove(AppConstant.PREFS_EMERGENCY_CONTACT_NUM);
+                editor.remove(AppConstant.PREFS_EMERGENCY_CONTACT_NAME);
+
+
+
+                // Commit the edits!
+                editor.commit();
 
                 Intent intent = new Intent(MainActivity.this, OnboardingActivity.class);
                 startActivity(intent);

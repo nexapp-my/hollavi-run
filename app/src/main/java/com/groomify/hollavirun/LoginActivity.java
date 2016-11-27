@@ -1,6 +1,7 @@
 package com.groomify.hollavirun;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import com.facebook.Profile;
 import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.groomify.hollavirun.constants.AppConstant;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,6 +65,14 @@ public class LoginActivity extends AppCompatActivity {
                             Log.v("facebook - profile", profile2.getFirstName());
                             mProfileTracker.stopTracking();
                             // profile2 is the new profile
+                            SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putBoolean(AppConstant.PREFS_USER_LOGGGED_IN, true);
+
+
+                            // Commit the edits!
+                            editor.commit();
+
 
                             launchWelcomeScreen();
                         }

@@ -2,6 +2,7 @@ package com.groomify.hollavirun;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -25,6 +26,7 @@ import com.facebook.Profile;
 import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.groomify.hollavirun.constants.AppConstant;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,13 +72,21 @@ public class OnboardingActivity extends AppCompatActivity {
                 // App code
                 Log.i(TAG, "On facebook login success callback. Login status: " +loginResult.getRecentlyGrantedPermissions().toString());
 
+                SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean(AppConstant.PREFS_USER_LOGGGED_IN, true);
+
+
+                // Commit the edits!
+                editor.commit();
+
                 if(Profile.getCurrentProfile() == null) {
                     mProfileTracker = new ProfileTracker() {
                         @Override
                         protected void onCurrentProfileChanged(Profile profile, Profile profile2) {
                             Log.v("facebook - profile", profile2.getFirstName());
                             mProfileTracker.stopTracking();
-                            launchWelcomeScreen();
+                            launchRaceSelectionScreen();
                         }
                     };
                     // no need to call startTracking() on mProfileTracker
@@ -85,7 +95,8 @@ public class OnboardingActivity extends AppCompatActivity {
                 else {
                     Profile profile = Profile.getCurrentProfile();
                     Log.v("facebook - profile", profile.getFirstName());
-                    launchWelcomeScreen();
+                    launchRaceSelectionScreen();
+                    // launchWelcomeScreen();
                 }
             }
 
@@ -102,6 +113,12 @@ public class OnboardingActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    private void launchRaceSelectionScreen(){
+        Intent sosIntent = new Intent(this, SelectRaceActivity.class);
+        startActivity(sosIntent);
+        finish();
     }
 
     private void launchWelcomeScreen(){
@@ -142,7 +159,6 @@ public class OnboardingActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         new AlertDialog.Builder(this)
-                .setIcon(android.R.drawable.ic_dialog_alert)
                 .setMessage("Are you sure you want to exit Groomify?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener()
                 {

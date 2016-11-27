@@ -79,6 +79,7 @@ public class ProfileActivity extends AppCompatActivity {
                 SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putBoolean("profile_updated", true);
+                
 
                 setResult(RESULT_REQUIRE_LOGOUT);
                 ProfileActivity.this.finish();

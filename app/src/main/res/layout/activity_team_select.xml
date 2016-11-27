@@ -84,14 +84,15 @@
     </RelativeLayout>
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:text="Let&apos;s go"
         android:id="@+id/text_view_lets_go"
         android:layout_below="@+id/relativeLayout"
         android:layout_centerHorizontal="true"
         android:textSize="17sp"
         android:textColor="@color/rustyRed"
-        android:layout_marginTop="40dp" />
+        android:layout_marginTop="40dp"
+        android:textAlignment="center"
+        android:layout_width="100dp" />
 
 </RelativeLayout>

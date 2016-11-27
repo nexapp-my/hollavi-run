@@ -1,8 +1,10 @@
 package com.groomify.hollavirun;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,25 +29,18 @@ public class TeamSelectActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_team_select);
 
-        if(teamSelectionOneTextView == null){
-            teamSelectionOneTextView = (TextView) findViewById(R.id.text_view_team_one);
-        }
 
-        if(teamSelectionTwoTextView == null){
-            teamSelectionTwoTextView = (TextView) findViewById(R.id.text_view_team_two);
-        }
+        teamSelectionOneTextView = (TextView) findViewById(R.id.text_view_team_one);
+        teamSelectionTwoTextView = (TextView) findViewById(R.id.text_view_team_two);
+        teamSelectionThreeTextView = (TextView) findViewById(R.id.text_view_team_three);
 
-        if(teamSelectionThreeTextView== null){
-            teamSelectionThreeTextView = (TextView) findViewById(R.id.text_view_team_three);
-        }
-
-        teamSelectionOneTextView.setTextColor(ContextCompat.getColor(this,R.color.primaryTextColour));
+        teamSelectionOneTextView.setTextColor(ContextCompat.getColor(this,R.color.rustyRed));
         teamSelectionTwoTextView.setTextColor(ContextCompat.getColor(this,R.color.primaryTextColour));
         teamSelectionThreeTextView.setTextColor(ContextCompat.getColor(this,R.color.primaryTextColour));
 
-        if(letsGoTextView== null){
-            letsGoTextView = (TextView) findViewById(R.id.text_view_lets_go);
-        }
+        letsGoTextView = (TextView) findViewById(R.id.text_view_lets_go);
+
+
 
         teamSelectionOneTextView.setOnClickListener(new TextView.OnClickListener() {
             @Override
@@ -114,6 +109,19 @@ public class TeamSelectActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+
         Log.i(TAG, "onBackPressed. Do nothing.");
+        new AlertDialog.Builder(this)
+                .setMessage("Setting not saved, confirm to exit groomify?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 }

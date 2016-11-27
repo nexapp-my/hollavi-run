@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_select_race"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/rustyRed">
+
+    <com.groomify.hollavirun.view.ViewPagerCarouselView
+        android:id="@+id/carousel_view"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_alignWithParentIfMissing="false"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="80dp"
+        android:layout_alignParentTop="true">
+
+
+    </com.groomify.hollavirun.view.ViewPagerCarouselView>
+
+    <TextView
+        android:text="Run as Guest"
+        android:layout_width="150dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/run_as_guest_button"
+        android:layout_height="40dp"
+        android:textAlignment="center"
+        android:textSize="17sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="20dp" />
+
+    <RelativeLayout
+        android:layout_width="272dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/join_race_button"
+        android:background="@android:color/white"
+        android:layout_marginBottom="20dp"
+        android:layout_above="@+id/run_as_guest_button"
+        android:layout_centerHorizontal="true">
+
+        <TextView
+            android:text="JOIN RACE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/join_race_button_label"
+            android:textColor="@color/rustyRed"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="13dp" />
+    </RelativeLayout>
+
+    <TextView
+        android:text="SELECT A RACE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/select_race_text_label"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="normal|bold"
+        android:layout_marginTop="31dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

@@ -1,15 +1,19 @@
 package com.groomify.hollavirun;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Contacts;
 import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -39,12 +43,15 @@ public class SOSActivity extends AppCompatActivity {
     private TextView setupEmergencyContactTextView;
     private TextView changeContactTextView;
 
-    boolean emergencyContactSelected = false;
+    public static boolean emergencyContactSelected = false;
 
     private final static int PICK_CONTACT = 100;
+    private static final int PERMISSIONS_REQUEST = 101;
 
     private String emergencyContactName;
     private String emergencyContactNumber;
+
+    public static String temporaryEmergencyContactNamePlaceHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,13 +70,53 @@ public class SOSActivity extends AppCompatActivity {
             firstAidPanel = findViewById(R.id.first_aid_panel);
         }
 
+        firstAidPanel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                prompCallConfirmationDialog("60399999999", "Call for first aid?");
+            }
+        });
+
         if(emergencyContactPanel == null){
             emergencyContactPanel = findViewById(R.id.emergency_contact_panel);
         }
 
+        emergencyContactPanel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(SOSActivity.emergencyContactSelected){
+                    prompCallConfirmationDialog(emergencyContactNumber, "Calling emergency contact "+emergencyContactName+" ?");
+                }else{
+                    Log.i(TAG, "Emergency contact is not set, prompt user to setup now.");
+                    new AlertDialog.Builder(SOSActivity.this)
+                            .setMessage("Emergency contact is not set.")
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setPositiveButton("Setup now", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    if(which == AlertDialog.BUTTON_POSITIVE){
+                                        setupEmergencyContact();
+                                    }
+                                }
+                            }).setNegativeButton("Cancel", null).
+                            show();
+
+
+
+                }
+            }
+        });
+
         if(groomifySupportPanel == null){
             groomifySupportPanel = findViewById(R.id.groomify_support_panel);
         }
+
+        groomifySupportPanel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                prompCallConfirmationDialog("603000000000", "Call for groomify support now?");
+            }
+        });
 
         if(setupEmergencyContactPanel == null){
             setupEmergencyContactPanel = findViewById(R.id.set_emergency_contact_panel);
@@ -82,7 +129,7 @@ public class SOSActivity extends AppCompatActivity {
             }
         });
 
-        if(emergencyContactName == null){
+        if(emergencyContactNameTextView == null){
             emergencyContactNameTextView = (TextView) findViewById(R.id.emergency_contact_name_text_view);
         }
 
@@ -98,10 +145,15 @@ public class SOSActivity extends AppCompatActivity {
         emergencyContactName = settings.getString(AppConstant.PREFS_EMERGENCY_CONTACT_NAME, null);
         emergencyContactNumber = settings.getString(AppConstant.PREFS_EMERGENCY_CONTACT_NUM, null);
 
+        Log.i(TAG, "Emergency contact in pref: "+emergencyContactName+" - "+emergencyContactNumber);
 
         if(emergencyContactName != null){
             Log.i(TAG, "Emergency contact found. Name:"+emergencyContactName+", Number:"+emergencyContactNumber);
             emergencyContactSelected = true;
+
+            emergencyContactNameTextView.setText(emergencyContactName);
+        }else{
+            emergencyContactSelected = false;
         }
 
         toggleSetupEmergencyPanel();
@@ -124,7 +176,7 @@ public class SOSActivity extends AppCompatActivity {
                     Cursor cursor = null;
                     String phoneNumber = "";
                     List<String> allNumbers = new ArrayList<String>();
-                    String displayName = "";
+                    //String displayName = "";
                     int phoneIdx = 0;
                     int nameIdx = 0;
                     try {
@@ -136,7 +188,7 @@ public class SOSActivity extends AppCompatActivity {
                         phoneIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA);
                         nameIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Contactables.DISPLAY_NAME);
                         if (cursor.moveToFirst()) {
-                            displayName = cursor.getString(nameIdx);
+                            temporaryEmergencyContactNamePlaceHolder = cursor.getString(nameIdx);
                             while (cursor.isAfterLast() == false) {
                                 phoneNumber = cursor.getString(phoneIdx);
                                 allNumbers.add(phoneNumber);
@@ -160,14 +212,14 @@ public class SOSActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int item) {
                                 String selectedNumber = items[item].toString();
                                 selectedNumber = selectedNumber.replace("-", "");
-                                saveEmergencyContact(emergencyContactNumber, emergencyContactName);
+                                saveEmergencyContact(selectedNumber, temporaryEmergencyContactNamePlaceHolder);
                             }
                         });
                         AlertDialog alert = builder.create();
                         if(allNumbers.size() > 1) {
                             alert.show();
                         } else {
-                            saveEmergencyContact(phoneNumber, displayName);
+                            saveEmergencyContact(phoneNumber, temporaryEmergencyContactNamePlaceHolder);
                         }
 
                         if (phoneNumber.length() == 0) {
@@ -212,6 +264,9 @@ public class SOSActivity extends AppCompatActivity {
         editor.commit();
         emergencyContactSelected = true;
 
+        emergencyContactName = displayName;
+        emergencyContactNumber = phoneNumber;
+
         toggleSetupEmergencyPanel();
     }
 
@@ -226,5 +281,51 @@ public class SOSActivity extends AppCompatActivity {
             emergencyContactNameTextView.setVisibility(View.INVISIBLE);
         }
 
+    }
+
+
+    private void prompCallConfirmationDialog(final String phoneNumber, String message){
+        new AlertDialog.Builder(this)
+                .setMessage(message)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(Intent.ACTION_CALL);
+
+                        intent.setData(Uri.parse("tel:" +phoneNumber));
+                        if(isPermissionGranted()){
+                            startActivity(intent);
+                        }else{
+                            requestPermission();
+                        }
+                    }
+
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private boolean isPermissionGranted() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED;
+
+    }
+
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, PERMISSIONS_REQUEST);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    recreate();
+                }
+            } else {
+                Toast.makeText(this, "You're require to grant phone call permission for emergency contact.", Toast.LENGTH_SHORT).show();
+                //finish();
+            }
+        }
     }
 }

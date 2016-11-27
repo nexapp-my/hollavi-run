@@ -99,10 +99,18 @@ public class SplashActivity extends AppCompatActivity {
                 @Override
                 public void run() {
 
-                    //TODO another mechanism to determine user authenticated if user is not login with facebook.
-                    if(AccessToken.getCurrentAccessToken() != null && Profile.getCurrentProfile() != null){
+                    SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+                    boolean userLoggedIn = settings.getBoolean(AppConstant.PREFS_USER_LOGGGED_IN, false);
 
-                        SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+                    if(!userLoggedIn){
+                        LoginManager.getInstance().logOut();
+                        AccessToken.setCurrentAccessToken(null);
+                    }
+
+                    //TODO another mechanism to determine user authenticated if user is not login with facebook.
+                    if(AccessToken.getCurrentAccessToken() != null && Profile.getCurrentProfile() != null && userLoggedIn){
+
+
                         boolean profileUpdated = settings.getBoolean(AppConstant.PREFS_PROFILE_PIC_UPDATED, false);
                         boolean teamSelected = settings.getBoolean(AppConstant.PREFS_TEAM_SELECTED, false);
                         boolean runSelected = settings.getBoolean(AppConstant.PREFS_RUN_SELECTED, true);
@@ -133,13 +141,14 @@ public class SplashActivity extends AppCompatActivity {
 
     private boolean isPermissionGranted() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS, Manifest.permission.CALL_PHONE}, PERMISSIONS_REQUEST);
     }
 
     @Override
