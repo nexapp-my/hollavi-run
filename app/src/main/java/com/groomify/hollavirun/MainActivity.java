@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.groomify.hollavirun.constants.AppConstant;
+import com.groomify.hollavirun.fragment.CouponsListFragment;
 import com.groomify.hollavirun.fragment.MainFragment;
 import com.groomify.hollavirun.fragment.MissionFragment;
 import com.groomify.hollavirun.fragment.MissionListFragment;
@@ -59,6 +60,8 @@ implements
     private static final int PERMISSIONS_REQUEST = 100;
     private static final int REQUEST_PROFILE_LOGOUT = 102;
 
+    private View topMenuBar;
+
 
     private ImageView menuBarLogo;
     private TextView menuBarGreetingText;
@@ -74,9 +77,11 @@ implements
 
     private ImageView homeMenuIcon;
     private ImageView missionMenuIcon;
+    private ImageView couponMenuIcon;
 
     public MainFragment mainFragment = new MainFragment();
     public MissionFragment missionFragment = new MissionFragment();
+    public CouponsListFragment couponsListFragment = new CouponsListFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +105,13 @@ implements
             pictureView = (ImageView) findViewById(R.id.menu_bar_profile_picture);
 
 
+        if(topMenuBar == null){
+            topMenuBar = findViewById(R.id.main_menu_bar_top);
+            /*Log.i(TAG, " rootMenuBar: "+rootMenuBar);
+
+            topMenuBar = rootMenuBar.findViewById(R.id.menu_bar_top);
+            Log.i(TAG, " topMenuBar: "+topMenuBar);*/
+        }
 
 
         menuBarLogo.setVisibility(ImageView.INVISIBLE);
@@ -182,16 +194,21 @@ implements
 
         homeMenuIcon = (ImageView) findViewById(R.id.menu_home_image_view);
         missionMenuIcon = (ImageView) findViewById(R.id.menu_mission_image_view);
+        couponMenuIcon = (ImageView) findViewById(R.id.menu_coupon_image_view);
 
 
         homeMenu = findViewById(menusId[0]);
+        missionMenu = findViewById(menusId[1]);
+        cameraButton = findViewById(menusId[2]);
+        couponMenu = findViewById(menusId[3]);
+        sosMenu = findViewById(menusId[4]);
 
         homeMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(currentMenuIndex != 0 ){
-
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                    mainFragment = new MainFragment();
                     ft.remove(currentFragment).add(R.id.main_placeholder, mainFragment).commit();
                     currentFragment = mainFragment;
                     currentMenuIndex = 0;
@@ -200,16 +217,12 @@ implements
             }
         });
 
-        missionMenu = findViewById(menusId[1]);
-
         missionMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(currentMenuIndex != 1){
-
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                     missionFragment = new MissionFragment();
-
                     ft.remove(currentFragment).add(R.id.main_placeholder,  missionFragment).commit();
                     currentFragment = missionFragment;
                     currentMenuIndex = 1;
@@ -217,23 +230,6 @@ implements
                 }
             }
         });
-
-
-        sosMenu = findViewById(menusId[4]);
-
-        sosMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //if(currentMenuIndex != 4){
-                    Intent sosIntent = new Intent(v.getContext(), SOSActivity.class);
-                    startActivity(sosIntent);
-
-                    currentMenuIndex = 4;
-                //}
-            }
-        });
-
-        cameraButton = findViewById(menusId[2]);
 
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -270,12 +266,30 @@ implements
             }
         });
 
-        couponMenu = findViewById(menusId[3]);
         couponMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Coupon clicked", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Coupon clicked", Toast.LENGTH_SHORT).show();
+                if(currentMenuIndex != 3){
+                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                    couponsListFragment = new CouponsListFragment();
+                    ft.remove(currentFragment).add(R.id.main_placeholder,  couponsListFragment).commit();
+                    currentFragment = couponsListFragment;
+                    currentMenuIndex = 3;
+                    toggleMenuState();
+                }
 
+            }
+        });
+
+        sosMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //if(currentMenuIndex != 4){
+                Intent sosIntent = new Intent(v.getContext(), SOSActivity.class);
+                startActivity(sosIntent);
+                currentMenuIndex = 4;
+                //}
             }
         });
 
@@ -284,6 +298,9 @@ implements
     private void toggleMenuState(){
         homeMenuIcon.setImageResource(R.drawable.ic_menu_home);
         missionMenuIcon.setImageResource(R.drawable.ic_menu_missions);
+        couponMenuIcon.setImageResource(R.drawable.ic_menu_coupons);
+
+        //topMenuBar.setVisibility(View.VISIBLE);
 
         switch (currentMenuIndex){
             case 0:
@@ -291,6 +308,10 @@ implements
                 break;
             case 1:
                 missionMenuIcon.setImageResource(R.drawable.ic_menu_mission_filled);
+                break;
+            case 3:
+                couponMenuIcon.setImageResource(R.drawable.ic_coupons_filled);
+                //topMenuBar.setVisibility(View.GONE);
                 break;
         }
     }

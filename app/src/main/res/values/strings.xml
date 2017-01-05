@@ -42,6 +42,7 @@
     <string name="team_select_three">C</string>
 
     <string name="mission_detail_scan_qr_btn">SCAN QR TO ACTIVATE</string>
+    <string name="coupon_detail_scan_qr_btn">SCAN QR TO REDEEM</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

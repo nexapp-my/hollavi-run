@@ -42,7 +42,7 @@ public class MainFragment  extends Fragment {
     private HorizontalAdapter horizontalAdapter;*/
 
     public static View mainFragment;
-    public boolean isFirstTimeInitialized = true;
+    //public boolean isFirstTimeInitialized = true;
 
     public static EditText editText;
 
@@ -50,9 +50,9 @@ public class MainFragment  extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(!isFirstTimeInitialized){
+       /* if(!isFirstTimeInitialized){
             return;
-        }
+        }*/
 
 
         Log.i(TAG, "Inside the main fragment!!!!");
@@ -79,7 +79,7 @@ public class MainFragment  extends Fragment {
         missionCards.add(new MissionCard("05", "DON't TEXT & DRIVE", BitmapUtils.decodeSampledBitmapFromResource(getContext().getResources(), R.drawable.mission_sample_ffantasy, 128, 128)));
         missionCards.add(new MissionCard("06", "UPSIDE DOWN WORLD", null));
 */
-        isFirstTimeInitialized = false;
+        //isFirstTimeInitialized = false;
 
     }
 
@@ -91,9 +91,9 @@ public class MainFragment  extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        if(mainFragment != null){
+        /*if(mainFragment != null){
             return mainFragment;
-        }
+        }*/
         // Inflate the layout for this fragment
         mainFragment = inflater.inflate(R.layout.fragment_main, container, false);
 

@@ -101,7 +101,9 @@
             android:authorities="com.facebook.app.FacebookContentProvider1066614556786691"
             android:exported="true" />
 
-        <activity android:name=".SelectRaceActivity"></activity>
+        <activity android:name=".SelectRaceActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".CouponDetailsActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".EditProfileActivity" android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

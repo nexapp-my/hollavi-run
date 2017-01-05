@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_coupon_details"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.groomify.hollavirun.CouponDetailsActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        app:navigationIcon="@drawable/ic_chevron_left"
+        android:layout_width="56dp"
+        android:layout_height="56dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="106dp"
+        app:srcCompat="@drawable/milo"
+        android:id="@+id/coupon_header_image_view"
+        android:layout_below="@id/toolbar"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:text="FREE MILO DRINK FOR GROOMIFY RUNNERS"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/coupon_header_image_view"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/coupon_detail_title_text_view"
+        android:textColor="@android:color/black"
+        android:textStyle="normal|bold"
+        android:textSize="12sp"
+        android:layout_marginTop="32dp" />
+
+    <TextView
+        android:text="Expires in 3:00:00"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/coupon_detail_title_text_view"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/coupon_details_expiration_text_view"
+        android:textSize="12sp"
+        android:layout_marginTop="12dp"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:text="This coupon is brought to you by:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/coupon_details_expiration_text_view"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/label_brough_you_by"
+        android:textSize="12sp"
+        android:layout_marginTop="40dp"
+        android:textColor="@android:color/black" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        app:srcCompat="@drawable/ic_groomify_support"
+        android:layout_below="@+id/label_brough_you_by"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/sponsor_brand_image_view"
+        android:layout_margin="24dp" />
+
+
+    <Button android:id="@+id/scan_qr_button" android:layout_width="201dp"
+        android:layout_height="36dp"
+        android:text="@string/coupon_detail_scan_qr_btn"
+        android:background="@drawable/groomify_button_state"
+        style="@style/OnboardingFooterBar"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:text="Scan the QR code at the redemption counter to redeem this."
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/scan_qr_button"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/label_scan_qr_to_redeem"
+        android:textAlignment="center"
+        android:layout_marginLeft="51dp"
+        android:layout_marginRight="51dp"
+        android:textSize="12sp" />
+</RelativeLayout>

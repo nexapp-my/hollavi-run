@@ -18,7 +18,6 @@ import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
-import com.groomify.hollavirun.view.ProfilePictureView;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +31,8 @@ public class ProfileActivity extends AppCompatActivity {
     private final String TAG = ProfileActivity.class.getSimpleName();
 
     View logoutTouch = null;
+
+    View editProfileTouch = null;
 
 
     public static final int RESULT_REQUIRE_LOGOUT = 2;
@@ -48,7 +49,7 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         if(pictureView == null)
-            pictureView = (ImageView) findViewById(R.id.profile_fb_profile_picture);
+            pictureView = (ImageView) findViewById(R.id.profile_picture_image_view);
 
         if(logoutTouch == null){
             logoutTouch = findViewById(R.id.select_logout);
@@ -87,8 +88,26 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+        if(editProfileTouch == null){
+            editProfileTouch = findViewById(R.id.select_edit_my_profile);
+        }
+
+        editProfileTouch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchEditProfileScreen();
+
+            }
+        });
+
         loadProfileImageFromStorage();
     }
+
+    private void launchEditProfileScreen(){
+        Intent intent = new Intent(this, EditProfileActivity.class);
+        startActivity(intent);
+    }
+
 
     private void loadProfileImageFromStorage()
     {

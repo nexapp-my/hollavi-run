@@ -82,7 +82,8 @@
             android:layout_height="25dp"
             android:src="@drawable/ic_menu_coupons"
             android:layout_marginTop="7dp"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:id="@+id/menu_coupon_image_view" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -105,7 +106,8 @@
             android:layout_height="25dp"
             android:src="@drawable/ic_menu_sos"
             android:layout_marginTop="7dp"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:id="@+id/menu_sos_image_view" />
 
         <TextView
             android:layout_width="wrap_content"
