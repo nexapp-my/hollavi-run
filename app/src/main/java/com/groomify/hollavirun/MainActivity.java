@@ -29,6 +29,8 @@ import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.fragment.CouponsListFragment;
 import com.groomify.hollavirun.fragment.MainFragment;
@@ -52,7 +54,8 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity
 implements
         MissionListFragment.OnListFragmentInteractionListener,
-        RankingListFragment.OnFragmentInteractionListener{
+        RankingListFragment.OnFragmentInteractionListener
+         {
 
     private final static String TAG = MainActivity.class.getSimpleName();
 

@@ -5,15 +5,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -21,8 +16,6 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
 import com.facebook.Profile;
 import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
@@ -30,14 +23,10 @@ import com.facebook.login.widget.LoginButton;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.LoginRequest;
-import com.groomify.hollavirun.rest.models.LoginResponse;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.groomify.hollavirun.rest.models.response.LoginResponse;
 
 import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.http.HTTP;
 
 public class OnboardingActivity extends AppCompatActivity {
 

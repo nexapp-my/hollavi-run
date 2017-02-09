@@ -27,10 +27,13 @@ dependencies {
     compile 'com.android.support:support-v4:23.4.0'
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
     compile 'com.android.support:recyclerview-v7:23.4.0'
-    compile 'com.google.android.gms:play-services-vision:8.4.0'
+    compile 'com.google.android.gms:play-services-vision:10.0.1'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.google.code.gson:gson:2.7'
+
+    compile 'com.google.android.gms:play-services-maps:10.0.1'
+
 
     compile 'org.parceler:parceler-api:1.1.6'
     annotationProcessor 'org.parceler:parceler:1.1.6'

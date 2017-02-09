@@ -103,7 +103,7 @@ public class MainFragment_backup extends ListFragment {
         //LinearLayout view = (LinearLayout) mainFragment.findViewById(R.id.profile_layout);
         //view.addView(profileRankingView);
 
-        horizonRecyclerView = (RecyclerView) mainFragment.findViewById(R.id.horizontal_mission_list);
+        //horizonRecyclerView = (RecyclerView) mainFragment.findViewById(R.id.horizontal_mission_list);
         horizontalAdapter = new HorizontalAdapter(missionCards);
 
         LinearLayoutManager horizontalLayoutManager

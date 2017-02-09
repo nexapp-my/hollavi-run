@@ -1,4 +1,4 @@
-package com.groomify.hollavirun.rest.models;
+package com.groomify.hollavirun.rest.models.response;
 
 /**
  * Created by Valkyrie1988 on 1/22/2017.
@@ -6,6 +6,7 @@ package com.groomify.hollavirun.rest.models;
 
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.annotations.Expose;
+import com.groomify.hollavirun.rest.models.ProfilePicture;
 
 public class LoginResponse {
 

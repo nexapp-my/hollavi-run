@@ -59,12 +59,19 @@ public class ViewPagerCarouselFragment extends Fragment {
         raceDistanceTextView.setText(race.getDistance() + " KM");
 
         miniMapImageView = new ImageView(this.getContext());
-        Bitmap miniMapBitmap = BitmapFactory.decodeByteArray(race.getMiniMapByteArr(), 0, race.getMiniMapByteArr().length);
-        miniMapImageView.setImageBitmap(miniMapBitmap);
+
+        if(race.getMiniMapByteArr() != null){
+            Bitmap miniMapBitmap = BitmapFactory.decodeByteArray(race.getMiniMapByteArr(), 0, race.getMiniMapByteArr().length);
+            miniMapImageView.setImageBitmap(miniMapBitmap);
+        }
 
         finisherBadgeImageView = new ImageView(this.getContext());
-        Bitmap finisherBadgeBitmap = BitmapFactory.decodeByteArray(race.getCompletetionBadgeByteArr(), 0, race.getCompletetionBadgeByteArr().length);
-        finisherBadgeImageView.setImageBitmap(finisherBadgeBitmap);
+
+        if(race.getMiniMapByteArr() != null){
+            Bitmap finisherBadgeBitmap = BitmapFactory.decodeByteArray(race.getCompletetionBadgeByteArr(), 0, race.getCompletetionBadgeByteArr().length);
+            finisherBadgeImageView.setImageBitmap(finisherBadgeBitmap);
+        }
+
 
         /*ivCarouselImage = (ImageView) v.findViewById(R.id.iv_carousel_image);
         imageResourceId = getArguments().getInt(IMAGE_RESOURCE_ID, R.drawable.ic_default_avatar); // default to car1 image resource
