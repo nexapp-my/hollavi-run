@@ -1,14 +1,17 @@
 package com.groomify.hollavirun.fragment;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ListFragment;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -40,6 +43,7 @@ import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.adapter.NewsFeedArrayAdapter;
 import com.groomify.hollavirun.entities.MissionCard;
 import com.groomify.hollavirun.entities.NewsFeed;
+import com.groomify.hollavirun.utils.AppPermissionHelper;
 import com.groomify.hollavirun.utils.BitmapUtils;
 import com.groomify.hollavirun.view.ProfilePictureView;
 
@@ -64,11 +68,12 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
     //public boolean isFirstTimeInitialized = true;
 
     public static EditText editText;
-
-
     private MapView mMapView;
 
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
+
+    private Context context;
+    private FragmentActivity fragmentActivity;
 
     //6.718263, 100.206579
     //1.257542, 103.897877
@@ -79,15 +84,15 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
+        context = this.getContext();
+        fragmentActivity = this.getActivity();
 
        /* if(!isFirstTimeInitialized){
             return;
         }*/
 
 
-        Log.i(TAG, "Inside the main fragment!!!!");
+        //Log.i(TAG, "Inside the main fragment!!!!");
 
         /*NewsFeed[] newsFeeds = {
                 new NewsFeed("Accident reported at section 13", "Get the latest news on the run right here.", "4 mins ago"),
@@ -125,7 +130,6 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
         }*/
         // Inflate the layout for this fragment
         mainFragment = inflater.inflate(R.layout.fragment_main, container, false);
-
 
         if (editText == null) {
             editText = (EditText) mainFragment.findViewById(R.id.search_runner_field);
@@ -260,8 +264,20 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
 
         } catch (Resources.NotFoundException e) {
             Log.e(TAG, "Can't find style. Error: ", e);
-        }catch (Exception ex){
-            Log.e(TAG, "Failed to instantiate google map.");
+        } catch ( java.lang.SecurityException e){
+            Log.w(TAG, "Application does not have location permission.", e);
+            new Handler().postDelayed(new Runnable(){
+                @Override
+                public void run() {
+                    if(!AppPermissionHelper.isLocationPermissionGranted(context)){
+                        Log.i(TAG, "Requesting user to grant location permission.");
+                        AppPermissionHelper.requestLocationPermission(fragmentActivity);
+                    }
+                }
+
+            }, 500);
+        } catch (Exception ex){
+            Log.e(TAG, "Failed to instantiate google map.", ex);
         }
     }
 

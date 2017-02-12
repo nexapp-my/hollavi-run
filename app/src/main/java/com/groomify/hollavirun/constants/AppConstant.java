@@ -13,7 +13,11 @@ public class AppConstant {
 
     public static final String PREFS_PROFILE_PIC_UPDATED = "profile_updated";
     public static final String PREFS_RUN_SELECTED = "run_selected";
+    public static final String PREFS_RUN_SELECTED_ID = "run_selected_id";
+    public static final String PREFS_RUN_BIB_NO = "run_bib_no";
+
     public static final String PREFS_TEAM_SELECTED = "team_selected";
+    public static final String PREFS_TEAM_SELECTED_ID = "team_selected_id";
 
 
     public static final String PREFS_EMERGENCY_CONTACT_NAME = "emergency_contact_name";

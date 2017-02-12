@@ -229,7 +229,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 }
             } else {
                 Toast.makeText(this, "This application needs Camera permission to take photo", Toast.LENGTH_SHORT).show();
-                finish();
+                //finish();
             }
         }
     }

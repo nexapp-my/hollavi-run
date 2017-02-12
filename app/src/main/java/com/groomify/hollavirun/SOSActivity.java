@@ -85,7 +85,7 @@ public class SOSActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(SOSActivity.emergencyContactSelected){
-                    prompCallConfirmationDialog(emergencyContactNumber, "Calling emergency contact "+emergencyContactName+" ?");
+                    prompCallConfirmationDialog(emergencyContactNumber, "Call emergency contact "+emergencyContactName+" ?");
                 }else{
                     Log.i(TAG, "Emergency contact is not set, prompt user to setup now.");
                     new AlertDialog.Builder(SOSActivity.this)

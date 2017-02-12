@@ -1,4 +1,3 @@
-
 package com.groomify.hollavirun.rest.models.response;
 
 import java.io.Serializable;
@@ -8,15 +7,15 @@ import android.os.Parcelable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class LoginResponse implements Serializable, Parcelable
+public class UserInfoResponse implements Serializable, Parcelable
 {
 
     @SerializedName("id")
     @Expose
-    private Long id;
+    private Integer id;
     @SerializedName("fb_id")
     @Expose
-    private Long fbId;
+    private Integer fbId;
     @SerializedName("name")
     @Expose
     private String name;
@@ -37,60 +36,60 @@ public class LoginResponse implements Serializable, Parcelable
     private ProfilePicture profilePicture;
     @SerializedName("emergency_contact_person")
     @Expose
-    private String emergencyContactPerson;
+    private Object emergencyContactPerson;
     @SerializedName("emergency_contact_phone")
     @Expose
     private Object emergencyContactPhone;
     @SerializedName("number_of_runs")
     @Expose
-    private Long numberOfRuns;
+    private Integer numberOfRuns;
     @SerializedName("last_rank")
     @Expose
-    private Object lastRank;
-    public final static Parcelable.Creator<LoginResponse> CREATOR = new Creator<LoginResponse>() {
+    private Integer lastRank;
+    public final static Parcelable.Creator<UserInfoResponse> CREATOR = new Creator<UserInfoResponse>() {
 
 
         @SuppressWarnings({
                 "unchecked"
         })
-        public LoginResponse createFromParcel(Parcel in) {
-            LoginResponse instance = new LoginResponse();
-            instance.id = ((Long) in.readValue((Long.class.getClassLoader())));
-            instance.fbId = ((Long) in.readValue((Long.class.getClassLoader())));
+        public UserInfoResponse createFromParcel(Parcel in) {
+            UserInfoResponse instance = new UserInfoResponse();
+            instance.id = ((Integer) in.readValue((Integer.class.getClassLoader())));
+            instance.fbId = ((Integer) in.readValue((Integer.class.getClassLoader())));
             instance.name = ((String) in.readValue((String.class.getClassLoader())));
             instance.email = ((Object) in.readValue((Object.class.getClassLoader())));
             instance.country = ((Object) in.readValue((Object.class.getClassLoader())));
             instance.authToken = ((String) in.readValue((String.class.getClassLoader())));
             instance.phoneNo = ((Object) in.readValue((Object.class.getClassLoader())));
             instance.profilePicture = ((ProfilePicture) in.readValue((ProfilePicture.class.getClassLoader())));
-            instance.emergencyContactPerson = ((String) in.readValue((String.class.getClassLoader())));
+            instance.emergencyContactPerson = ((Object) in.readValue((Object.class.getClassLoader())));
             instance.emergencyContactPhone = ((Object) in.readValue((Object.class.getClassLoader())));
-            instance.numberOfRuns = ((Long) in.readValue((Long.class.getClassLoader())));
-            instance.lastRank = ((Object) in.readValue((Object.class.getClassLoader())));
+            instance.numberOfRuns = ((Integer) in.readValue((Integer.class.getClassLoader())));
+            instance.lastRank = ((Integer) in.readValue((Integer.class.getClassLoader())));
             return instance;
         }
 
-        public LoginResponse[] newArray(int size) {
-            return (new LoginResponse[size]);
+        public UserInfoResponse[] newArray(int size) {
+            return (new UserInfoResponse[size]);
         }
 
     }
             ;
-    private final static long serialVersionUID = -5877959178619302781L;
+    private final static long serialVersionUID = -4220787807358928934L;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public Long getFbId() {
+    public Integer getFbId() {
         return fbId;
     }
 
-    public void setFbId(Long fbId) {
+    public void setFbId(Integer fbId) {
         this.fbId = fbId;
     }
 
@@ -142,11 +141,11 @@ public class LoginResponse implements Serializable, Parcelable
         this.profilePicture = profilePicture;
     }
 
-    public String getEmergencyContactPerson() {
+    public Object getEmergencyContactPerson() {
         return emergencyContactPerson;
     }
 
-    public void setEmergencyContactPerson(String emergencyContactPerson) {
+    public void setEmergencyContactPerson(Object emergencyContactPerson) {
         this.emergencyContactPerson = emergencyContactPerson;
     }
 
@@ -158,19 +157,19 @@ public class LoginResponse implements Serializable, Parcelable
         this.emergencyContactPhone = emergencyContactPhone;
     }
 
-    public Long getNumberOfRuns() {
+    public Integer getNumberOfRuns() {
         return numberOfRuns;
     }
 
-    public void setNumberOfRuns(Long numberOfRuns) {
+    public void setNumberOfRuns(Integer numberOfRuns) {
         this.numberOfRuns = numberOfRuns;
     }
 
-    public Object getLastRank() {
+    public Integer getLastRank() {
         return lastRank;
     }
 
-    public void setLastRank(Object lastRank) {
+    public void setLastRank(Integer lastRank) {
         this.lastRank = lastRank;
     }
 

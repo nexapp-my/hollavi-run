@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.groomify.hollavirun.constants.AppConstant;
+import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
 public class TeamSelectActivity extends AppCompatActivity {
 
@@ -23,6 +24,8 @@ public class TeamSelectActivity extends AppCompatActivity {
     private static TextView teamSelectionThreeTextView;
 
     private static TextView letsGoTextView;
+
+    private String selectedTeam = "A";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,18 +69,18 @@ public class TeamSelectActivity extends AppCompatActivity {
         letsGoTextView.setOnClickListener(new TextView.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i(TAG, "Lets go clicked. Run run run.");
-
-                SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("team_selected", true);
-
-                // Commit the edits!
-                editor.commit();
-                launchMainActivity();
+              selectTeam();
             }
         });
 
+    }
+
+    private void selectTeam(){
+        Log.i(TAG, "Team selected: "+selectedTeam);
+
+        SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_TEAM_SELECTED, true);
+        SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_TEAM_SELECTED_ID, selectedTeam);
+        launchMainActivity();
     }
 
     private void launchMainActivity(){
@@ -95,12 +98,15 @@ public class TeamSelectActivity extends AppCompatActivity {
         switch (currentTeam){
             case 1:
                 teamSelectionOneTextView.setTextColor(ContextCompat.getColor(this,R.color.rustyRed));
+                selectedTeam = "A";
                 break;
             case 2:
                 teamSelectionTwoTextView.setTextColor(ContextCompat.getColor(this,R.color.rustyRed));
+                selectedTeam = "B";
                 break;
             case 3:
                 teamSelectionThreeTextView.setTextColor(ContextCompat.getColor(this,R.color.rustyRed));
+                selectedTeam = "C";
                 break;
             default:
                 break;

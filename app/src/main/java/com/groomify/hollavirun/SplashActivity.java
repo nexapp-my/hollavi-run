@@ -54,12 +54,12 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(!isPermissionGranted()){
+        /*if(!isPermissionGranted()){
             Log.i(TAG, "Permission is not granted.");
             requestPermission();
         }else{
             Log.i(TAG, "Permission granted.");
-        }
+        }*/
 
 
         boolean exitApp = false;
@@ -113,14 +113,20 @@ public class SplashActivity extends AppCompatActivity {
 
                         boolean profileUpdated = settings.getBoolean(AppConstant.PREFS_PROFILE_PIC_UPDATED, false);
                         boolean teamSelected = settings.getBoolean(AppConstant.PREFS_TEAM_SELECTED, false);
-                        boolean runSelected = settings.getBoolean(AppConstant.PREFS_RUN_SELECTED, true);
+                        boolean runSelected = settings.getBoolean(AppConstant.PREFS_RUN_SELECTED, false);
 
                         Log.i(TAG,"profileUpdated: "+profileUpdated+", teamSelected: "+teamSelected+", runSelected: "+runSelected);
                         //launchWelcomeScreen();
 
+                        //TODO check is the race expired, relaunch with race selection again.
+                        //TODO check is facebook login success and groomify failed. If failed perform groomify login here.
+
                         if(profileUpdated && teamSelected && runSelected){
                             launchMainScreen();
-                        }else if (!teamSelected){
+                        }else if(!runSelected){
+                            launchRaceSelectionScreen();
+                        }
+                        else if (!teamSelected){
                             launchTeamSelectionScreen();
                         }
                         else{
@@ -139,7 +145,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
 
-    private boolean isPermissionGranted() {
+    /*private boolean isPermissionGranted() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
@@ -160,7 +166,7 @@ public class SplashActivity extends AppCompatActivity {
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION
                 }, PERMISSIONS_REQUEST);
-    }
+    }*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -174,6 +180,12 @@ public class SplashActivity extends AppCompatActivity {
                 finish();
             }
         }
+    }
+
+    private void launchRaceSelectionScreen(){
+        Intent sosIntent = new Intent(this, SelectRaceActivity.class);
+        startActivity(sosIntent);
+        finish();
     }
 
     private void launchTeamSelectionScreen(){

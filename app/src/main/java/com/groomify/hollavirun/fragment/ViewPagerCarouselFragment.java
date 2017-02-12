@@ -80,7 +80,7 @@ public class ViewPagerCarouselFragment extends Fragment {
         /*v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "Race: "+race.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "RaceResponse: "+race.toString(), Toast.LENGTH_SHORT).show();
             }
         });*/
 

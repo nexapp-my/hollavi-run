@@ -8,31 +8,31 @@ import android.os.Parcelable.Creator;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Cover_ implements Serializable, Parcelable
+public class ProfilePicture_ implements Serializable, Parcelable
 {
 
     @SerializedName("url")
     @Expose
     private String url;
-    public final static Creator<Cover_> CREATOR = new Creator<Cover_>() {
+    public final static Creator<ProfilePicture_> CREATOR = new Creator<ProfilePicture_>() {
 
 
         @SuppressWarnings({
             "unchecked"
         })
-        public Cover_ createFromParcel(Parcel in) {
-            Cover_ instance = new Cover_();
+        public ProfilePicture_ createFromParcel(Parcel in) {
+            ProfilePicture_ instance = new ProfilePicture_();
             instance.url = ((String) in.readValue((String.class.getClassLoader())));
             return instance;
         }
 
-        public Cover_[] newArray(int size) {
-            return (new Cover_[size]);
+        public ProfilePicture_[] newArray(int size) {
+            return (new ProfilePicture_[size]);
         }
 
     }
     ;
-    private final static long serialVersionUID = 593598530041151192L;
+    private final static long serialVersionUID = 5384580728631946458L;
 
     public String getUrl() {
         return url;

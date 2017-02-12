@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -38,6 +39,7 @@ import com.groomify.hollavirun.fragment.MissionFragment;
 import com.groomify.hollavirun.fragment.MissionListFragment;
 import com.groomify.hollavirun.fragment.RankingListFragment;
 import com.groomify.hollavirun.fragment.dummy.MissionContent;
+import com.groomify.hollavirun.utils.AppPermissionHelper;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
 import com.groomify.hollavirun.view.ProfilePictureView;
 
@@ -46,6 +48,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -55,12 +58,12 @@ public class MainActivity extends AppCompatActivity
 implements
         MissionListFragment.OnListFragmentInteractionListener,
         RankingListFragment.OnFragmentInteractionListener
-         {
+{
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
     private static final int REQUEST_IMAGE_CAPTURE = 101;
-    private static final int PERMISSIONS_REQUEST = 100;
+    //private static final int PERMISSIONS_REQUEST = 100;
     private static final int REQUEST_PROFILE_LOGOUT = 102;
 
     private View topMenuBar;
@@ -130,7 +133,6 @@ implements
             currentFragment = new MainFragment();
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.add(R.id.main_placeholder, currentFragment).commit();
-
         }
 
         if(Profile.getCurrentProfile() != null){
@@ -154,6 +156,8 @@ implements
         initializeMenuBarListener();
         loadProfileImageFromStorage();
         toggleMenuState();
+
+
 
     }
 
@@ -237,7 +241,7 @@ implements
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isPermissionGranted()){
+                if(AppPermissionHelper.isPermissionGranted(MainActivity.this)){
                     /*Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                         startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
@@ -264,7 +268,7 @@ implements
                         }
                     }
                 }else{
-                    requestPermission();
+                    AppPermissionHelper.requestPermission(MainActivity.this);
                 }
             }
         });
@@ -395,7 +399,7 @@ implements
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private boolean isPermissionGranted() {
+  /*  private boolean isPermissionGranted() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
@@ -403,21 +407,29 @@ implements
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST);
-    }
+    }*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    recreate();
-                }
-            } else {
-                Toast.makeText(this, "This application needs Camera permission to take photo", Toast.LENGTH_SHORT).show();
-                //finish();
+        Log.i(TAG, "onRequestPermissionsResult, requestCode:"+requestCode+", permissions:"+Arrays.toString(permissions)+", grantResults:"+Arrays.toString(grantResults));
+
+        boolean successGranted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+
+        if(successGranted){
+            Log.i(TAG, "Permission granted.");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                Log.i(TAG, "Recreating activity.");
+                recreate();
+            }
+        }else{
+            if (requestCode == AppPermissionHelper.PERMISSIONS_CAMERA_AND_STOAGE_REQUEST_CODE) {
+                Toast.makeText(this, "This application require camera and storage permission to take photo.", Toast.LENGTH_LONG).show();
+            }else if(requestCode == AppPermissionHelper.PERMISSIONS_LOCATION_REQUEST_CODE){
+                Toast.makeText(this, "This application require to access your location for optimal performance.", Toast.LENGTH_LONG).show();
             }
         }
     }
+
     @Override
     public void onListFragmentInteraction(MissionContent.MissionItem item) {
 
@@ -444,4 +456,5 @@ implements
                 .setNegativeButton("No", null)
                 .show();
     }
+
 }

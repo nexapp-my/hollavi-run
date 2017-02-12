@@ -1,5 +1,6 @@
 package com.groomify.hollavirun;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,8 +23,10 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.rest.RestClient;
-import com.groomify.hollavirun.rest.models.LoginRequest;
+import com.groomify.hollavirun.rest.models.request.FbUser;
+import com.groomify.hollavirun.rest.models.request.LoginRequest;
 import com.groomify.hollavirun.rest.models.response.LoginResponse;
+import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -41,7 +44,9 @@ public class OnboardingActivity extends AppCompatActivity {
 
     RestClient client = new RestClient();
 
-    boolean loginComplete = false;
+    boolean grommifyLoginInProgress = false;
+
+    Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +56,15 @@ public class OnboardingActivity extends AppCompatActivity {
         if(getSupportActionBar() != null)
             getSupportActionBar().hide();
 
+        context = this.getApplicationContext();
+
         loginButton = (Button) findViewById(R.id.login_button);
         faceLoginButton = (LoginButton) findViewById(R.id.facebook_login_button);
 
 
         loginButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-
+                loginButton.setEnabled(false);
                 if(AccessToken.getCurrentAccessToken()!=  null){
                     loginToGroomify(AccessToken.getCurrentAccessToken().getUserId());
                     Log.i(TAG, "User already login to facebook, perform Groomify login.");
@@ -78,14 +85,9 @@ public class OnboardingActivity extends AppCompatActivity {
 
                 // App code
                 Log.i(TAG, "On facebook login success callback. Login status: " +loginResult.getRecentlyGrantedPermissions().toString());
+                Toast.makeText(context, "Facebook log in success, logging into groomify now...", Toast.LENGTH_SHORT).show();
 
-                SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean(AppConstant.PREFS_USER_LOGGGED_IN, true);
-
-                // Commit the edits!
-                editor.commit();
-
+                SharedPreferencesHelper.savePreferences(getApplicationContext(), SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_USER_LOGGGED_IN, true);
                 if(Profile.getCurrentProfile() == null) {
                     mProfileTracker = new ProfileTracker() {
                         @Override
@@ -93,6 +95,7 @@ public class OnboardingActivity extends AppCompatActivity {
                             Log.v("facebook - profile", profile2.getFirstName());
                             mProfileTracker.stopTracking();
                             //launchRaceSelectionScreen();
+
                             loginToGroomify(AccessToken.getCurrentAccessToken().getUserId());
                         }
                     };
@@ -110,10 +113,12 @@ public class OnboardingActivity extends AppCompatActivity {
             @Override
             public void onCancel() {
                 Log.i(TAG, "On facebook login cancel callback.");
+                loginButton.setEnabled(true);
             }
 
             @Override
             public void onError(FacebookException exception) {
+                loginButton.setEnabled(true);
                 Log.i(TAG, "On facebook login error callback.", exception);
                 Toast.makeText(OnboardingActivity.this, "Failed to login with facebook.\n"+exception.getMessage(), Toast.LENGTH_SHORT).show();
             }
@@ -150,6 +155,7 @@ public class OnboardingActivity extends AppCompatActivity {
     }
 
     public void loginToGroomify(String facebookUserId){
+        faceLoginButton.setEnabled(false);
         Log.i(TAG, "Login groomify service with id: "+facebookUserId);
         new GroomifyLoginTask().execute(facebookUserId);
     }
@@ -161,9 +167,11 @@ public class OnboardingActivity extends AppCompatActivity {
 
             Log.i(TAG, "#doInBackground Login to groomify services.");
 
-            LoginRequest loginRequest = new LoginRequest(params[0]);
-
             try{
+                LoginRequest loginRequest = new LoginRequest();
+                FbUser fbUser = new FbUser();
+                fbUser.setFbId(params[0]);
+                loginRequest.setFbUser(fbUser);
                 Call<LoginResponse> loginCall = client.getApiService().loginUser(loginRequest);
                 Response<LoginResponse> response = loginCall.execute();
                 if(response != null && response.code() == 200){
@@ -186,7 +194,9 @@ public class OnboardingActivity extends AppCompatActivity {
                 loginButton.setVisibility(View.GONE);
                 launchRaceSelectionScreen();
             }else{
+                loginButton.setEnabled(true);
                 Toast.makeText(OnboardingActivity.this, "Failed to login to groomify services", Toast.LENGTH_SHORT).show();
+                loginButton.setVisibility(View.VISIBLE);
             }
         }
     }
