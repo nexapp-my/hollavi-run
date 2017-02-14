@@ -52,13 +52,13 @@ public class MainFragment_backup extends ListFragment {
         Log.i(TAG, "Inside the main fragment!!!!");
 
         NewsFeed[] newsFeeds = {
-                new NewsFeed("Accident reported at section 13", "Get the latest news on the run right here.", "4 mins ago"),
-                new NewsFeed("Well done guys!", "It was a beautiful run today. Thanks for your participation and till we meet again.", "4 mins ago"),
-                new NewsFeed("King of the road!", "Congratulations. You have done this.", "1 day ago"),
-                new NewsFeed("Neque porro quisquam est qui dolorem ipsum ", "Cras fermentum dolor et nisl tincidunt, in molestie nisl pellentesque. Duis dictum laoreet elit", "1 day ago"),
-                new NewsFeed("quia dolor sit amet, consectetur", "Duis id tincidunt velit. Sed gravida diam nibh, et egestas sem porttitor et.", "1 day ago"),
-                new NewsFeed("adipisci velit...", "Donec ut sapien enim. Fusce non tristique odio.", "2 days ago"),
-                new NewsFeed("Nam eu pulvinar velit. Mauris ac nisl qua", "Morbi pellentesque nisi vel sollicitudin dapibus.", "1 day ago")
+                new NewsFeed(1, "Accident reported at section 13", "Get the latest news on the run right here.", "4 mins ago"),
+                new NewsFeed(2, "Well done guys!", "It was a beautiful run today. Thanks for your participation and till we meet again.", "4 mins ago"),
+                new NewsFeed(3, "King of the road!", "Congratulations. You have done this.", "1 day ago"),
+                new NewsFeed(4, "Neque porro quisquam est qui dolorem ipsum ", "Cras fermentum dolor et nisl tincidunt, in molestie nisl pellentesque. Duis dictum laoreet elit", "1 day ago"),
+                new NewsFeed(5, "quia dolor sit amet, consectetur", "Duis id tincidunt velit. Sed gravida diam nibh, et egestas sem porttitor et.", "1 day ago"),
+                new NewsFeed(6, "adipisci velit...", "Donec ut sapien enim. Fusce non tristique odio.", "2 days ago"),
+                new NewsFeed(7, "Nam eu pulvinar velit. Mauris ac nisl qua", "Morbi pellentesque nisi vel sollicitudin dapibus.", "1 day ago")
         };
         setListAdapter(new NewsFeedArrayAdapter(this.getContext(), newsFeeds));
 

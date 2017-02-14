@@ -1,9 +1,12 @@
 package com.groomify.hollavirun.rest;
 
+import com.github.simonpercic.oklog3.OkLogInterceptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.groomify.hollavirun.rest.services.GroomifyAPIServices;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -12,12 +15,31 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class RestClient {
-    private static final String BASE_URL = "https://groomifyrun-api.herokuapp.com";
+    private static final String BASE_URL = "http://groomifyrun-api.herokuapp.com";
 
     private GroomifyAPIServices apiService;
 
     public RestClient()
     {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        // set your desired log level
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        // add your other interceptors …
+
+        // add logging as last interceptor
+        httpClient.addInterceptor(logging);  // <-- this is the important line!
+
+        OkLogInterceptor okLogInterceptor = OkLogInterceptor.builder()
+                .withRequestContentType(true)
+                .withRequestHeaders(true)
+                .withResponseHeaders(true)
+                // set desired custom options
+                .withAllLogData()
+                .build();
+        httpClient.addInterceptor(okLogInterceptor);
+
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'")
                 .create();
@@ -25,6 +47,7 @@ public class RestClient {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
+                .client(httpClient.build())
                 .build();
 
 

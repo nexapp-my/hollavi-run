@@ -104,7 +104,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
         MissionDetailsActivity.ViewPagerAdapter adapter = new MissionDetailsActivity.ViewPagerAdapter(getSupportFragmentManager());
         MissionDetailsFragment missionDetailFragment = MissionDetailsFragment.newInstance(mission);
         adapter.addFragment(missionDetailFragment, "DETAILS");
-        adapter.addFragment(new RankingListFragment(), "RANKINGS");
+        //adapter.addFragment(new RankingListFragment(), "RANKINGS");
         viewPager.setAdapter(adapter);
     }
 

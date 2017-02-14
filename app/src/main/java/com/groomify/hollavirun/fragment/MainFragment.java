@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -68,7 +69,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
     //public boolean isFirstTimeInitialized = true;
 
     public static EditText editText;
-    private MapView mMapView;
+    public static MapView mMapView;
 
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
 
@@ -80,6 +81,8 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
     private LatLngBounds MALAYSIA = new LatLngBounds(
             new LatLng(1.2, 100),new LatLng(7.0, 104.3));
 
+
+    public static GoogleMap googleMap = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -124,38 +127,28 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        /*if(mainFragment != null){
-            return mainFragment;
-        }*/
         // Inflate the layout for this fragment
+
         mainFragment = inflater.inflate(R.layout.fragment_main, container, false);
 
         if (editText == null) {
             editText = (EditText) mainFragment.findViewById(R.id.search_runner_field);
         }
-        /*editText.setOnFocusChangeListener(
-                new EditText.OnFocusChangeListener() {
-                      @Override
-                      public void onFocusChange(View v, boolean hasFocus) {
-                          EditText editText = (EditText) v;
-                          if(hasFocus){
-                              editText.setText("");
-                          }else{
-                              editText.setText("Search Runner ID");
-                          }
-                      }
-                  }
-        );*/
-
+        editText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText editText = (EditText) v;
+                editText.setText("");
+            }
+        });
 
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
         }
+        Log.i(TAG, "Creating map view.");
         mMapView = (MapView) mainFragment.findViewById(R.id.map);
         mMapView.onCreate(mapViewBundle);
-
         mMapView.getMapAsync(this);
 
         return mainFragment;
@@ -182,14 +175,10 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap map) {
-        //map.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+
 
         try {
-            // Customise the styling of the base map using a JSON object defined
-            // in a raw resource file.
-
-
-
+            googleMap = map;
             // Constrain the camera target to the Adelaide bounds.
             map.setLatLngBoundsForCameraTarget(MALAYSIA);
 
@@ -202,10 +191,8 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
             }
 
             map.getUiSettings().setZoomGesturesEnabled(true);
-            if (ActivityCompat.checkSelfPermission(mainFragment.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(mainFragment.getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (!AppPermissionHelper.isLocationPermissionGranted(context)) {
                 Log.i(TAG,"Location permission is not granted.");
-                return;
             }else{
                 map.setMyLocationEnabled(true);
             }
@@ -235,10 +222,6 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
                     .position(new LatLng(3.065279, 101.603333))
                     .title("Mission 4"));
             marketMission3.setTag(0);
-
-
-
-
             //3.064059, 101.579973
 
             PolylineOptions rectOptions = new PolylineOptions()
@@ -252,10 +235,6 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
                     .add(new LatLng(3.072339, 101.593151))
                     .add(new LatLng(3.072468, 101.596402))
                     .add(new LatLng(3.073053, 101.597232))
-
-                    //3.073972, 101.610781
-                    //3.065541, 101.610792
-                    //3.065309, 101.593327
                     .color(ResourcesCompat.getColor(getResources(), R.color.rustyRed, null));// Closes the polyline.
 
              // Get back the mutable Polyline
@@ -266,16 +245,6 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
             Log.e(TAG, "Can't find style. Error: ", e);
         } catch ( java.lang.SecurityException e){
             Log.w(TAG, "Application does not have location permission.", e);
-            new Handler().postDelayed(new Runnable(){
-                @Override
-                public void run() {
-                    if(!AppPermissionHelper.isLocationPermissionGranted(context)){
-                        Log.i(TAG, "Requesting user to grant location permission.");
-                        AppPermissionHelper.requestLocationPermission(fragmentActivity);
-                    }
-                }
-
-            }, 500);
         } catch (Exception ex){
             Log.e(TAG, "Failed to instantiate google map.", ex);
         }
@@ -289,6 +258,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onDestroy() {
+        Log.i(TAG, "onDestroy, map destroyed.");
         mMapView.onDestroy();
         super.onDestroy();
     }

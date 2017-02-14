@@ -1,6 +1,7 @@
 package com.groomify.hollavirun.rest.services;
 
 import com.groomify.hollavirun.rest.models.request.MissionTransactionRequest;
+import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
 import com.groomify.hollavirun.rest.models.response.RaceResponse;
 import com.groomify.hollavirun.rest.models.request.LoginRequest;
 import com.groomify.hollavirun.rest.models.request.PostFacebookTransactionRequest;
@@ -11,7 +12,7 @@ import com.groomify.hollavirun.rest.models.response.LoginResponse;
 import com.groomify.hollavirun.rest.models.response.RaceDetailResponse;
 import com.groomify.hollavirun.rest.models.response.MissionSubmissionResponse;
 import com.groomify.hollavirun.rest.models.response.PostFacebookTransactionResponse;
-import com.groomify.hollavirun.rest.models.response.RaceInfo;
+import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
 import com.groomify.hollavirun.rest.models.response.SearchRunnerLocationResponse;
 import com.groomify.hollavirun.rest.models.response.UpdateRunnerInfoResponse;
 import com.groomify.hollavirun.rest.models.response.UpdateUserLocationResponse;
@@ -47,13 +48,13 @@ public interface GroomifyAPIServices {
             @Header("auth_token") String authToken);
 
     @GET("races/{id}")
-    Call<List<RaceDetailResponse>> raceDetail(
+    Call<RaceDetailResponse> raceDetail(
             @Header("fb_id") String facebookId,
             @Header("auth_token") String authToken,
             @Path("id") String id);
 
     @GET("races/{id}/info")
-    Call<List<RaceInfo>> raceInfo(
+    Call<List<RaceInfoResponse>> raceInfo(
             @Header("fb_id") String facebookId,
             @Header("auth_token") String authToken,
             @Path("id") String id);

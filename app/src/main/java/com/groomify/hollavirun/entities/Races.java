@@ -4,28 +4,50 @@ import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-public class Races implements Parcelable{
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.Ignore;
+import io.realm.annotations.PrimaryKey;
 
+public class Races extends RealmObject implements Parcelable{
+
+    @PrimaryKey
     public int id;
     public String raceName;
     public String raceLocation;
     public String distance;
     public String totalMission;
+    public boolean status;
+    public String endTime;
+    public String firstAid;
+    public String groomifySupport;
 
+
+    public RealmList<Mission> missions;
+
+    @Ignore
     public byte[] miniMapByteArr;
+    @Ignore
     public byte[] completetionBadgeByteArr;
 
-    public Races(int id, String raceName, String raceLocation, String distance, String totalMission, byte[] miniMapByteArr, byte[] completetionBadgeByteArr) {
+
+    public Races(int id, String raceName, String raceLocation, String distance, String totalMission, boolean status, String endTime, String firstAid, String groomifySupport) {
         this.id = id;
         this.raceName = raceName;
         this.raceLocation = raceLocation;
         this.distance = distance;
         this.totalMission = totalMission;
-        this.miniMapByteArr = miniMapByteArr;
-        this.completetionBadgeByteArr = completetionBadgeByteArr;
+        this.status = status;
+        this.endTime = endTime;
+        this.firstAid = firstAid;
+        this.groomifySupport = groomifySupport;
     }
+
+    public Races() {}
 
     public int getId() {
         return id;
@@ -67,6 +89,46 @@ public class Races implements Parcelable{
         this.totalMission = totalMission;
     }
 
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getFirstAid() {
+        return firstAid;
+    }
+
+    public void setFirstAid(String firstAid) {
+        this.firstAid = firstAid;
+    }
+
+    public String getGroomifySupport() {
+        return groomifySupport;
+    }
+
+    public void setGroomifySupport(String groomifySupport) {
+        this.groomifySupport = groomifySupport;
+    }
+
+    public RealmList<Mission> getMissions() {
+        return missions;
+    }
+
+    public void setMissions(RealmList<Mission> missions) {
+        this.missions = missions;
+    }
+
     public byte[] getMiniMapByteArr() {
         return miniMapByteArr;
     }
@@ -83,27 +145,6 @@ public class Races implements Parcelable{
         this.completetionBadgeByteArr = completetionBadgeByteArr;
     }
 
-    protected Races(Parcel in) {
-        id = in.readInt();
-        raceName = in.readString();
-        raceLocation = in.readString();
-        distance = in.readString();
-        totalMission = in.readString();
-        miniMapByteArr = in.createByteArray();
-        completetionBadgeByteArr = in.createByteArray();
-    }
-
-    public static final Creator<Races> CREATOR = new Creator<Races>() {
-        @Override
-        public Races createFromParcel(Parcel in) {
-            return new Races(in);
-        }
-
-        @Override
-        public Races[] newArray(int size) {
-            return new Races[size];
-        }
-    };
 
     @Override
     public int describeContents() {
@@ -112,12 +153,45 @@ public class Races implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeString(raceName);
-        dest.writeString(raceLocation);
-        dest.writeString(distance);
-        dest.writeString(totalMission);
-        dest.writeByteArray(miniMapByteArr);
-        dest.writeByteArray(completetionBadgeByteArr);
+        dest.writeInt(this.id);
+        dest.writeString(this.raceName);
+        dest.writeString(this.raceLocation);
+        dest.writeString(this.distance);
+        dest.writeString(this.totalMission);
+        dest.writeByte(this.status ? (byte) 1 : (byte) 0);
+        dest.writeString(this.endTime);
+        dest.writeString(this.firstAid);
+        dest.writeString(this.groomifySupport);
+        dest.writeTypedList(this.missions);
+        dest.writeByteArray(this.miniMapByteArr);
+        dest.writeByteArray(this.completetionBadgeByteArr);
     }
+
+
+
+    protected Races(Parcel in) {
+        this.id = in.readInt();
+        this.raceName = in.readString();
+        this.raceLocation = in.readString();
+        this.distance = in.readString();
+        this.totalMission = in.readString();
+        this.status = in.readByte() != 0;
+        this.endTime = in.readString();
+        this.firstAid = in.readString();
+        this.groomifySupport = in.readString();
+        this.miniMapByteArr = in.createByteArray();
+        this.completetionBadgeByteArr = in.createByteArray();
+    }
+
+    public static final Creator<Races> CREATOR = new Creator<Races>() {
+        @Override
+        public Races createFromParcel(Parcel source) {
+            return new Races(source);
+        }
+
+        @Override
+        public Races[] newArray(int size) {
+            return new Races[size];
+        }
+    };
 }

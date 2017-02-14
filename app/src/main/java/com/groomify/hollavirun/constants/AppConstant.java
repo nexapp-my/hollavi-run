@@ -23,4 +23,8 @@ public class AppConstant {
     public static final String PREFS_EMERGENCY_CONTACT_NAME = "emergency_contact_name";
     public static final String PREFS_EMERGENCY_CONTACT_NUM = "emergency_contact_num";
 
+    public static final String PREFS_FB_ID = "fb_id";
+    public static final String PREFS_AUTH_TOKEN = "auth_token";
+    public static final String PREFS_RUNNER_ID = "runner_id";
+
 }

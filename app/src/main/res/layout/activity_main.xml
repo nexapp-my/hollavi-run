@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -17,60 +18,56 @@
         android:layout_alignParentStart="true"
         android:id="@+id/main_menu_bar_bottom" />
 
+
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:id="@+id/main_placeholder"
         android:paddingTop="49dp"
-        android:paddingBottom="49dp">
-<!--
-        <include layout="@layout/fragment_main"/>
-        <include layout="@layout/fragment_mission"/>-->
+        android:paddingBottom="49dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
     </FrameLayout>
-
-    <!-- <LinearLayout
-         android:orientation="vertical"
-         android:layout_width="fill_parent"
-         android:layout_height="fill_parent"
-         android:padding="5dp">
-
-         <FrameLayout
-             android:id="@android:id/tabcontent"
-             android:layout_width="fill_parent"
-             android:layout_height="wrap_content"
-             android:padding="5dp"
-             android:layout_weight="1"/>
-
-         <TabWidget
-             android:id="@android:id/tabs"
-             android:layout_width="fill_parent"
-             android:layout_height="wrap_content"
-             android:layout_weight="0"
-             android:layout_marginBottom="-4dp"/>
-
-     </LinearLayout>-->
-   <!-- <android.support.v4.view.ViewPager
-        android:id="@+id/viewpager"
+    <RelativeLayout
+        android:id="@+id/alert_banner"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />-->
-<!--@style/HollaviTabLayout -->
-   <!-- <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:gravity="bottom">
+        android:layout_height="44dp"
+        android:background="@color/alertBannerBGColour"
+        android:layout_marginTop="49dp">
 
-        <android.support.design.widget.TabLayout
-                android:id="@+id/tabs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                app:tabMode="fixed"
-                app:tabGravity="fill" />
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            app:srcCompat="@drawable/ic_warning"
+            android:id="@+id/imageView8"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="12dp" />
 
-    </LinearLayout>-->
+        <TextView
+            android:text="Alert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/imageView8"
+            android:layout_toEndOf="@+id/imageView8"
+            android:id="@+id/alert_text"
+            android:textColor="@android:color/white"
+            android:layout_marginLeft="4dp" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="13dp"
+            app:srcCompat="@drawable/ic_chevron_right_white"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/imageView9"
+            android:layout_marginRight="16dp" />
+    </RelativeLayout>
+
 </RelativeLayout>

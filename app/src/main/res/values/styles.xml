@@ -3,8 +3,6 @@
     <style name="GroomifyAppTheme" parent="Theme.AppCompat.Light">
         <item name="android:background">@android:color/white</item>
         <item name="toolbarStyle">@style/Widget.Toolbar</item>
-
-
     </style>
 
     <style name="GroomifyAppActionBarTheme" parent="GroomifyAppTheme">
@@ -20,6 +18,30 @@
     <style name="GroomifyAppActionBarTheme.Text" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/rustyRed</item>
     </style>
+
+    <style name="GroomifyAppActionBarTheme.Dialog" parent="Theme.AppCompat.Light">
+        <item name="android:alertDialogStyle">@style/CustomAlertDialogStyle</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="CustomAlertDialogStyle">
+        <item name="android:bottomBright">@android:color/transparent</item>
+        <item name="android:bottomDark">@android:color/transparent</item>
+        <item name="android:bottomMedium">@android:color/transparent</item>
+        <item name="android:centerBright">@android:color/transparent</item>
+        <item name="android:centerDark">@android:color/transparent</item>
+        <item name="android:centerMedium">@android:color/transparent</item>
+        <item name="android:fullBright">@android:color/transparent</item>
+        <item name="android:fullDark">@android:color/transparent</item>
+        <item name="android:topBright">@android:color/transparent</item>
+        <item name="android:topDark">@android:color/transparent</item>
+    </style>
+
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
@@ -61,6 +83,8 @@
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
     </style>
+
+
 
 
     <style name="HollaviTabLayout" parent="Widget.Design.TabLayout">

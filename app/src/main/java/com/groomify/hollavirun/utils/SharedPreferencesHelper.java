@@ -31,4 +31,19 @@ public class SharedPreferencesHelper {
         // Commit the edits!
         editor.commit();
     }
+
+    public static String getAuthToken(Context context){
+        SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        return settings.getString(AppConstant.PREFS_AUTH_TOKEN, null);
+    }
+
+    public static String getFbId(Context context){
+        SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        return settings.getString(AppConstant.PREFS_FB_ID, null);
+    }
+
+    public static Integer getSelectedRaceId(Context context){
+        SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        return settings.getInt(AppConstant.PREFS_RUN_SELECTED_ID, -1);
+    }
 }

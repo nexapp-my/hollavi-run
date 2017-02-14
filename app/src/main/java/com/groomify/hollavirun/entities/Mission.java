@@ -3,17 +3,26 @@ package com.groomify.hollavirun.entities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by Valkyrie1988 on 10/23/2016.
  */
 
-public class Mission implements Parcelable {
+public class Mission extends RealmObject implements Parcelable {
+    @PrimaryKey
     private int missionNumber;
+
     private String missionNumberString;
     private String missionTitle;
     private String missionDesc;
     private int missionImageId;
     private boolean unlocked;
+
+    public Mission(){
+
+    }
 
     public Mission(int missionNumber, String missionNumberString, String missionTitle, String missionDesc, int missionImageId, boolean unlocked) {
         this.missionDesc = missionDesc;

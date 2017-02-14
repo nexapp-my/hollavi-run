@@ -17,6 +17,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="splashScreenBGColour">#0E1D32</color>
+    <color name="alertBannerBGColour">#1895C8</color>
 
     <color name="hollaviBlue">#0E1D32</color>
 

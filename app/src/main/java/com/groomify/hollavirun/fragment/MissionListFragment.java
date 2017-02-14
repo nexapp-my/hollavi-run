@@ -7,6 +7,7 @@ import android.support.v4.app.ListFragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,13 @@ import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.fragment.dummy.MissionContent;
 import com.groomify.hollavirun.fragment.dummy.MissionContent.MissionItem;
 
+import java.util.Arrays;
+
+import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
+
 /**
  * A fragment representing a list of Items.
  * <p/>
@@ -30,6 +38,7 @@ import com.groomify.hollavirun.fragment.dummy.MissionContent.MissionItem;
  */
 public class MissionListFragment extends ListFragment {
 
+    private final String TAG = MissionListFragment.class.getSimpleName();
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
     // TODO: Customize parameters
@@ -47,6 +56,11 @@ public class MissionListFragment extends ListFragment {
             new Mission(6, "06", "UPSIDE DOWN WORLD", "Meet your favourite Superheroes.", R.drawable.mission_banner_06, false)
 
     };
+
+    MissionArrayAdapter missionArrayAdapter;
+    RealmChangeListener<RealmResults<Mission>> realmChangeListener;
+
+    private Realm realm;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -73,7 +87,40 @@ public class MissionListFragment extends ListFragment {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
 
-        setListAdapter(new MissionArrayAdapter(this.getContext(), missions));
+        Realm.init(this.getContext());
+        RealmConfiguration config = new RealmConfiguration
+                .Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
+
+        realm = Realm.getInstance(config);
+
+         // ... boilerplate omitted for brevity
+        // get all the customers
+        RealmResults<Mission> missionRealmResults = realm.where(Mission.class).findAll();
+
+        Log.i(TAG, "All missions. "+missionRealmResults.size());
+        // ... build a list adapter and set it to the ListView/RecyclerView/etc
+
+        missions = missionRealmResults.toArray(new Mission[0]);
+
+        // set up a Realm change listener
+        realmChangeListener = new RealmChangeListener<RealmResults<Mission>>() {
+            @Override
+            public void onChange(RealmResults<Mission> results) {
+                // This is called anytime the Realm database changes on any thread.
+                // Please note, change listeners only work on Looper threads.
+                // For non-looper threads, you manually have to use Realm.waitForChange() instead.
+                missionArrayAdapter.notifyDataSetChanged(); // Update the UI
+            }
+        };
+        // Tell Realm to notify our listener when the customers results
+        // have changed (items added, removed, updated, anything of the sort).
+        missionRealmResults.addChangeListener(realmChangeListener);
+
+        missionArrayAdapter = new MissionArrayAdapter(this.getContext(), missions);
+        //setListAdapter(new MissionArrayAdapter(this.getContext(), missions));
+        setListAdapter(missionArrayAdapter);
     }
 
     @Override

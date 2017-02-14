@@ -93,7 +93,10 @@ public class ViewPagerCarouselView extends RelativeLayout {
      * Initialize carousel views, each item in the carousel view is a fragment
      */
     private void initCarousel() {
-        carouselPageIndicators.get(0).setSelected(true);
+
+        if(carouselPageIndicators.size() > 0){
+            carouselPageIndicators.get(0).setSelected(true);
+        }
 
         // Update the carousel page indicator on change
         vpCarousel.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {

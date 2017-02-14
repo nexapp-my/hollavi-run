@@ -1,6 +1,5 @@
 package com.groomify.hollavirun;
 
-import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,8 +9,6 @@ import android.content.pm.Signature;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
@@ -20,16 +17,16 @@ import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.Profile;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
 import com.groomify.hollavirun.constants.AppConstant;
+import com.groomify.hollavirun.rest.RestClient;
+import com.groomify.hollavirun.rest.models.response.RaceDetailResponse;
+import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,7 +34,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+
+import retrofit2.Response;
 
 /**
  * Created by Valkyrie1988 on 9/17/2016.
@@ -50,6 +48,10 @@ public class SplashActivity extends AppCompatActivity {
     private final static long SPLASH_DISPLAY_LENGTH = 0;
     private static final int PERMISSIONS_REQUEST = 100;
 
+    boolean isDebug = true;
+
+    RestClient client = new RestClient();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +63,11 @@ public class SplashActivity extends AppCompatActivity {
             Log.i(TAG, "Permission granted.");
         }*/
 
+        if(isDebug){
+            SharedPreferences settings = this.getSharedPreferences(AppConstant.PREFS_NAME, 0);
+            Log.i(TAG, "All information refreshed.");
+            settings.edit().clear().commit();
+        }
 
         boolean exitApp = false;
         try {
@@ -110,20 +117,22 @@ public class SplashActivity extends AppCompatActivity {
                     //TODO another mechanism to determine user authenticated if user is not login with facebook.
                     if(AccessToken.getCurrentAccessToken() != null && Profile.getCurrentProfile() != null && userLoggedIn){
 
-
                         boolean profileUpdated = settings.getBoolean(AppConstant.PREFS_PROFILE_PIC_UPDATED, false);
                         boolean teamSelected = settings.getBoolean(AppConstant.PREFS_TEAM_SELECTED, false);
                         boolean runSelected = settings.getBoolean(AppConstant.PREFS_RUN_SELECTED, false);
 
                         Log.i(TAG,"profileUpdated: "+profileUpdated+", teamSelected: "+teamSelected+", runSelected: "+runSelected);
-                        //launchWelcomeScreen();
 
                         //TODO check is the race expired, relaunch with race selection again.
                         //TODO check is facebook login success and groomify failed. If failed perform groomify login here.
 
+                        if(runSelected && isSelectedRaceValid()){
+
+                        }
+
                         if(profileUpdated && teamSelected && runSelected){
                             launchMainScreen();
-                        }else if(!runSelected){
+                        }else if(!runSelected || (runSelected && isSelectedRaceValid())){
                             launchRaceSelectionScreen();
                         }
                         else if (!teamSelected){
@@ -143,31 +152,6 @@ public class SplashActivity extends AppCompatActivity {
 
 
     }
-
-
-    /*private boolean isPermissionGranted() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestPermission() {
-        ActivityCompat.requestPermissions(this,
-                new String[]{
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.CALL_PHONE,
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                }, PERMISSIONS_REQUEST);
-    }*/
-
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST) {
@@ -232,8 +216,6 @@ public class SplashActivity extends AppCompatActivity {
         parameters.putString("fields", "id,name,email");
         request.setParameters(parameters);
         request.executeAsync();
-
-
     }
     //To add key into Development phone.
     private void printKeyHash(){
@@ -253,6 +235,37 @@ public class SplashActivity extends AppCompatActivity {
         }
     }
 
+    private boolean isSelectedRaceValid(){
+        SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        Integer raceId = settings.getInt(AppConstant.PREFS_RUN_SELECTED_ID, 0);
+
+        String authToken = SharedPreferencesHelper.getAuthToken(this);
+        String fbId = SharedPreferencesHelper.getAuthToken(this);
+
+        if(raceId == null || raceId == 0){
+            Log.i(TAG, "Race is not selected.");
+            return false;
+        }else if(raceId == -1){
+            Log.i(TAG, "Selected race id is -1: Run as guest.");
+            return true;
+        }else {
+            Log.i(TAG, "Selected race id is "+raceId);
+            try {
+                Response<RaceDetailResponse> raceDetailResponse = client.getApiService().raceDetail(fbId, authToken, raceId.toString()).execute();
+                if(raceDetailResponse.isSuccessful()){
+                    return raceDetailResponse.body().getStatus();
+                }else{
+                    return false;
+                }
+
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to get race info.", e);
+
+            }
+        }
+        return false;
+
+    }
 
     public boolean isOnline() throws IOException {
 
@@ -268,4 +281,5 @@ public class SplashActivity extends AppCompatActivity {
 
         return false;
     }
+
 }

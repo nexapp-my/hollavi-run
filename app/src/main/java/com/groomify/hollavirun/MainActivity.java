@@ -1,6 +1,5 @@
 package com.groomify.hollavirun;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
@@ -10,15 +9,14 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -30,18 +28,22 @@ import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.groomify.hollavirun.constants.AppConstant;
+import com.groomify.hollavirun.entities.NewsFeed;
+import com.groomify.hollavirun.entities.Races;
 import com.groomify.hollavirun.fragment.CouponsListFragment;
 import com.groomify.hollavirun.fragment.MainFragment;
 import com.groomify.hollavirun.fragment.MissionFragment;
 import com.groomify.hollavirun.fragment.MissionListFragment;
 import com.groomify.hollavirun.fragment.RankingListFragment;
 import com.groomify.hollavirun.fragment.dummy.MissionContent;
+import com.groomify.hollavirun.rest.RestClient;
+import com.groomify.hollavirun.rest.models.response.Info;
+import com.groomify.hollavirun.rest.models.response.JoinRaceResponse;
+import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
-import com.groomify.hollavirun.view.ProfilePictureView;
+import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,12 +52,17 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import retrofit2.Response;
 
 /**
  * Created by Valkyrie1988 on 9/17/2016.
  */
 public class MainActivity extends AppCompatActivity
-implements
+        implements
         MissionListFragment.OnListFragmentInteractionListener,
         RankingListFragment.OnFragmentInteractionListener
 {
@@ -85,9 +92,21 @@ implements
     private ImageView missionMenuIcon;
     private ImageView couponMenuIcon;
 
-    public MainFragment mainFragment = new MainFragment();
-    public MissionFragment missionFragment = new MissionFragment();
-    public CouponsListFragment couponsListFragment = new CouponsListFragment();
+    private TextView alertText;
+    private View alertBanner;
+
+    //public MainFragment mainFragment = new MainFragment();
+    //public MissionFragment missionFragment = new MissionFragment();
+    //public CouponsListFragment couponsListFragment = new CouponsListFragment();
+
+    private View.OnClickListener granPermissionListener = null;
+    private View.OnClickListener updateProfileListener = null;
+
+    private final String ALERT_TEXT_REQUIRE_PERMISSION = "Location permission is required.";
+    private final String ALERT_UPDATE_PROFILE = "Please update your profile";
+
+    private RestClient client = new RestClient();
+    private Realm realm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +116,14 @@ implements
         Log.i(TAG,  "In the Main activity.");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Realm.init(this);
+        RealmConfiguration config = new RealmConfiguration
+                .Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
+
+        realm = Realm.getInstance(config);
 
         if(getSupportActionBar() != null)
             getSupportActionBar().hide();
@@ -119,30 +146,45 @@ implements
             Log.i(TAG, " topMenuBar: "+topMenuBar);*/
         }
 
+        if(alertBanner == null){
+            alertBanner = findViewById(R.id.alert_banner);
+        }
+
+        alertBanner.setVisibility(View.GONE);
+        if(alertText == null){
+            alertText = (TextView) findViewById(R.id.alert_text);
+        }
 
         menuBarLogo.setVisibility(ImageView.INVISIBLE);
         menuBarGreetingText.setVisibility(TextView.VISIBLE);
         pictureView.setVisibility(View.VISIBLE);
 
-
         //TODO load all the fragments here.
+/*
+        getSupportFragmentManager().executePendingTransactions();
+        Fragment fragmentById = getSupportFragmentManager().
+                findFragmentById(R.id.main_placeholder);
 
+        if (fragmentById!=null) {
+            getSupportFragmentManager().beginTransaction()
+                    .remove(fragmentById).commit();
+        }*/
 
 
         if (savedInstanceState == null) {
-            currentFragment = new MainFragment();
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.add(R.id.main_placeholder, currentFragment).commit();
+            //currentFragment = new MainFragment();
+            //FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            //ft.replace(R.id.main_placeholder, new MainFragment()).commit();
         }
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.main_placeholder, new MainFragment()).commit();
 
         if(Profile.getCurrentProfile() != null){
             menuBarGreetingText.setText("Good Morning, " +Profile.getCurrentProfile().getName());
-
-
             //pictureView.setProfileId(Profile.getCurrentProfile().getId());
             //pictureView.setDrawingCacheEnabled(true);
             //Log.i(TAG, "Action bar profile picture loaded");
-
         }
 
         pictureView.setOnClickListener(new View.OnClickListener() {
@@ -156,9 +198,58 @@ implements
         initializeMenuBarListener();
         loadProfileImageFromStorage();
         toggleMenuState();
+        initializeBannerOnClickListener();
 
 
+        if(!AppPermissionHelper.isLocationPermissionGranted(getApplicationContext())){
+            Log.i(TAG, "Location permission is not granted, showing alert banner.");
+            alertText.setText(ALERT_TEXT_REQUIRE_PERMISSION);
+            alertBanner.setVisibility(View.VISIBLE);
+            alertBanner.setOnClickListener(granPermissionListener);
+        }else{
+            alertBanner.setVisibility(View.GONE);
+        }
 
+        Integer raceId = SharedPreferencesHelper.getSelectedRaceId(this);
+        new GroomifyRaceInfoTask().execute(""+raceId);//TODO temporary hardcore race id
+    }
+
+    private void initializeNewsView(){
+       /* // ... boilerplate omitted for brevity
+        realm = Realm.getDefaultInstance();
+        // get all the customers
+        RealmResults<Customer> customers = realm.where(Customer.class).findAllAsync();
+        // ... build a list adapter and set it to the ListView/RecyclerView/etc
+
+        // set up a Realm change listener
+        changeListener = new RealmChangeListener() {
+            @Override
+            public void onChange(RealmResults<Customer> results) {
+                // This is called anytime the Realm database changes on any thread.
+                // Please note, change listeners only work on Looper threads.
+                // For non-looper threads, you manually have to use Realm.waitForChange() instead.
+                listAdapter.notifyDataSetChanged(); // Update the UI
+            }
+        };
+        // Tell Realm to notify our listener when the customers results
+        // have changed (items added, removed, updated, anything of the sort).
+        customers.addChangeListener(changeListener);*/
+    }
+
+    private void initializeBannerOnClickListener(){
+        granPermissionListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppPermissionHelper.requestLocationPermission(MainActivity.this);
+            }
+        };
+
+        updateProfileListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "Update profile", Toast.LENGTH_SHORT).show();
+            }
+        };
     }
 
     private void loadProfileImageFromStorage()
@@ -215,9 +306,13 @@ implements
             public void onClick(View v) {
                 if(currentMenuIndex != 0 ){
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    mainFragment = new MainFragment();
-                    ft.remove(currentFragment).add(R.id.main_placeholder, mainFragment).commit();
-                    currentFragment = mainFragment;
+                    //mainFragment = new MainFragment();
+                    ft.replace(R.id.main_placeholder, new MainFragment()).commit();
+                   /* if(currentFragment != null){
+                        ft.remove(currentFragment);
+                    }
+                    ft.add(R.id.main_placeholder, mainFragment).commit();*/
+                    //currentFragment = mainFragment;
                     currentMenuIndex = 0;
                     toggleMenuState();
                 }
@@ -228,12 +323,20 @@ implements
             @Override
             public void onClick(View v) {
                 if(currentMenuIndex != 1){
-                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    missionFragment = new MissionFragment();
-                    ft.remove(currentFragment).add(R.id.main_placeholder,  missionFragment).commit();
-                    currentFragment = missionFragment;
-                    currentMenuIndex = 1;
-                    toggleMenuState();
+                    try {
+                        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                        //missionFragment = new MissionFragment();
+                        ft.replace(R.id.main_placeholder, new MissionFragment()).commit();
+                        /*if (currentFragment != null) {
+                            ft.remove(currentFragment);
+                        }
+                        ft.add(R.id.main_placeholder, missionFragment).commit();*/
+                        //currentFragment = missionFragment;
+                        currentMenuIndex = 1;
+                        toggleMenuState();
+                    }catch (Exception ex){
+                        Log.e(TAG, ">>>>>>>>>>>>>>>>>>>>>>>>", ex);
+                    }
                 }
             }
         });
@@ -241,7 +344,7 @@ implements
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(AppPermissionHelper.isPermissionGranted(MainActivity.this)){
+                if(AppPermissionHelper.isCameraPermissionGranted(MainActivity.this)){
                     /*Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                         startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
@@ -279,9 +382,13 @@ implements
                 //Toast.makeText(MainActivity.this, "Coupon clicked", Toast.LENGTH_SHORT).show();
                 if(currentMenuIndex != 3){
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    couponsListFragment = new CouponsListFragment();
-                    ft.remove(currentFragment).add(R.id.main_placeholder,  couponsListFragment).commit();
-                    currentFragment = couponsListFragment;
+                    //couponsListFragment = new CouponsListFragment();
+                    ft.replace(R.id.main_placeholder, new CouponsListFragment()).commit();
+                    /*if(currentFragment != null){
+                        ft.remove(currentFragment);
+                    }
+                    ft.add(R.id.main_placeholder,  couponsListFragment).commit();*/
+                    //currentFragment = couponsListFragment;
                     currentMenuIndex = 3;
                     toggleMenuState();
                 }
@@ -419,7 +526,19 @@ implements
             Log.i(TAG, "Permission granted.");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 Log.i(TAG, "Recreating activity.");
-                recreate();
+
+                /*new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        recreate();
+                    }
+                },2000);*/
+                if(MainFragment.googleMap != null){
+                    MainFragment.googleMap.setMyLocationEnabled(true);
+                    alertBanner.setVisibility(View.GONE);
+                }
+
+
             }
         }else{
             if (requestCode == AppPermissionHelper.PERMISSIONS_CAMERA_AND_STOAGE_REQUEST_CODE) {
@@ -457,4 +576,52 @@ implements
                 .show();
     }
 
+
+    private class GroomifyRaceInfoTask extends AsyncTask<String, String, List<RaceInfoResponse>> {
+
+        @Override
+        protected List<RaceInfoResponse> doInBackground(String... params) {
+            String authToken = SharedPreferencesHelper.getAuthToken(MainActivity.this);
+            String fbId = SharedPreferencesHelper.getFbId(MainActivity.this);
+            try {
+                Response<List<RaceInfoResponse>> listResponse = client.getApiService().raceInfo(fbId, authToken, params[0]).execute();
+
+                if(listResponse.isSuccessful()){
+                    Log.i(TAG, "Calling race news api success");
+                    return listResponse.body();
+                }else{
+                    Log.i(TAG, "Calling race news api failed, race id: "+params[0]+", response code: "+listResponse.code()+", error body: "+listResponse.errorBody().string());
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to get race news.",e);
+                Toast.makeText(MainActivity.this, "Unable to get race detail.", Toast.LENGTH_SHORT).show();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(List<RaceInfoResponse> raceInfoResponses) {
+            super.onPostExecute(raceInfoResponses);
+
+            //TODO save race info into database.
+            if(raceInfoResponses != null){
+
+                realm.beginTransaction();
+                realm.delete(NewsFeed.class);//truncate the tables.
+                List<Info> infos = raceInfoResponses.get(0).getInfos();
+                Log.i(TAG, "Total news: "+infos.size());
+
+                for(int i =0; i < infos.size(); i++){
+                    NewsFeed newsFeed = realm.createObject(NewsFeed.class, i + 1);
+                    newsFeed.setContent(infos.get(i).getContent());
+                    newsFeed.setHeader(infos.get(i).getTitle());
+                    newsFeed.setTimeStamp("1 min ago");//TODO missing timestamp
+
+                }
+
+                realm.commitTransaction();
+                initializeNewsView();
+            }
+        }
+    }
 }

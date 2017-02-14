@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -37,6 +38,7 @@ public class OnboardingActivity extends AppCompatActivity {
 
     LoginButton faceLoginButton = null;
     Button loginButton = null;
+    ProgressBar progressBar;
 
 
     CallbackManager callbackManager;
@@ -60,7 +62,7 @@ public class OnboardingActivity extends AppCompatActivity {
 
         loginButton = (Button) findViewById(R.id.login_button);
         faceLoginButton = (LoginButton) findViewById(R.id.facebook_login_button);
-
+        progressBar = (ProgressBar) findViewById(R.id.login_progress_bar);
 
         loginButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
@@ -156,6 +158,7 @@ public class OnboardingActivity extends AppCompatActivity {
 
     public void loginToGroomify(String facebookUserId){
         faceLoginButton.setEnabled(false);
+        progressBar.setVisibility(View.VISIBLE);
         Log.i(TAG, "Login groomify service with id: "+facebookUserId);
         new GroomifyLoginTask().execute(facebookUserId);
     }
@@ -175,8 +178,9 @@ public class OnboardingActivity extends AppCompatActivity {
                 Call<LoginResponse> loginCall = client.getApiService().loginUser(loginRequest);
                 Response<LoginResponse> response = loginCall.execute();
                 if(response != null && response.code() == 200){
-
                     Log.i(TAG, "#doInBackground User logged in: "+response.body().toString());
+                    SharedPreferencesHelper.savePreferences(OnboardingActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_FB_ID, ""+response.body().getFbId());
+                    SharedPreferencesHelper.savePreferences(OnboardingActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_AUTH_TOKEN, ""+response.body().getAuthToken());
                     return true;
                 }else{
                     Log.e(TAG, "#doInBackground API returned HTTP Response code:"+ response.code()+", errors:"+response.errorBody());
@@ -198,6 +202,7 @@ public class OnboardingActivity extends AppCompatActivity {
                 Toast.makeText(OnboardingActivity.this, "Failed to login to groomify services", Toast.LENGTH_SHORT).show();
                 loginButton.setVisibility(View.VISIBLE);
             }
+            progressBar.setVisibility(View.GONE);
         }
     }
 /*private void launchWelcomeScreen(){
