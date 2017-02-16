@@ -27,20 +27,20 @@
             android:layout_centerHorizontal="true"
             android:layout_margin="10dp"
             android:background="@android:color/white"
-            android:id="@+id/fmRelativeLayout">
+            android:id="@+id/latest_news_float_pane">
 
             <ImageView
                 android:layout_width="72dp"
                 android:layout_height="72dp"
                 app:srcCompat="@drawable/pikachu_resize"
-                android:id="@+id/imageView6"
+                android:id="@+id/latest_news_image_view"
                 android:layout_margin="10dp" />
 
             <TextView
                 android:text="Welcome to Groomify Run"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/textView14"
+                android:id="@+id/latest_news_title_text_view"
                 android:textSize="12sp"
                 android:textColor="@android:color/black"
                 android:textStyle="normal|bold"
@@ -56,7 +56,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
 
-                android:id="@+id/textView15"
+                android:id="@+id/latest_news_desc_text_view"
                 android:textSize="12sp"
                 tools:text="It all begins now."
                 android:textColor="@color/primaryTextColour"
@@ -68,13 +68,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
 
-                android:id="@+id/textView17"
+                android:id="@+id/latest_news_timestamp_text_view"
                 android:textSize="10sp"
                 android:textColor="@color/primaryTextColour"
                 tools:text="2 hours ago"
-                android:layout_alignBottom="@+id/imageView6"
-                android:layout_alignLeft="@+id/textView15"
-                android:layout_alignStart="@+id/textView15" />
+                android:layout_alignBottom="@+id/latest_news_image_view"
+                android:layout_alignLeft="@+id/latest_news_desc_text_view"
+                android:layout_alignStart="@+id/latest_news_desc_text_view" />
 
         </RelativeLayout>
 

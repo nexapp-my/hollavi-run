@@ -51,7 +51,7 @@ public class MainFragment_backup extends ListFragment {
 
         Log.i(TAG, "Inside the main fragment!!!!");
 
-        NewsFeed[] newsFeeds = {
+       /* NewsFeed[] newsFeeds = {
                 new NewsFeed(1, "Accident reported at section 13", "Get the latest news on the run right here.", "4 mins ago"),
                 new NewsFeed(2, "Well done guys!", "It was a beautiful run today. Thanks for your participation and till we meet again.", "4 mins ago"),
                 new NewsFeed(3, "King of the road!", "Congratulations. You have done this.", "1 day ago"),
@@ -61,6 +61,7 @@ public class MainFragment_backup extends ListFragment {
                 new NewsFeed(7, "Nam eu pulvinar velit. Mauris ac nisl qua", "Morbi pellentesque nisi vel sollicitudin dapibus.", "1 day ago")
         };
         setListAdapter(new NewsFeedArrayAdapter(this.getContext(), newsFeeds));
+        */
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 8;

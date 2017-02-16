@@ -48,7 +48,7 @@ public class SplashActivity extends AppCompatActivity {
     private final static long SPLASH_DISPLAY_LENGTH = 0;
     private static final int PERMISSIONS_REQUEST = 100;
 
-    boolean isDebug = true;
+    boolean isDebug = false;
 
     RestClient client = new RestClient();
 
@@ -236,7 +236,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private boolean isSelectedRaceValid(){
-        SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+       /* SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
         Integer raceId = settings.getInt(AppConstant.PREFS_RUN_SELECTED_ID, 0);
 
         String authToken = SharedPreferencesHelper.getAuthToken(this);
@@ -262,8 +262,8 @@ public class SplashActivity extends AppCompatActivity {
                 Log.e(TAG, "Failed to get race info.", e);
 
             }
-        }
-        return false;
+        }*/
+        return true;
 
     }
 

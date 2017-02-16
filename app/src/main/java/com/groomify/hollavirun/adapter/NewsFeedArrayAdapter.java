@@ -5,10 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.entities.NewsFeed;
+import com.groomify.hollavirun.utils.ImageLoadUtils;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.w3c.dom.Text;
 
@@ -37,12 +40,14 @@ public class NewsFeedArrayAdapter extends ArrayAdapter<NewsFeed> {
         TextView feedHeaderTextView = (TextView) rowView.findViewById(R.id.feeds_header);
         TextView feedContentTextView = (TextView) rowView.findViewById(R.id.feeds_content);
         TextView feedTimestampTextView = (TextView) rowView.findViewById(R.id.feeds_timestamp);
+        ImageView feedImageView = (ImageView) rowView.findViewById(R.id.feeds_image);
 
         if(values != null && values[position] != null){
             NewsFeed newsFeed = values[position];
             feedContentTextView.setText(newsFeed.getContent());
             feedHeaderTextView.setText(newsFeed.getHeader());
             feedTimestampTextView.setText(newsFeed.getTimeStamp());
+            ImageLoader.getInstance().displayImage(newsFeed.getCoverPhotoUrl(), feedImageView, ImageLoadUtils.getDisplayImageOptions());
         }
 
 

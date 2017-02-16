@@ -24,6 +24,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
@@ -53,12 +54,13 @@ public interface GroomifyAPIServices {
             @Header("auth_token") String authToken,
             @Path("id") String id);
 
+
     @GET("races/{id}/info")
-    Call<List<RaceInfoResponse>> raceInfo(
+    Call<RaceInfoResponse> raceInfo(
             @Header("fb_id") String facebookId,
             @Header("auth_token") String authToken,
-            @Path("id") String id);
-
+            @Path("id") String id
+    );
 
     @POST("races/{id}/join")
     Call<JoinRaceResponse> joinRace(

@@ -11,12 +11,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
-
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
-
-
 
     <meta-data
         android:name="com.google.android.gms.vision.DEPENDENCIES"
@@ -33,10 +29,9 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_map_api_key"/>
+            android:value="@string/google_map_api_key" />
 
         <!-- android:theme="@android:style/Theme.NoTitleBar.Fullscreen" -->
         <activity
@@ -63,8 +58,10 @@
             android:theme="@style/GroomifyAppActionBarTheme.Dialog">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
@@ -110,9 +107,16 @@
             android:authorities="com.facebook.app.FacebookContentProvider1066614556786691"
             android:exported="true" />
 
-        <activity android:name=".SelectRaceActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".CouponDetailsActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".EditProfileActivity" android:screenOrientation="portrait"/>
+        <activity
+            android:name=".SelectRaceActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".CouponDetailsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".EditProfileActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".LatestUpdateActivity"></activity>
     </application>
 
 </manifest>

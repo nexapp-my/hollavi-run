@@ -1,22 +1,12 @@
 package com.groomify.hollavirun.fragment;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
+import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.ListFragment;
 import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,13 +14,11 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -39,27 +27,28 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.groomify.hollavirun.MainActivity;
+import com.groomify.hollavirun.LatestUpdateActivity;
 import com.groomify.hollavirun.R;
-import com.groomify.hollavirun.adapter.NewsFeedArrayAdapter;
-import com.groomify.hollavirun.entities.MissionCard;
 import com.groomify.hollavirun.entities.NewsFeed;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
-import com.groomify.hollavirun.utils.BitmapUtils;
+import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.view.ProfilePictureView;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
 
 /**
  * Created by Valkyrie1988 on 9/18/2016.
  */
 public class MainFragment extends Fragment implements OnMapReadyCallback {
 
-    public static ProfilePictureView profilePictureView;
+    private final static int MAX_LATEST_NEWS_CONTENT = 50;
 
     private final static String TAG = MainFragment.class.getSimpleName();
+
+    public static ProfilePictureView profilePictureView;
 
     /*private RecyclerView horizonRecyclerView;
     private ArrayList<MissionCard> missionCards;
@@ -67,6 +56,12 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
 
     public static View mainFragment;
     //public boolean isFirstTimeInitialized = true;
+
+    private View latestNewsFloatPane = null;
+    private TextView latestNewsTitle= null;
+    private TextView latestNewsDesc= null;
+    private TextView latestNewsTimestamp = null;
+    private ImageView latestNewsCover = null;
 
     public static EditText editText;
     public static MapView mMapView;
@@ -84,11 +79,25 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
 
     public static GoogleMap googleMap = null;
 
+    private Realm realm;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = this.getContext();
         fragmentActivity = this.getActivity();
+
+        Realm.init(this.getContext());
+        RealmConfiguration config = new RealmConfiguration
+                .Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
+
+        realm = Realm.getInstance(config);
+
+        // Create global configuration and initialize ImageLoader with this config
+
+        ImageLoadUtils.initImageLoader(this.getContext());
 
        /* if(!isFirstTimeInitialized){
             return;
@@ -142,6 +151,19 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
+        latestNewsFloatPane = mainFragment.findViewById(R.id.latest_news_float_pane);
+        latestNewsTitle = (TextView) mainFragment.findViewById(R.id.latest_news_title_text_view);
+        latestNewsDesc= (TextView) mainFragment.findViewById(R.id.latest_news_desc_text_view);
+        latestNewsTimestamp = (TextView) mainFragment.findViewById(R.id.latest_news_timestamp_text_view);
+        latestNewsCover= (ImageView) mainFragment.findViewById(R.id.latest_news_image_view);
+
+        latestNewsFloatPane.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchLatestUpdateScreen();
+            }
+        });
+
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
@@ -151,7 +173,64 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
         mMapView.onCreate(mapViewBundle);
         mMapView.getMapAsync(this);
 
+        initializeNewsView();
+
         return mainFragment;
+
+    }
+
+    private void launchLatestUpdateScreen(){
+        Intent intent = new Intent(context, LatestUpdateActivity.class);
+        startActivity(intent);
+    }
+
+
+    private void initializeNewsView(){
+
+        RealmResults<NewsFeed> newsFeedRealmResults = realm.where(NewsFeed.class).findAll();
+
+        Log.i(TAG, "Total news feed from database: "+newsFeedRealmResults);
+        //TODO get the first item for latest news
+
+        if(newsFeedRealmResults.size() > 0){
+            NewsFeed latestNews = newsFeedRealmResults.get(1);
+
+            latestNewsTimestamp.setText(latestNews.getTimeStamp());
+            latestNewsTitle.setText(latestNews.getHeader());
+            if(latestNews.getContent().length() > MAX_LATEST_NEWS_CONTENT){
+                String trimContent = latestNews.getContent().substring(0, MAX_LATEST_NEWS_CONTENT) + "...";
+                latestNewsDesc.setText(trimContent);
+            }else{
+                latestNewsDesc.setText(latestNews.getContent());
+            }
+
+            ImageLoader.getInstance().displayImage(latestNews.getCoverPhotoUrl(), latestNewsCover, ImageLoadUtils.getDisplayImageOptions());
+        }else{
+            latestNewsFloatPane.setVisibility(View.GONE);
+        }
+
+
+       /* // ... boilerplate omitted for brevity
+        realm = Realm.getDefaultInstance();
+        // get all the customers
+        RealmResults<Customer> customers = realm.where(Customer.class).findAllAsync();
+        // ... build a list adapter and set it to the ListView/RecyclerView/etc
+
+        // set up a Realm change listener
+        changeListener = new RealmChangeListener() {
+            @Override
+            public void onChange(RealmResults<Customer> results) {
+                // This is called anytime the Realm database changes on any thread.
+                // Please note, change listeners only work on Looper threads.
+                // For non-looper threads, you manually have to use Realm.waitForChange() instead.
+                listAdapter.notifyDataSetChanged(); // Update the UI
+            }
+        };
+        // Tell Realm to notify our listener when the customers results
+        // have changed (items added, removed, updated, anything of the sort).
+        customers.addChangeListener(changeListener);*/
+
+
 
     }
 

@@ -14,14 +14,16 @@ public class NewsFeed extends RealmObject{
     private String header;
     private String content;
     private String timeStamp;
+    private String coverPhotoUrl;
 
     public NewsFeed(){}
 
-    public NewsFeed(int id, String header, String content, String timeStamp) {
+    public NewsFeed(int id, String header, String content, String timeStamp, String coverPhotoUrl) {
         this.id = id;
         this.header = header;
         this.content = content;
         this.timeStamp = timeStamp;
+        this.coverPhotoUrl = coverPhotoUrl;
     }
 
     public String getHeader() {
@@ -54,5 +56,24 @@ public class NewsFeed extends RealmObject{
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getCoverPhotoUrl() {
+        return coverPhotoUrl;
+    }
+
+    public void setCoverPhotoUrl(String coverPhotoUrl) {
+        this.coverPhotoUrl = coverPhotoUrl;
+    }
+
+    @Override
+    public String toString() {
+        return "NewsFeed{" +
+                "id=" + id +
+                ", header='" + header + '\'' +
+                ", content='" + content + '\'' +
+                ", timeStamp='" + timeStamp + '\'' +
+                ", coverPhotoUrl='" + coverPhotoUrl + '\'' +
+                '}';
     }
 }

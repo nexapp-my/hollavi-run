@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -137,7 +138,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
     private void joinRace(){
         Races race = SelectRaceActivity.races[currentPosition];
-        Toast.makeText(SelectRaceActivity.this, "Race "+race.getRaceName()+" has been selected. Bib no:"+bibNo, Toast.LENGTH_LONG).show();
+        //Toast.makeText(SelectRaceActivity.this, "Race "+race.getRaceName()+" has been selected. Bib no:"+bibNo, Toast.LENGTH_LONG).show();
         SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_RUN_SELECTED, true);
         SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.INTEGER, AppConstant.PREFS_RUN_SELECTED_ID, race.getId());
         //launchWelcomeScreen();
@@ -158,6 +159,9 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         builder.setMessage("Enter your bib number");
         // Set up the input
         final EditText input = new EditText(this);
+        InputFilter[] filterArray = new InputFilter[1];
+        filterArray[0] = new InputFilter.LengthFilter(MAX_BIB_NO);
+        input.setFilters(filterArray);
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_VARIATION_NORMAL);
         builder.setView(input);
@@ -335,6 +339,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
                 races.missions = new RealmList<>();
                 realm.delete(Mission.class);
+
                 for(int i = 0; i < raceDetail.getMissions().size(); i++) {
                     com.groomify.hollavirun.rest.models.response.Mission missionResponse = raceDetail.getMissions().get(i);
 
@@ -384,10 +389,11 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
             if(joinRace != null){
                 Log.i(TAG, "Join race success, runner id:"+joinRace.getRunnerId());
                 SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_RUNNER_ID, ""+joinRace.getRunnerId());
+                launchWelcomeScreen();
             }
 
             //TODO temporary skip join race.
-            launchWelcomeScreen();
+
         }
     }
 

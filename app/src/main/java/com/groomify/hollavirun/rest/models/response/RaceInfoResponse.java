@@ -1,13 +1,13 @@
 
 package com.groomify.hollavirun.rest.models.response;
-
 import java.io.Serializable;
 import java.util.List;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
 
 public class RaceInfoResponse implements Serializable, Parcelable
 {
@@ -15,11 +15,11 @@ public class RaceInfoResponse implements Serializable, Parcelable
     @SerializedName("infos")
     @Expose
     private List<Info> infos = null;
-    public final static Creator<RaceInfoResponse> CREATOR = new Creator<RaceInfoResponse>() {
+    public final static Parcelable.Creator<RaceInfoResponse> CREATOR = new Creator<RaceInfoResponse>() {
 
 
         @SuppressWarnings({
-            "unchecked"
+                "unchecked"
         })
         public RaceInfoResponse createFromParcel(Parcel in) {
             RaceInfoResponse instance = new RaceInfoResponse();
@@ -32,8 +32,8 @@ public class RaceInfoResponse implements Serializable, Parcelable
         }
 
     }
-    ;
-    private final static long serialVersionUID = -3310163745639562511L;
+            ;
+    private final static long serialVersionUID = -241465292332704010L;
 
     public List<Info> getInfos() {
         return infos;
@@ -48,7 +48,7 @@ public class RaceInfoResponse implements Serializable, Parcelable
     }
 
     public int describeContents() {
-        return  0;
+        return 0;
     }
 
 }

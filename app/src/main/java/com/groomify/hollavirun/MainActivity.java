@@ -56,6 +56,7 @@ import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
 import retrofit2.Response;
 
 /**
@@ -214,27 +215,7 @@ public class MainActivity extends AppCompatActivity
         new GroomifyRaceInfoTask().execute(""+raceId);//TODO temporary hardcore race id
     }
 
-    private void initializeNewsView(){
-       /* // ... boilerplate omitted for brevity
-        realm = Realm.getDefaultInstance();
-        // get all the customers
-        RealmResults<Customer> customers = realm.where(Customer.class).findAllAsync();
-        // ... build a list adapter and set it to the ListView/RecyclerView/etc
 
-        // set up a Realm change listener
-        changeListener = new RealmChangeListener() {
-            @Override
-            public void onChange(RealmResults<Customer> results) {
-                // This is called anytime the Realm database changes on any thread.
-                // Please note, change listeners only work on Looper threads.
-                // For non-looper threads, you manually have to use Realm.waitForChange() instead.
-                listAdapter.notifyDataSetChanged(); // Update the UI
-            }
-        };
-        // Tell Realm to notify our listener when the customers results
-        // have changed (items added, removed, updated, anything of the sort).
-        customers.addChangeListener(changeListener);*/
-    }
 
     private void initializeBannerOnClickListener(){
         granPermissionListener = new View.OnClickListener() {
@@ -577,14 +558,15 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private class GroomifyRaceInfoTask extends AsyncTask<String, String, List<RaceInfoResponse>> {
+    //TODO might need a thread periodicaly pull the news.
+    private class GroomifyRaceInfoTask extends AsyncTask<String, String, RaceInfoResponse> {
 
         @Override
-        protected List<RaceInfoResponse> doInBackground(String... params) {
+        protected RaceInfoResponse doInBackground(String... params) {
             String authToken = SharedPreferencesHelper.getAuthToken(MainActivity.this);
             String fbId = SharedPreferencesHelper.getFbId(MainActivity.this);
             try {
-                Response<List<RaceInfoResponse>> listResponse = client.getApiService().raceInfo(fbId, authToken, params[0]).execute();
+                Response<RaceInfoResponse> listResponse = client.getApiService().raceInfo(fbId, authToken, params[0]).execute();
 
                 if(listResponse.isSuccessful()){
                     Log.i(TAG, "Calling race news api success");
@@ -600,7 +582,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected void onPostExecute(List<RaceInfoResponse> raceInfoResponses) {
+        protected void onPostExecute(RaceInfoResponse raceInfoResponses) {
             super.onPostExecute(raceInfoResponses);
 
             //TODO save race info into database.
@@ -608,19 +590,22 @@ public class MainActivity extends AppCompatActivity
 
                 realm.beginTransaction();
                 realm.delete(NewsFeed.class);//truncate the tables.
-                List<Info> infos = raceInfoResponses.get(0).getInfos();
+                List<Info> infos = raceInfoResponses.getInfos();
                 Log.i(TAG, "Total news: "+infos.size());
+
 
                 for(int i =0; i < infos.size(); i++){
                     NewsFeed newsFeed = realm.createObject(NewsFeed.class, i + 1);
                     newsFeed.setContent(infos.get(i).getContent());
                     newsFeed.setHeader(infos.get(i).getTitle());
                     newsFeed.setTimeStamp("1 min ago");//TODO missing timestamp
+                    newsFeed.setCoverPhotoUrl(infos.get(i).getCover().getCover().getUrl());
 
+                    realm.copyToRealmOrUpdate(newsFeed);
                 }
 
                 realm.commitTransaction();
-                initializeNewsView();
+
             }
         }
     }
