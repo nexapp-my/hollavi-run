@@ -16,7 +16,7 @@ import io.realm.annotations.PrimaryKey;
 public class Races extends RealmObject implements Parcelable{
 
     @PrimaryKey
-    public int id;
+    public long id;
     public String raceName;
     public String raceLocation;
     public String distance;
@@ -26,7 +26,6 @@ public class Races extends RealmObject implements Parcelable{
     public String firstAid;
     public String groomifySupport;
 
-
     public RealmList<Mission> missions;
 
     @Ignore
@@ -35,7 +34,7 @@ public class Races extends RealmObject implements Parcelable{
     public byte[] completetionBadgeByteArr;
 
 
-    public Races(int id, String raceName, String raceLocation, String distance, String totalMission, boolean status, String endTime, String firstAid, String groomifySupport) {
+    public Races(long id, String raceName, String raceLocation, String distance, String totalMission, boolean status, String endTime, String firstAid, String groomifySupport) {
         this.id = id;
         this.raceName = raceName;
         this.raceLocation = raceLocation;
@@ -49,11 +48,11 @@ public class Races extends RealmObject implements Parcelable{
 
     public Races() {}
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -153,7 +152,7 @@ public class Races extends RealmObject implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.id);
+        dest.writeLong(this.id);
         dest.writeString(this.raceName);
         dest.writeString(this.raceLocation);
         dest.writeString(this.distance);
@@ -170,7 +169,7 @@ public class Races extends RealmObject implements Parcelable{
 
 
     protected Races(Parcel in) {
-        this.id = in.readInt();
+        this.id = in.readLong();
         this.raceName = in.readString();
         this.raceLocation = in.readString();
         this.distance = in.readString();

@@ -65,16 +65,7 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-        <!--
-        <activity
-            android:name=".SignUpActivity"
-            android:parentActivityName=".OnboardingActivity"
-            android:theme="@style/GroomifyAppActionBarTheme" android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.groomify.hollavirun.OnboardingActivity" />
-        </activity>
-        -->
+
         <activity
             android:name=".TeamSelectActivity"
             android:screenOrientation="portrait" />

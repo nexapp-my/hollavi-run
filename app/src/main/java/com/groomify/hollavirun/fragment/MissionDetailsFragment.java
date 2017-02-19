@@ -37,7 +37,9 @@ import com.groomify.hollavirun.QRActivity;
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.utils.BitmapUtils;
+import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -231,7 +233,7 @@ public class MissionDetailsFragment extends Fragment {
         //missionBannerImgView.setImageBitmap(bm);
 
         Log.i(TAG, "Mission details: "+mission.toString());
-
+/*
         if(mission.getMissionNumber() == 1){
             missionBannerImgView.setImageResource(R.drawable.mission_banner_01);
         }else if(mission.getMissionNumber() == 2){
@@ -244,7 +246,11 @@ public class MissionDetailsFragment extends Fragment {
             missionBannerImgView.setImageResource(R.drawable.mission_banner_05);
         }else{
             missionBannerImgView.setImageResource(R.drawable.mission_banner_06);
+        }*/
+        if(mission.getCoverPhotoUrl() != null){
+            ImageLoader.getInstance().displayImage(mission.getCoverPhotoUrl(), missionBannerImgView, ImageLoadUtils.getDisplayImageOptions());
         }
+
         missionNumberTxtView.setText(mission.getMissionNumberString());
         missionTitleTxtView.setText(mission.getMissionTitle());
         missionDescTxtView.setText(mission.getMissionDesc());

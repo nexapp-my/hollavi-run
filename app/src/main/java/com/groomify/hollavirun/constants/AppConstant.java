@@ -25,6 +25,12 @@ public class AppConstant {
 
     public static final String PREFS_FB_ID = "fb_id";
     public static final String PREFS_AUTH_TOKEN = "auth_token";
+    public static final String PREFS_BIB_NO = "bib_no";
     public static final String PREFS_RUNNER_ID = "runner_id";
+
+    public static final String PREFS_FIRST_TIME_SETUP_COMPLETE = "first_time_setup_completed";
+
+
+    public static final String DEFAULT_BIB_NO = "-99999";
 
 }

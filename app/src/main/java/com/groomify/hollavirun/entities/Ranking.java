@@ -1,15 +1,36 @@
 package com.groomify.hollavirun.entities;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by Valkyrie1988 on 10/23/2016.
  */
 
-public class Ranking {
-    private int rankNumber;
+public class Ranking extends RealmObject{
+
+    @PrimaryKey
+    private Integer rankNumber;
     private String name;
     private String id;
-    private String time;
+    private String teamName;
+    private Integer completionTime;
 
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
+    }
+
+    public Integer getCompletionTime() {
+        return completionTime;
+    }
+
+    public void setCompletionTime(Integer completionTime) {
+        this.completionTime = completionTime;
+    }
 
     public String getId() {
         return id;
@@ -27,7 +48,7 @@ public class Ranking {
         this.name = name;
     }
 
-    public int getRankNumber() {
+    public Integer getRankNumber() {
         return rankNumber;
     }
 
@@ -35,19 +56,26 @@ public class Ranking {
         this.rankNumber = rankNumber;
     }
 
-    public String getTime() {
-        return time;
+
+    public Ranking() {
     }
 
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    public Ranking(int rankNumber, String name, String id, String time) {
-
-        this.rankNumber = rankNumber;
-        this.name = name;
+    public Ranking(Integer completionTime, String id, String name, Integer rankNumber, String teamName) {
+        this.completionTime = completionTime;
         this.id = id;
-        this.time = time;
+        this.name = name;
+        this.rankNumber = rankNumber;
+        this.teamName = teamName;
+    }
+
+    @Override
+    public String toString() {
+        return "Ranking{" +
+                "completionTime=" + completionTime +
+                ", rankNumber=" + rankNumber +
+                ", name='" + name + '\'' +
+                ", id='" + id + '\'' +
+                ", teamName='" + teamName + '\'' +
+                '}';
     }
 }

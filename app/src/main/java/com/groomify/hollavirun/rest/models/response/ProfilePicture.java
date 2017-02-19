@@ -12,18 +12,18 @@ import com.groomify.hollavirun.rest.models.*;
 public class ProfilePicture implements Serializable, Parcelable
 {
 
-    @SerializedName("profile_picture")
+    @SerializedName("url")
     @Expose
-    private com.groomify.hollavirun.rest.models.response.ProfilePicture_ profilePicture;
-    public final static Creator<ProfilePicture> CREATOR = new Creator<ProfilePicture>() {
+    private String url;
+    public final static Parcelable.Creator<ProfilePicture> CREATOR = new Creator<ProfilePicture>() {
 
 
         @SuppressWarnings({
-            "unchecked"
+                "unchecked"
         })
         public ProfilePicture createFromParcel(Parcel in) {
             ProfilePicture instance = new ProfilePicture();
-            instance.profilePicture = ((com.groomify.hollavirun.rest.models.response.ProfilePicture_) in.readValue((com.groomify.hollavirun.rest.models.response.ProfilePicture_.class.getClassLoader())));
+            instance.url = ((String) in.readValue((String.class.getClassLoader())));
             return instance;
         }
 
@@ -32,23 +32,23 @@ public class ProfilePicture implements Serializable, Parcelable
         }
 
     }
-    ;
-    private final static long serialVersionUID = -2545254387752246057L;
+            ;
+    private final static long serialVersionUID = 3895019402738333084L;
 
-    public com.groomify.hollavirun.rest.models.response.ProfilePicture_ getProfilePicture() {
-        return profilePicture;
+    public String getUrl() {
+        return url;
     }
 
-    public void setProfilePicture(com.groomify.hollavirun.rest.models.response.ProfilePicture_ profilePicture) {
-        this.profilePicture = profilePicture;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(profilePicture);
+        dest.writeValue(url);
     }
 
     public int describeContents() {
-        return  0;
+        return 0;
     }
 
 }

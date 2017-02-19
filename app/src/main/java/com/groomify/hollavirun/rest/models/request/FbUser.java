@@ -13,10 +13,10 @@ public class FbUser implements Serializable, Parcelable
 
     @SerializedName("fb_id")
     @Expose
-    private String fbId;
-    @SerializedName("profile_picture")
+    private Long fbId;
+    @SerializedName("name")
     @Expose
-    private String profilePicture;
+    private String name;
     @SerializedName("email")
     @Expose
     private String email;
@@ -32,12 +32,9 @@ public class FbUser implements Serializable, Parcelable
     @SerializedName("emergency_contact_phone")
     @Expose
     private String emergencyContactPhone;
-    @SerializedName("number_of_runs")
+    @SerializedName("profile_picture")
     @Expose
-    private Long numberOfRuns;
-    @SerializedName("last_rank")
-    @Expose
-    private Object lastRank;
+    private String profilePicture;
     public final static Parcelable.Creator<FbUser> CREATOR = new Creator<FbUser>() {
 
 
@@ -46,15 +43,14 @@ public class FbUser implements Serializable, Parcelable
         })
         public FbUser createFromParcel(Parcel in) {
             FbUser instance = new FbUser();
-            instance.fbId = ((String) in.readValue((String.class.getClassLoader())));
-            instance.profilePicture = ((String) in.readValue((String.class.getClassLoader())));
+            instance.fbId = ((Long) in.readValue((Long.class.getClassLoader())));
+            instance.name = ((String) in.readValue((String.class.getClassLoader())));
             instance.email = ((String) in.readValue((String.class.getClassLoader())));
             instance.country = ((String) in.readValue((String.class.getClassLoader())));
             instance.phoneNo = ((String) in.readValue((String.class.getClassLoader())));
             instance.emergencyContactPerson = ((String) in.readValue((String.class.getClassLoader())));
             instance.emergencyContactPhone = ((String) in.readValue((String.class.getClassLoader())));
-            instance.numberOfRuns = ((Long) in.readValue((Long.class.getClassLoader())));
-            instance.lastRank = ((Object) in.readValue((Object.class.getClassLoader())));
+            instance.profilePicture = ((String) in.readValue((String.class.getClassLoader())));
             return instance;
         }
 
@@ -64,22 +60,22 @@ public class FbUser implements Serializable, Parcelable
 
     }
             ;
-    private final static long serialVersionUID = 6702478361975914245L;
+    private final static long serialVersionUID = 6940264791101527105L;
 
-    public String getFbId() {
+    public Long getFbId() {
         return fbId;
     }
 
-    public void setFbId(String fbId) {
+    public void setFbId(Long fbId) {
         this.fbId = fbId;
     }
 
-    public String getProfilePicture() {
-        return profilePicture;
+    public String getName() {
+        return name;
     }
 
-    public void setProfilePicture(String profilePicture) {
-        this.profilePicture = profilePicture;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {
@@ -122,36 +118,40 @@ public class FbUser implements Serializable, Parcelable
         this.emergencyContactPhone = emergencyContactPhone;
     }
 
-    public Long getNumberOfRuns() {
-        return numberOfRuns;
+    public String getProfilePicture() {
+        return profilePicture;
     }
 
-    public void setNumberOfRuns(Long numberOfRuns) {
-        this.numberOfRuns = numberOfRuns;
-    }
-
-    public Object getLastRank() {
-        return lastRank;
-    }
-
-    public void setLastRank(Object lastRank) {
-        this.lastRank = lastRank;
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeValue(fbId);
-        dest.writeValue(profilePicture);
+        dest.writeValue(name);
         dest.writeValue(email);
         dest.writeValue(country);
         dest.writeValue(phoneNo);
         dest.writeValue(emergencyContactPerson);
         dest.writeValue(emergencyContactPhone);
-        dest.writeValue(numberOfRuns);
-        dest.writeValue(lastRank);
+        dest.writeValue(profilePicture);
     }
 
     public int describeContents() {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "FbUser{" +
+                "country='" + country + '\'' +
+                ", fbId=" + fbId +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNo='" + phoneNo + '\'' +
+                ", emergencyContactPerson='" + emergencyContactPerson + '\'' +
+                ", emergencyContactPhone='" + emergencyContactPhone + '\'' +
+                ", profilePicture='" + profilePicture + '\'' +
+                '}';
+    }
 }

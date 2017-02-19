@@ -50,4 +50,10 @@ public class UpdateUserInfoRequest implements Serializable, Parcelable
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "UpdateUserInfoRequest{" +
+                "fbUser=" + fbUser +
+                '}';
+    }
 }

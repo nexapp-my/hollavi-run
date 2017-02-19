@@ -23,12 +23,16 @@ import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.groomify.hollavirun.constants.AppConstant;
+import com.groomify.hollavirun.entities.GroomifyUser;
 import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.request.FbUser;
 import com.groomify.hollavirun.rest.models.request.LoginRequest;
 import com.groomify.hollavirun.rest.models.response.LoginResponse;
+import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -50,10 +54,21 @@ public class OnboardingActivity extends AppCompatActivity {
 
     Context context;
 
+    private Realm realm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_onboarding);
+
+        Realm.init(this);
+        RealmConfiguration config = new RealmConfiguration
+                .Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
+
+        realm = Realm.getInstance(config);
+
 
         if(getSupportActionBar() != null)
             getSupportActionBar().hide();
@@ -159,43 +174,63 @@ public class OnboardingActivity extends AppCompatActivity {
     public void loginToGroomify(String facebookUserId){
         faceLoginButton.setEnabled(false);
         progressBar.setVisibility(View.VISIBLE);
-        Log.i(TAG, "Login groomify service with id: "+facebookUserId);
+        Log.i(TAG, "Login groomify service with facebook id: "+facebookUserId);
         new GroomifyLoginTask().execute(facebookUserId);
     }
 
-    private class GroomifyLoginTask extends AsyncTask<String, String, Boolean>{
+    private class GroomifyLoginTask extends AsyncTask<String, String, UserInfoResponse>{
 
         @Override
-        protected Boolean doInBackground(String... params) {
+        protected UserInfoResponse doInBackground(String... params) {
 
             Log.i(TAG, "#doInBackground Login to groomify services.");
 
             try{
                 LoginRequest loginRequest = new LoginRequest();
                 FbUser fbUser = new FbUser();
-                fbUser.setFbId(params[0]);
+                fbUser.setFbId(Long.parseLong(params[0]));
                 loginRequest.setFbUser(fbUser);
-                Call<LoginResponse> loginCall = client.getApiService().loginUser(loginRequest);
-                Response<LoginResponse> response = loginCall.execute();
+                Call<UserInfoResponse> loginCall = client.getApiService().loginUser(loginRequest);
+                Response<UserInfoResponse> response = loginCall.execute();
+
                 if(response != null && response.code() == 200){
                     Log.i(TAG, "#doInBackground User logged in: "+response.body().toString());
                     SharedPreferencesHelper.savePreferences(OnboardingActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_FB_ID, ""+response.body().getFbId());
                     SharedPreferencesHelper.savePreferences(OnboardingActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_AUTH_TOKEN, ""+response.body().getAuthToken());
-                    return true;
+                    return response.body();
                 }else{
                     Log.e(TAG, "#doInBackground API returned HTTP Response code:"+ response.code()+", errors:"+response.errorBody());
-                    return false;
+                    return null;
                 }
             }catch (Exception e){
                 Log.e(TAG, "#doInBackground Exception while invoke groomify API service.", e);
-                return false;
+                return null;
             }
         }
 
         @Override
-        protected void onPostExecute(Boolean success) {
-            if(success){
+        protected void onPostExecute(UserInfoResponse userInfoResponse) {
+            if(userInfoResponse != null){
                 loginButton.setVisibility(View.GONE);
+
+                realm.beginTransaction();
+                GroomifyUser groomifyUser = new GroomifyUser();
+                groomifyUser.setAuthToken(userInfoResponse.getAuthToken());
+                groomifyUser.setCountry(userInfoResponse.getCountry());
+                groomifyUser.setEmail(userInfoResponse.getEmail());
+                groomifyUser.setEmergencyContactName(userInfoResponse.getEmergencyContactPerson());
+                groomifyUser.setEmergencyContactPhoneNo(userInfoResponse.getEmergencyContactPhone());
+                groomifyUser.setFacebookId(userInfoResponse.getFbId());
+                groomifyUser.setId(new Long(userInfoResponse.getId())); //Unsafe if user id null.
+                groomifyUser.setLastRank(userInfoResponse.getLastRank());
+                groomifyUser.setName(userInfoResponse.getName());
+                groomifyUser.setPhoneNo(userInfoResponse.getPhoneNo());
+                groomifyUser.setTotalRuns(userInfoResponse.getNumberOfRuns());
+                groomifyUser.setProfilePictureUrl(userInfoResponse.getProfilePicture().getUrl());
+                groomifyUser.setFacebookId(userInfoResponse.getFbId());
+                realm.copyToRealmOrUpdate(groomifyUser);
+                realm.commitTransaction();
+                Log.i(TAG, "User info saved into realm. "+groomifyUser);
                 launchRaceSelectionScreen();
             }else{
                 loginButton.setEnabled(true);
@@ -232,15 +267,11 @@ public class OnboardingActivity extends AppCompatActivity {
         request.setParameters(parameters);
         request.executeAsync();
     }*/
-    /*private void launchSignUpScreen(){
-        Intent intent = new Intent(OnboardingActivity.this, SignUpActivity.class);
-        startActivity(intent);
-        //finish();
-    }
 
-    private void launchWelcomeScreen(){
-        Intent intent = new Intent(OnboardingActivity.this, WelcomeActivity.class);
-        startActivity(intent);
-        finish();
-    }*/
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
+    }
 }

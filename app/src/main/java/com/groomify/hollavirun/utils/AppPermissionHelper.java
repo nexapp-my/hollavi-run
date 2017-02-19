@@ -89,9 +89,8 @@ public class AppPermissionHelper {
     public static void requestContactAndPhoneCallPermission(Activity activity) {
         ActivityCompat.requestPermissions(activity,
                 new String[]{
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        Manifest.permission.READ_CONTACTS,
+                        Manifest.permission.CALL_PHONE
                 }, PERMISSIONS_PHONE_CALL_AND_CONTACT_REQUEST_CODE);
     }
 

@@ -12,34 +12,34 @@ public class UserInfoResponse implements Serializable, Parcelable
 
     @SerializedName("id")
     @Expose
-    private Integer id;
+    private Long id;
     @SerializedName("fb_id")
     @Expose
-    private Integer fbId;
+    private Long fbId;
     @SerializedName("name")
     @Expose
     private String name;
     @SerializedName("email")
     @Expose
-    private Object email;
+    private String email;
     @SerializedName("country")
     @Expose
-    private Object country;
+    private String country;
     @SerializedName("auth_token")
     @Expose
     private String authToken;
     @SerializedName("phone_no")
     @Expose
-    private Object phoneNo;
+    private String phoneNo;
+    @SerializedName("emergency_contact_person")
+    @Expose
+    private String emergencyContactPerson;
+    @SerializedName("emergency_contact_phone")
+    @Expose
+    private String emergencyContactPhone;
     @SerializedName("profile_picture")
     @Expose
     private ProfilePicture profilePicture;
-    @SerializedName("emergency_contact_person")
-    @Expose
-    private Object emergencyContactPerson;
-    @SerializedName("emergency_contact_phone")
-    @Expose
-    private Object emergencyContactPhone;
     @SerializedName("number_of_runs")
     @Expose
     private Integer numberOfRuns;
@@ -54,16 +54,16 @@ public class UserInfoResponse implements Serializable, Parcelable
         })
         public UserInfoResponse createFromParcel(Parcel in) {
             UserInfoResponse instance = new UserInfoResponse();
-            instance.id = ((Integer) in.readValue((Integer.class.getClassLoader())));
-            instance.fbId = ((Integer) in.readValue((Integer.class.getClassLoader())));
+            instance.id = ((Long) in.readValue((Long.class.getClassLoader())));
+            instance.fbId = ((Long) in.readValue((Long.class.getClassLoader())));
             instance.name = ((String) in.readValue((String.class.getClassLoader())));
-            instance.email = ((Object) in.readValue((Object.class.getClassLoader())));
-            instance.country = ((Object) in.readValue((Object.class.getClassLoader())));
+            instance.email = ((String) in.readValue((String.class.getClassLoader())));
+            instance.country = ((String) in.readValue((String.class.getClassLoader())));
             instance.authToken = ((String) in.readValue((String.class.getClassLoader())));
-            instance.phoneNo = ((Object) in.readValue((Object.class.getClassLoader())));
+            instance.phoneNo = ((String) in.readValue((String.class.getClassLoader())));
+            instance.emergencyContactPerson = ((String) in.readValue((String.class.getClassLoader())));
+            instance.emergencyContactPhone = ((String) in.readValue((String.class.getClassLoader())));
             instance.profilePicture = ((ProfilePicture) in.readValue((ProfilePicture.class.getClassLoader())));
-            instance.emergencyContactPerson = ((Object) in.readValue((Object.class.getClassLoader())));
-            instance.emergencyContactPhone = ((Object) in.readValue((Object.class.getClassLoader())));
             instance.numberOfRuns = ((Integer) in.readValue((Integer.class.getClassLoader())));
             instance.lastRank = ((Integer) in.readValue((Integer.class.getClassLoader())));
             return instance;
@@ -75,21 +75,21 @@ public class UserInfoResponse implements Serializable, Parcelable
 
     }
             ;
-    private final static long serialVersionUID = -4220787807358928934L;
+    private final static long serialVersionUID = 8077109803590672404L;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public Integer getFbId() {
+    public Long getFbId() {
         return fbId;
     }
 
-    public void setFbId(Integer fbId) {
+    public void setFbId(Long fbId) {
         this.fbId = fbId;
     }
 
@@ -101,19 +101,19 @@ public class UserInfoResponse implements Serializable, Parcelable
         this.name = name;
     }
 
-    public Object getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public void setEmail(Object email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
-    public Object getCountry() {
+    public String getCountry() {
         return country;
     }
 
-    public void setCountry(Object country) {
+    public void setCountry(String country) {
         this.country = country;
     }
 
@@ -125,12 +125,28 @@ public class UserInfoResponse implements Serializable, Parcelable
         this.authToken = authToken;
     }
 
-    public Object getPhoneNo() {
+    public String getPhoneNo() {
         return phoneNo;
     }
 
-    public void setPhoneNo(Object phoneNo) {
+    public void setPhoneNo(String phoneNo) {
         this.phoneNo = phoneNo;
+    }
+
+    public String getEmergencyContactPerson() {
+        return emergencyContactPerson;
+    }
+
+    public void setEmergencyContactPerson(String emergencyContactPerson) {
+        this.emergencyContactPerson = emergencyContactPerson;
+    }
+
+    public String getEmergencyContactPhone() {
+        return emergencyContactPhone;
+    }
+
+    public void setEmergencyContactPhone(String emergencyContactPhone) {
+        this.emergencyContactPhone = emergencyContactPhone;
     }
 
     public ProfilePicture getProfilePicture() {
@@ -139,22 +155,6 @@ public class UserInfoResponse implements Serializable, Parcelable
 
     public void setProfilePicture(ProfilePicture profilePicture) {
         this.profilePicture = profilePicture;
-    }
-
-    public Object getEmergencyContactPerson() {
-        return emergencyContactPerson;
-    }
-
-    public void setEmergencyContactPerson(Object emergencyContactPerson) {
-        this.emergencyContactPerson = emergencyContactPerson;
-    }
-
-    public Object getEmergencyContactPhone() {
-        return emergencyContactPhone;
-    }
-
-    public void setEmergencyContactPhone(Object emergencyContactPhone) {
-        this.emergencyContactPhone = emergencyContactPhone;
     }
 
     public Integer getNumberOfRuns() {
@@ -181,9 +181,9 @@ public class UserInfoResponse implements Serializable, Parcelable
         dest.writeValue(country);
         dest.writeValue(authToken);
         dest.writeValue(phoneNo);
-        dest.writeValue(profilePicture);
         dest.writeValue(emergencyContactPerson);
         dest.writeValue(emergencyContactPhone);
+        dest.writeValue(profilePicture);
         dest.writeValue(numberOfRuns);
         dest.writeValue(lastRank);
     }
@@ -192,4 +192,21 @@ public class UserInfoResponse implements Serializable, Parcelable
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "UserInfoResponse{" +
+                "id=" + id +
+                ", fbId=" + fbId +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", country='" + country + '\'' +
+                ", authToken='" + authToken + '\'' +
+                ", phoneNo='" + phoneNo + '\'' +
+                ", emergencyContactPerson='" + emergencyContactPerson + '\'' +
+                ", emergencyContactPhone='" + emergencyContactPhone + '\'' +
+                ", profilePicture=" + profilePicture +
+                ", numberOfRuns=" + numberOfRuns +
+                ", lastRank=" + lastRank +
+                '}';
+    }
 }

@@ -12,6 +12,9 @@ import com.google.gson.annotations.SerializedName;
 public class RaceDetailResponse implements Serializable, Parcelable
 {
 
+    @SerializedName("id")
+    @Expose
+    private Long id;
     @SerializedName("name")
     @Expose
     private String name;
@@ -42,14 +45,15 @@ public class RaceDetailResponse implements Serializable, Parcelable
     @SerializedName("url")
     @Expose
     private String url;
-    public final static Creator<RaceDetailResponse> CREATOR = new Creator<RaceDetailResponse>() {
+    public final static Parcelable.Creator<RaceDetailResponse> CREATOR = new Creator<RaceDetailResponse>() {
 
 
         @SuppressWarnings({
-            "unchecked"
+                "unchecked"
         })
         public RaceDetailResponse createFromParcel(Parcel in) {
             RaceDetailResponse instance = new RaceDetailResponse();
+            instance.id = ((Long) in.readValue((Long.class.getClassLoader())));
             instance.name = ((String) in.readValue((String.class.getClassLoader())));
             instance.location = ((String) in.readValue((String.class.getClassLoader())));
             instance.distance = ((Long) in.readValue((Long.class.getClassLoader())));
@@ -58,7 +62,7 @@ public class RaceDetailResponse implements Serializable, Parcelable
             instance.endTime = ((String) in.readValue((String.class.getClassLoader())));
             instance.firstAid = ((String) in.readValue((String.class.getClassLoader())));
             instance.grSupport = ((String) in.readValue((String.class.getClassLoader())));
-            in.readList(instance.missions, (Mission.class.getClassLoader()));
+            in.readList(instance.missions, (com.groomify.hollavirun.rest.models.response.Mission.class.getClassLoader()));
             instance.url = ((String) in.readValue((String.class.getClassLoader())));
             return instance;
         }
@@ -68,8 +72,16 @@ public class RaceDetailResponse implements Serializable, Parcelable
         }
 
     }
-    ;
-    private final static long serialVersionUID = 1691735398046549404L;
+            ;
+    private final static long serialVersionUID = -4477338688856641397L;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -152,6 +164,7 @@ public class RaceDetailResponse implements Serializable, Parcelable
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeValue(id);
         dest.writeValue(name);
         dest.writeValue(location);
         dest.writeValue(distance);
@@ -165,7 +178,23 @@ public class RaceDetailResponse implements Serializable, Parcelable
     }
 
     public int describeContents() {
-        return  0;
+        return 0;
     }
 
+    @Override
+    public String toString() {
+        return "RaceDetailResponse{" +
+                "distance=" + distance +
+                ", id=" + id +
+                ", name='" + name + '\'' +
+                ", location='" + location + '\'' +
+                ", missionNo=" + missionNo +
+                ", status=" + status +
+                ", endTime='" + endTime + '\'' +
+                ", firstAid='" + firstAid + '\'' +
+                ", grSupport='" + grSupport + '\'' +
+                ", missions=" + missions +
+                ", url='" + url + '\'' +
+                '}';
+    }
 }

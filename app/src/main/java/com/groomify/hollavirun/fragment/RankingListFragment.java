@@ -5,14 +5,24 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.adapter.MissionArrayAdapter;
 import com.groomify.hollavirun.adapter.RankingArrayAdapter;
+import com.groomify.hollavirun.entities.GroomifyUser;
+import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.entities.Ranking;
+import com.groomify.hollavirun.utils.AppUtils;
+
+import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,14 +42,28 @@ public class RankingListFragment extends ListFragment {
     private String mParam1;
     private String mParam2;
 
+    private final static String TAG = RankingListFragment.class.getSimpleName();
+
+    TextView myRankingNoTextView = null;
+    TextView myRankingNameTextView = null;
+    TextView myRankingUserIdTextView = null;
+    TextView myRankingTimeTextView = null;
+
     private OnFragmentInteractionListener mListener;
 
+    private Realm realm;
+
+    private RealmChangeListener<RealmResults<Ranking>> realmChangeListener;
+
+    private RankingArrayAdapter rankingArrayAdapter;
+
+
     Ranking[] rankings = {
-            new Ranking(1, "Ceric", "10001", "1 m 0 s"),
+           /* new Ranking(1, "Ceric", "10001", "1 m 0 s"),
             new Ranking(2, "Calvin Koh", "10001", "1 m 0 s"),
             new Ranking(3, "CMonz", "10001", "1 m 0 s"),
             new Ranking(4, "Jeffrey", "10001", "1 m 0 s"),
-            new Ranking(5, "Ken", "10001", "1 m 0 s")
+            new Ranking(5, "Ken", "10001", "1 m 0 s")*/
 
     };
 
@@ -73,14 +97,68 @@ public class RankingListFragment extends ListFragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        setListAdapter(new RankingArrayAdapter(this.getContext(), rankings));
+        Realm.init(this.getContext());
+        RealmConfiguration config = new RealmConfiguration
+                .Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
+
+        realm = Realm.getInstance(config);
+
+        // ... boilerplate omitted for brevity
+        // get all the customers
+        RealmResults<Ranking> rankingRealmResults = realm.where(Ranking.class).findAll();
+
+        Log.i(TAG, "All ranking. "+rankingRealmResults.size());
+        // ... build a list adapter and set it to the ListView/RecyclerView/etc
+
+        rankings = rankingRealmResults.toArray(new Ranking[0]);
+
+        // set up a Realm change listener
+        realmChangeListener = new RealmChangeListener<RealmResults<Ranking>>() {
+            @Override
+            public void onChange(RealmResults<Ranking> results) {
+                // This is called anytime the Realm database changes on any thread.
+                // Please note, change listeners only work on Looper threads.
+                // For non-looper threads, you manually have to use Realm.waitForChange() instead.
+                rankingArrayAdapter.notifyDataSetChanged(); // Update the UI
+            }
+        };
+        // Tell Realm to notify our listener when the customers results
+        // have changed (items added, removed, updated, anything of the sort).
+        rankingRealmResults.addChangeListener(realmChangeListener);
+
+        rankingArrayAdapter = new RankingArrayAdapter(this.getContext(), rankings);
+        setListAdapter(rankingArrayAdapter);
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_ranking_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_ranking_list, container, false);
+        View parentView = view.findViewById(R.id.my_profile_ranking);
+        myRankingNoTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_no);
+        myRankingNameTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_name);
+        myRankingUserIdTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_user_id);
+        myRankingTimeTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_time);
+
+        initializeMyRanking(parentView);
+        return view;
+    }
+
+    private void initializeMyRanking(View parentView)
+    {
+        GroomifyUser groomifyUser = realm.where(GroomifyUser.class).findFirst();
+
+        Ranking ranking = groomifyUser.getMyRanking() ;
+
+        myRankingNoTextView.setText("#"+ranking.getRankNumber()+".");
+        myRankingNameTextView.setText(ranking.getName());
+        myRankingTimeTextView.setText(ranking.getCompletionTime() == null ? "" : AppUtils.getFormattedTimeFromSeconds(ranking.getCompletionTime()));
+        myRankingUserIdTextView.setText("(ID:"+ranking.getId()+")");
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event

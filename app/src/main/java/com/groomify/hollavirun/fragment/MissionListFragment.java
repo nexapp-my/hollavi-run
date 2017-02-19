@@ -48,14 +48,15 @@ public class MissionListFragment extends ListFragment {
     public static View viewInstance;
 
     Mission[] missions = {
-            new Mission(1, "01", "SELFIE WITH STRANGERS", "Take 3 selfies with your fellow runners", R.drawable.mission_banner_01, true),
+    };
+    /*
+    new Mission(1, "01", "SELFIE WITH STRANGERS", "Take 3 selfies with your fellow runners", R.drawable.mission_banner_01, true),
             new Mission(2, "02", "POKEMON GO", "Spot the real Pikachu", R.drawable.mission_banner_02, false),
             new Mission(3, "03", "DONT'T TEXT & DRIVE", "Prepare to be mindblown.", R.drawable.mission_banner_03, false),
             new Mission(4, "04", "INFLATABLE CASTLE", "Meet your favourite Superheroes.", R.drawable.mission_banner_04, false),
             new Mission(5, "05", "THE 3D JOURNEY", "Meet your favourite Superheroes.", R.drawable.mission_banner_05, false),
             new Mission(6, "06", "UPSIDE DOWN WORLD", "Meet your favourite Superheroes.", R.drawable.mission_banner_06, false)
-
-    };
+     */
 
     MissionArrayAdapter missionArrayAdapter;
     RealmChangeListener<RealmResults<Mission>> realmChangeListener;

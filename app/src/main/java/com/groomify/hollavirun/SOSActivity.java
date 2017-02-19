@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Contacts;
 import android.provider.ContactsContract;
@@ -24,14 +25,27 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.groomify.hollavirun.constants.AppConstant;
+import com.groomify.hollavirun.entities.GroomifyUser;
+import com.groomify.hollavirun.entities.Races;
+import com.groomify.hollavirun.rest.RestClient;
+import com.groomify.hollavirun.rest.models.request.FbUser;
+import com.groomify.hollavirun.rest.models.request.UpdateUserInfoRequest;
+import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
+import com.groomify.hollavirun.utils.AppPermissionHelper;
+import com.groomify.hollavirun.utils.RealmUtils;
+import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.realm.Realm;
+import retrofit2.Response;
 
 public class SOSActivity extends AppCompatActivity {
 
     Toolbar toolbar;
-
+    RestClient client = new RestClient();
     private final static String TAG = SOSActivity.class.getSimpleName();
 
     private View firstAidPanel;
@@ -53,10 +67,26 @@ public class SOSActivity extends AppCompatActivity {
 
     public static String temporaryEmergencyContactNamePlaceHolder;
 
+    Realm realm;
+    GroomifyUser groomifyUser;
+    Races currentRaces;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sos);
+
+        Realm.init(this);
+        realm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+
+        groomifyUser = realm.where(GroomifyUser.class).findFirst();
+        Log.i(TAG,"Current race id: "+groomifyUser.getCurrentRaceId());
+
+        currentRaces = realm.where(Races.class).equalTo("id", groomifyUser.getCurrentRaceId()).findFirst();
+        Log.i(TAG,"Current race query: "+currentRaces);
+
+        emergencyContactName = groomifyUser.getEmergencyContactName();
+        emergencyContactNumber = groomifyUser.getEmergencyContactPhoneNo();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -65,6 +95,11 @@ public class SOSActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
+        String firstAidNumber = currentRaces.getFirstAid();
+        String supportNumber = currentRaces.getGroomifySupport();
+
+        Log.i(TAG, "First aid number: "+firstAidNumber);
+        Log.i(TAG, "Support number: "+supportNumber);
 
         if(firstAidPanel == null){
             firstAidPanel = findViewById(R.id.first_aid_panel);
@@ -73,7 +108,18 @@ public class SOSActivity extends AppCompatActivity {
         firstAidPanel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                prompCallConfirmationDialog("60399999999", "Call for first aid?");
+                prompCallConfirmationDialog(currentRaces.getFirstAid(), "Call for first aid: "+currentRaces.getFirstAid()+" ?");
+            }
+        });
+
+        if(groomifySupportPanel == null){
+            groomifySupportPanel = findViewById(R.id.groomify_support_panel);
+        }
+
+        groomifySupportPanel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                prompCallConfirmationDialog(currentRaces.getGroomifySupport(), "Call for groomify support now?");
             }
         });
 
@@ -107,16 +153,7 @@ public class SOSActivity extends AppCompatActivity {
             }
         });
 
-        if(groomifySupportPanel == null){
-            groomifySupportPanel = findViewById(R.id.groomify_support_panel);
-        }
 
-        groomifySupportPanel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                prompCallConfirmationDialog("603000000000", "Call for groomify support now?");
-            }
-        });
 
         if(setupEmergencyContactPanel == null){
             setupEmergencyContactPanel = findViewById(R.id.set_emergency_contact_panel);
@@ -141,7 +178,7 @@ public class SOSActivity extends AppCompatActivity {
             changeContactTextView = (TextView) findViewById(R.id.change_contact_text_view);
         }
 
-        SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        /*SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
         emergencyContactName = settings.getString(AppConstant.PREFS_EMERGENCY_CONTACT_NAME, null);
         emergencyContactNumber = settings.getString(AppConstant.PREFS_EMERGENCY_CONTACT_NUM, null);
 
@@ -154,13 +191,18 @@ public class SOSActivity extends AppCompatActivity {
             emergencyContactNameTextView.setText(emergencyContactName);
         }else{
             emergencyContactSelected = false;
-        }
+        }*/
 
         toggleSetupEmergencyPanel();
 
     }
 
     private void setupEmergencyContact(){
+        if(!AppPermissionHelper.isContactPermissionGranted(this)){
+            AppPermissionHelper.requestContactAndPhoneCallPermission(this);
+            return;
+        }
+
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
         startActivityForResult(intent, PICK_CONTACT);
@@ -248,43 +290,53 @@ public class SOSActivity extends AppCompatActivity {
         toggleSetupEmergencyPanel();*/
     }
     private void saveEmergencyContact(String phoneNumber, String displayName){
-        String selectedNumber = phoneNumber.toString();
-        selectedNumber = selectedNumber.replace("-", "");
+        String selectedNumber = phoneNumber.replace("-", "");
 
-        Toast.makeText(this,   displayName+" ("+phoneNumber+") has been configured as emergency number.", Toast.LENGTH_LONG).show();
-
-        emergencyContactNameTextView.setText(displayName);
-
-        SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString(AppConstant.PREFS_EMERGENCY_CONTACT_NAME, displayName);
-        editor.putString(AppConstant.PREFS_EMERGENCY_CONTACT_NUM, phoneNumber);
-
-        // Commit the edits!
-        editor.commit();
-        emergencyContactSelected = true;
+        if(selectedNumber == null || selectedNumber.trim().length() <= 0){
+            Toast.makeText(this,   "Selected contact does not have valid phone number.", Toast.LENGTH_LONG).show();
+            return;
+        }
 
         emergencyContactName = displayName;
         emergencyContactNumber = phoneNumber;
 
-        toggleSetupEmergencyPanel();
+        new GroomifyUpdateProfileTask().execute();
     }
 
     private void toggleSetupEmergencyPanel(){
-        if(emergencyContactSelected){
-            setupEmergencyContactTextView.setVisibility(View.INVISIBLE);
-            changeContactTextView.setVisibility(View.VISIBLE);
-            emergencyContactNameTextView.setVisibility(View.VISIBLE);
-        }else{
-            setupEmergencyContactTextView.setVisibility(View.VISIBLE);
-            changeContactTextView.setVisibility(View.INVISIBLE);
-            emergencyContactNameTextView.setVisibility(View.INVISIBLE);
-        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
 
+                if (emergencyContactName != null && emergencyContactNumber != null &&
+                        emergencyContactName.trim().length() > 0 && emergencyContactNumber.trim().length() > 0) {
+                    emergencyContactSelected = true;
+                    emergencyContactNameTextView.setText(emergencyContactName);
+                } else {
+                    emergencyContactSelected = false;
+                }
+
+                if (emergencyContactSelected) {
+                    setupEmergencyContactTextView.setVisibility(View.INVISIBLE);
+                    changeContactTextView.setVisibility(View.VISIBLE);
+                    emergencyContactNameTextView.setVisibility(View.VISIBLE);
+                } else {
+                    setupEmergencyContactTextView.setVisibility(View.VISIBLE);
+                    changeContactTextView.setVisibility(View.INVISIBLE);
+                    emergencyContactNameTextView.setVisibility(View.INVISIBLE);
+                }
+            }});
     }
 
 
     private void prompCallConfirmationDialog(final String phoneNumber, String message){
+
+        if(!AppPermissionHelper.isPhoneCallPermissionGranted(this)){
+            Log.i(TAG, "Call phone permission is not granted. Request permission.");
+            AppPermissionHelper.requestContactAndPhoneCallPermission(this);
+            return;
+        }
+
         new AlertDialog.Builder(this)
                 .setMessage(message)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener()
@@ -294,11 +346,11 @@ public class SOSActivity extends AppCompatActivity {
                         Intent intent = new Intent(Intent.ACTION_CALL);
 
                         intent.setData(Uri.parse("tel:" +phoneNumber));
-                        if(isPermissionGranted()){
-                            startActivity(intent);
+                        startActivity(intent);
+                        /*if(isPermissionGranted()){
                         }else{
                             requestPermission();
-                        }
+                        }*/
                     }
 
                 })
@@ -306,14 +358,14 @@ public class SOSActivity extends AppCompatActivity {
                 .show();
     }
 
-    private boolean isPermissionGranted() {
+   /* private boolean isPermissionGranted() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED;
 
     }
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, PERMISSIONS_REQUEST);
-    }
+    }*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -326,6 +378,74 @@ public class SOSActivity extends AppCompatActivity {
                 Toast.makeText(this, "You're require to grant phone call permission for emergency contact.", Toast.LENGTH_SHORT).show();
                 //finish();
             }
+        }
+    }
+
+
+
+    private class GroomifyUpdateProfileTask extends AsyncTask<Void, String, UserInfoResponse> {
+
+        @Override
+        protected UserInfoResponse doInBackground(Void... params) {
+            String authToken = SharedPreferencesHelper.getAuthToken(SOSActivity.this);
+            String fbId = SharedPreferencesHelper.getFbId(SOSActivity.this);
+            Realm innerRealm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+            GroomifyUser realmUser = innerRealm.where(GroomifyUser.class).findFirst();
+
+
+            try {
+                Log.i(TAG, "Update profile picture to back-end system..");
+                UpdateUserInfoRequest updateUserInfoRequest = new UpdateUserInfoRequest();
+                FbUser fbUser = new FbUser();
+                fbUser.setEmergencyContactPerson(emergencyContactName);
+                fbUser.setEmergencyContactPhone(emergencyContactNumber);
+                updateUserInfoRequest.setFbUser(fbUser);
+                Log.i(TAG, "Request ready to post:"+updateUserInfoRequest);
+
+                Response<UserInfoResponse> restResponse = client.getApiService().updateUser(fbId, authToken, realmUser.getId(), updateUserInfoRequest).execute();
+
+                if(restResponse.isSuccessful()){
+                    Log.i(TAG, "Calling update user api success");
+                    return restResponse.body();
+                }else{
+                    Log.i(TAG, "Calling update user api failed. response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to call update user api.",e);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(UserInfoResponse userInfoResponse) {
+            //TODO get the runner_id
+
+            super.onPostExecute(userInfoResponse);
+            if (userInfoResponse != null) {
+                Log.i(TAG, "Update user info success, returning:" + userInfoResponse.toString());
+                Realm innerRealm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+                innerRealm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+
+                        GroomifyUser realmUser = realm.where(GroomifyUser.class).findFirst();
+                        realmUser.setEmergencyContactName(emergencyContactName);
+                        realmUser.setEmergencyContactPhoneNo(emergencyContactNumber);
+                    }
+                });
+
+                Toast.makeText(SOSActivity.this,   emergencyContactName+" ("+emergencyContactNumber+") has been configured as emergency number.", Toast.LENGTH_LONG).show();
+                SharedPreferencesHelper.savePreferences(SOSActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_EMERGENCY_CONTACT_NAME, emergencyContactName);
+                SharedPreferencesHelper.savePreferences(SOSActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_EMERGENCY_CONTACT_NAME, emergencyContactNumber);
+                emergencyContactSelected = true;
+                toggleSetupEmergencyPanel();
+
+            } else {
+                Toast.makeText(SOSActivity.this, "Unable to setup emergency contact at this moment. Please try again later.", Toast.LENGTH_SHORT).show();
+
+            }
+
+
         }
     }
 }

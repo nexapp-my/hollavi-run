@@ -3,9 +3,12 @@ package com.groomify.hollavirun.utils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
+import android.util.Base64;
 import android.util.Log;
 
 import com.groomify.hollavirun.view.ProfilePictureView;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * Created by Valkyrie1988 on 11/12/2016.
@@ -70,6 +73,32 @@ public class ProfileImageUtils {
         return bitmap;
     }
 
+    public static String convertToBase64(String imagePath)
+    {
+        Bitmap bm = BitmapFactory.decodeFile(imagePath);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] byteArrayImage = baos.toByteArray();
+        String encodedImage = "data:image/jpeg;base64,"+Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+        return encodedImage;
+    }
+
+    public static String convertToBase64(Bitmap originalBitmap)
+    {
+        Bitmap bm = originalBitmap.copy(originalBitmap.getConfig(), true);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] byteArrayImage = baos.toByteArray();
+        String encodedImage = "data:image/jpeg;base64,"+Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+        return encodedImage;
+    }
+
+    public static Bitmap decodeFromBase64ToBitmap(String encodedImage)
+    {
+        byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        return decodedByte;
+    }
 
 
 }

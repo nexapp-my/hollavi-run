@@ -29,8 +29,10 @@ import android.widget.Toast;
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.groomify.hollavirun.constants.AppConstant;
+import com.groomify.hollavirun.entities.GroomifyUser;
 import com.groomify.hollavirun.entities.NewsFeed;
 import com.groomify.hollavirun.entities.Races;
+import com.groomify.hollavirun.entities.Ranking;
 import com.groomify.hollavirun.fragment.CouponsListFragment;
 import com.groomify.hollavirun.fragment.MainFragment;
 import com.groomify.hollavirun.fragment.MissionFragment;
@@ -41,9 +43,12 @@ import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.response.Info;
 import com.groomify.hollavirun.rest.models.response.JoinRaceResponse;
 import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
+import com.groomify.hollavirun.rest.models.response.RaceRankingResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
+import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -108,6 +113,7 @@ public class MainActivity extends AppCompatActivity
 
     private RestClient client = new RestClient();
     private Realm realm;
+    GroomifyUser groomifyUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +131,7 @@ public class MainActivity extends AppCompatActivity
                 .build();
 
         realm = Realm.getInstance(config);
+        groomifyUser = realm.where(GroomifyUser.class).findFirst();
 
         if(getSupportActionBar() != null)
             getSupportActionBar().hide();
@@ -160,33 +167,10 @@ public class MainActivity extends AppCompatActivity
         menuBarGreetingText.setVisibility(TextView.VISIBLE);
         pictureView.setVisibility(View.VISIBLE);
 
-        //TODO load all the fragments here.
-/*
-        getSupportFragmentManager().executePendingTransactions();
-        Fragment fragmentById = getSupportFragmentManager().
-                findFragmentById(R.id.main_placeholder);
-
-        if (fragmentById!=null) {
-            getSupportFragmentManager().beginTransaction()
-                    .remove(fragmentById).commit();
-        }*/
-
-
-        if (savedInstanceState == null) {
-            //currentFragment = new MainFragment();
-            //FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            //ft.replace(R.id.main_placeholder, new MainFragment()).commit();
-        }
-
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.main_placeholder, new MainFragment()).commit();
 
-        if(Profile.getCurrentProfile() != null){
-            menuBarGreetingText.setText("Good Morning, " +Profile.getCurrentProfile().getName());
-            //pictureView.setProfileId(Profile.getCurrentProfile().getId());
-            //pictureView.setDrawingCacheEnabled(true);
-            //Log.i(TAG, "Action bar profile picture loaded");
-        }
+        menuBarGreetingText.setText("Good Morning, " +groomifyUser.getName());
 
         pictureView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -197,7 +181,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         initializeMenuBarListener();
-        loadProfileImageFromStorage();
+        loadProfilePicture();
         toggleMenuState();
         initializeBannerOnClickListener();
 
@@ -211,8 +195,11 @@ public class MainActivity extends AppCompatActivity
             alertBanner.setVisibility(View.GONE);
         }
 
-        Integer raceId = SharedPreferencesHelper.getSelectedRaceId(this);
-        new GroomifyRaceInfoTask().execute(""+raceId);//TODO temporary hardcore race id
+        Long raceId = SharedPreferencesHelper.getSelectedRaceId(this);
+        new GroomifyRaceInfoTask().execute(""+raceId);
+        new GroomifyMissionRankingTask().execute(""+raceId);
+
+
     }
 
 
@@ -233,23 +220,12 @@ public class MainActivity extends AppCompatActivity
         };
     }
 
-    private void loadProfileImageFromStorage()
+    private void loadProfilePicture()
     {
-        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        // path to /data/data/yourapp/app_data/imageDir
-        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        // Create imageDir
-
-        try {
-            File f = new File(directory,"profile.jpg");
-            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-            Bitmap optimizedProfilePic = ProfileImageUtils.processOptimizedRoundBitmap(30, 30, b);
-            pictureView.setImageBitmap(optimizedProfilePic);
-            Log.i(TAG, "Action bar profile picture loaded");
-        }
-        catch (FileNotFoundException e)
-        {
-            Log.e(TAG, "Unable to find profile picture.", e);
+        try{
+            ImageLoader.getInstance().displayImage(groomifyUser.getProfilePictureUrl(), pictureView, ImageLoadUtils.getDisplayImageOptions());
+        }catch (Exception e){
+            Log.i(TAG, "Faild to load profile picture.");
         }
 
     }
@@ -261,12 +237,6 @@ public class MainActivity extends AppCompatActivity
             R.id.menu_coupons,
             R.id.menu_sos
     };
-
-   /* Fragment[] fragments = {
-            new MainFragment(),
-            new MissionFragment()
-    };*/
-
     String mCurrentPhotoPath;
 
     private void initializeMenuBarListener(){
@@ -566,13 +536,13 @@ public class MainActivity extends AppCompatActivity
             String authToken = SharedPreferencesHelper.getAuthToken(MainActivity.this);
             String fbId = SharedPreferencesHelper.getFbId(MainActivity.this);
             try {
-                Response<RaceInfoResponse> listResponse = client.getApiService().raceInfo(fbId, authToken, params[0]).execute();
+                Response<RaceInfoResponse> restResponse = client.getApiService().raceInfo(fbId, authToken, params[0]).execute();
 
-                if(listResponse.isSuccessful()){
+                if(restResponse.isSuccessful()){
                     Log.i(TAG, "Calling race news api success");
-                    return listResponse.body();
+                    return restResponse.body();
                 }else{
-                    Log.i(TAG, "Calling race news api failed, race id: "+params[0]+", response code: "+listResponse.code()+", error body: "+listResponse.errorBody().string());
+                    Log.i(TAG, "Calling race news api failed, race id: "+params[0]+", response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Unable to get race news.",e);
@@ -608,5 +578,83 @@ public class MainActivity extends AppCompatActivity
 
             }
         }
+    }
+
+    //TODO might need a thread periodicaly pull the ranking.
+    private class GroomifyMissionRankingTask extends AsyncTask<String, String, RaceRankingResponse> {
+
+        @Override
+        protected RaceRankingResponse doInBackground(String... params) {
+            String authToken = SharedPreferencesHelper.getAuthToken(MainActivity.this);
+            String fbId = SharedPreferencesHelper.getFbId(MainActivity.this);
+            try {
+                Response<RaceRankingResponse> restResponse = client.getApiService().raceRanking(fbId, authToken, params[0]).execute();
+
+                if(restResponse.isSuccessful()){
+                    Log.i(TAG, "Calling race news api success");
+                    return restResponse.body();
+                }else{
+                    Log.i(TAG, "Calling race news api failed, race id: "+params[0]+", response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to get race news.",e);
+                Toast.makeText(MainActivity.this, "Unable to get race detail.", Toast.LENGTH_SHORT).show();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(RaceRankingResponse raceRankingResponse) {
+            super.onPostExecute(raceRankingResponse);
+
+            //TODO save race info into database.
+            if(raceRankingResponse != null){
+
+                realm.beginTransaction();
+                realm.delete(com.groomify.hollavirun.entities.Ranking.class);//truncate the tables.
+
+                Log.i(TAG, "Total ranking size: "+raceRankingResponse.getRankings().size());
+
+                for(int i =0; i < raceRankingResponse.getRankings().size(); i++){
+                    com.groomify.hollavirun.entities.Ranking ranking = realm.createObject(com.groomify.hollavirun.entities.Ranking.class, i + 1);
+                    ranking.setName(raceRankingResponse.getRankings().get(i).getRunnerName());
+
+                    ranking.setCompletionTime(raceRankingResponse.getRankings().get(i).getTotalMissionTime());
+                    ranking.setId(raceRankingResponse.getRankings().get(i).getRunnerBib());
+                    ranking.setTeamName(raceRankingResponse.getRankings().get(i).getTeam());
+
+                    Log.i(TAG, "Saving ranking into database: "+ranking.toString());
+                    realm.copyToRealmOrUpdate(ranking);
+                }
+
+
+                Log.i(TAG, "Ranking list saved into database. Saving user own ranking into database.");
+                final com.groomify.hollavirun.entities.Ranking myRanking = new Ranking();
+                myRanking.setRankNumber(raceRankingResponse.getMyRanking().getRanking());
+                myRanking.setName(raceRankingResponse.getMyRanking().getRunnerName());
+                myRanking.setCompletionTime(raceRankingResponse.getMyRanking().getTotalMissionTime());
+                myRanking.setId(raceRankingResponse.getMyRanking().getRunnerBib());
+                myRanking.setTeamName(raceRankingResponse.getMyRanking().getTeam());
+
+                final Ranking realmRanking = realm.copyToRealmOrUpdate(myRanking);
+                Log.i(TAG, "Saving user ranking into database: "+myRanking.toString());
+                realm.commitTransaction();
+
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        GroomifyUser groomifyUser = realm.where(GroomifyUser.class).findFirst();
+                        groomifyUser.setMyRanking(realmRanking);
+                        Log.i(TAG, "User info from database: "+groomifyUser.toString());
+                    }
+                });
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
     }
 }

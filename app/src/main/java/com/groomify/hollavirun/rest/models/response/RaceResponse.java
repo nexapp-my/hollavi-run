@@ -1,10 +1,19 @@
 package com.groomify.hollavirun.rest.models.response;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class RaceResponse {
+import java.io.Serializable;
 
+public class RaceResponse implements Serializable, Parcelable
+{
+
+    @SerializedName("id")
+    @Expose
+    private Integer id;
     @SerializedName("name")
     @Expose
     private String name;
@@ -22,16 +31,52 @@ public class RaceResponse {
     private Boolean status;
     @SerializedName("end_time")
     @Expose
-    private Object endTime;
+    private String endTime;
     @SerializedName("first_aid")
     @Expose
-    private Object firstAid;
+    private String firstAid;
     @SerializedName("gr_support")
     @Expose
-    private Object grSupport;
+    private String grSupport;
     @SerializedName("url")
     @Expose
     private String url;
+    public final static Parcelable.Creator<RaceResponse> CREATOR = new Creator<RaceResponse>() {
+
+
+        @SuppressWarnings({
+                "unchecked"
+        })
+        public RaceResponse createFromParcel(Parcel in) {
+            RaceResponse instance = new RaceResponse();
+            instance.id = ((Integer) in.readValue((Integer.class.getClassLoader())));
+            instance.name = ((String) in.readValue((String.class.getClassLoader())));
+            instance.location = ((String) in.readValue((String.class.getClassLoader())));
+            instance.distance = ((Integer) in.readValue((Integer.class.getClassLoader())));
+            instance.missionNo = ((Integer) in.readValue((Integer.class.getClassLoader())));
+            instance.status = ((Boolean) in.readValue((Boolean.class.getClassLoader())));
+            instance.endTime = ((String) in.readValue((String.class.getClassLoader())));
+            instance.firstAid = ((String) in.readValue((String.class.getClassLoader())));
+            instance.grSupport = ((String) in.readValue((String.class.getClassLoader())));
+            instance.url = ((String) in.readValue((String.class.getClassLoader())));
+            return instance;
+        }
+
+        public RaceResponse[] newArray(int size) {
+            return (new RaceResponse[size]);
+        }
+
+    }
+            ;
+    private final static long serialVersionUID = -7788206753895020565L;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -73,27 +118,27 @@ public class RaceResponse {
         this.status = status;
     }
 
-    public Object getEndTime() {
+    public String getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Object endTime) {
+    public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
 
-    public Object getFirstAid() {
+    public String getFirstAid() {
         return firstAid;
     }
 
-    public void setFirstAid(Object firstAid) {
+    public void setFirstAid(String firstAid) {
         this.firstAid = firstAid;
     }
 
-    public Object getGrSupport() {
+    public String getGrSupport() {
         return grSupport;
     }
 
-    public void setGrSupport(Object grSupport) {
+    public void setGrSupport(String grSupport) {
         this.grSupport = grSupport;
     }
 
@@ -103,6 +148,23 @@ public class RaceResponse {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeValue(id);
+        dest.writeValue(name);
+        dest.writeValue(location);
+        dest.writeValue(distance);
+        dest.writeValue(missionNo);
+        dest.writeValue(status);
+        dest.writeValue(endTime);
+        dest.writeValue(firstAid);
+        dest.writeValue(grSupport);
+        dest.writeValue(url);
+    }
+
+    public int describeContents() {
+        return 0;
     }
 
 }

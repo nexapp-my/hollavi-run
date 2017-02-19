@@ -72,4 +72,13 @@
         android:textAlignment="center"
         android:layout_width="100dp" />
 
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:id="@+id/profile_pic_loading_circle"
+        android:layout_alignParentTop="false"
+        android:layout_centerHorizontal="false"
+        android:layout_centerInParent="true" />
+
 </RelativeLayout>

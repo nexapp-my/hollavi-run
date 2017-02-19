@@ -29,15 +29,24 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.Profile;
 import com.groomify.hollavirun.constants.AppConstant;
+import com.groomify.hollavirun.entities.GroomifyUser;
+import com.groomify.hollavirun.rest.RestClient;
+import com.groomify.hollavirun.rest.models.request.FbUser;
+import com.groomify.hollavirun.rest.models.request.UpdateUserInfoRequest;
+import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
+import com.groomify.hollavirun.utils.AppPermissionHelper;
 import com.groomify.hollavirun.utils.BitmapUtils;
 import com.groomify.hollavirun.utils.PathUtils;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
+import com.groomify.hollavirun.utils.RealmUtils;
+import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.groomify.hollavirun.view.ProfilePictureView;
 
 import java.io.File;
@@ -51,16 +60,21 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import retrofit2.Response;
+
 
 public class WelcomeActivity extends AppCompatActivity {
 
-    private final static String TAGNAME= "WelcomeActivity";
+    private final static String TAG = "WelcomeActivity";
     public static ProfilePictureView profilePictureView;
     public static String facebookUserId;
 
     ImageView addProfileImageView;
     TextView usernameTextView;
     TextView proceedTextView;
+    ProgressBar progressBar;
 
     private static final int REQUEST_IMAGE_CAPTURE = 101;
     private static final int REQUEST_PICTURE_FROM_GALLERY = 102;
@@ -69,9 +83,19 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private Bitmap profilePictureBitmap = null;
 
+    private Realm realm;
+
+    RestClient client = new RestClient();
+
+    private String profilePictureBase64;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Realm.init(this);
+        realm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+
         setContentView(R.layout.activity_welcome);
 
         ActionBar actionBar = getSupportActionBar();
@@ -79,11 +103,19 @@ public class WelcomeActivity extends AppCompatActivity {
             actionBar.hide();
         }
 
+        GroomifyUser groomifyUser = realm.where(GroomifyUser.class).findFirst();
+
         /*if(profilePictureView == null){
             profilePictureView = (ProfilePictureView) findViewById(R.id.welcome_screen_fb_profile_picture);
             profilePictureView.setVisibility(View.INVISIBLE);
             profilePictureView.setPresetSize(ProfilePictureView.NORMAL);
         }*/
+
+        if(progressBar == null){
+            progressBar = (ProgressBar) findViewById(R.id.profile_pic_loading_circle);
+        }
+
+        progressBar.setVisibility(View.GONE);
 
         if(addProfileImageView == null){
             addProfileImageView = (ImageView) findViewById(R.id.image_view_add_profile_pic);
@@ -98,21 +130,22 @@ public class WelcomeActivity extends AppCompatActivity {
         }
 
         usernameTextView.setAllCaps(true);
-        usernameTextView.setText("HELLO " +Profile.getCurrentProfile().getName());
 
+        if(groomifyUser != null && groomifyUser.getName() != null){
+            usernameTextView.setText("HELLO " +groomifyUser.getName());
+        }else{
+            usernameTextView.setText("HELLO " +Profile.getCurrentProfile().getName());
+        }
 
         addProfileImageView.setOnClickListener(new Button.OnClickListener(){
 
             @Override
             public void onClick(View v) {
-                //Toast.makeText(WelcomeActivity.this, "Add profile picture clicked", Toast.LENGTH_SHORT).show();
-
-                Log.i(TAGNAME, "Add profile picture clicked");
+                Log.i(TAG, "Add profile picture clicked");
 
                 /*profilePictureView.setVisibility(View.VISIBLE);
                 addProfileImageView.setVisibility(View.INVISIBLE);
                 proceedTextView.setText("Next");*/
-
                 prompPictureSelectionDialog();
             }
         });
@@ -122,11 +155,11 @@ public class WelcomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(proceedTextView.getText().equals("Next")){
                     //TODO upload photo should do here.
-                    flagProfilePictureSelected();
-                    launchTeamSelectScreen();
+                    new GroomifyUpdateProfileTask().execute();
+
                 }else{
+                    //User skip upload photo.
                     flagProfilePictureSelected();
-                    launchTeamSelectScreen();
                 }
             }
         });
@@ -135,17 +168,14 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private void flagProfilePictureSelected(){
         if(profilePictureBitmap == null){
-            Log.i(TAGNAME, "User skip profile picture selection.");
+            Log.i(TAG, "User skip profile picture selection.");
             profilePictureBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_default_avatar);
         }
         saveProfilePictureToDisk(profilePictureBitmap);
 
-        SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean("profile_updated", true);
+        SharedPreferencesHelper.savePreferences(WelcomeActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_PROFILE_PIC_UPDATED, Boolean.TRUE);
+        launchTeamSelectScreen();
 
-        // Commit the edits!
-        editor.commit();
     }
 
     private static final int OPTION_CAMERA = 0;
@@ -156,33 +186,23 @@ public class WelcomeActivity extends AppCompatActivity {
         builder
                 .setItems(R.array.profile_picture_selection, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Log.i(TAGNAME, "Upload profile picture, option "+which+" selected.");
+                        Log.i(TAG, "Upload profile picture, option "+which+" selected.");
                         if(which == OPTION_CAMERA){
-                            if(isPermissionGranted()){
+                            if(AppPermissionHelper.isCameraPermissionGranted(WelcomeActivity.this)){
                                 dispatchTakePictureIntent();
                             }else{
-                                requestPermission();
+                                AppPermissionHelper.requestCameraAndStoragePermission(WelcomeActivity.this);
                             }
                         }else if(which == OPTION_GALLERY){
-                            if(isPermissionGranted()){
+                            if(AppPermissionHelper.isCameraPermissionGranted(WelcomeActivity.this)){
                                 dispatchSelectPhotoIntent();
                             }else{
-                                requestPermission();
+                                AppPermissionHelper.requestCameraAndStoragePermission(WelcomeActivity.this);
                             }
                         }
                     }
                 });
         builder.create().show();
-    }
-
-    private boolean isPermissionGranted() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST);
     }
 
 
@@ -194,7 +214,7 @@ public class WelcomeActivity extends AppCompatActivity {
             File photoFile = null;
             try {
                 photoFile = createImageFile();
-                Log.i(TAGNAME, "mCurrentPhotoPath: "+mCurrentPhotoPath);
+                Log.i(TAG, "mCurrentPhotoPath: "+mCurrentPhotoPath);
             } catch (IOException ex) {
                Toast.makeText(this, "Unable to save photo to your phone's storage.",Toast.LENGTH_LONG).show();
             }
@@ -206,7 +226,7 @@ public class WelcomeActivity extends AppCompatActivity {
                     startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
                 }
             }catch (Exception e){
-                Log.e(TAGNAME, "Unable to retrieve the provided root.", e);
+                Log.e(TAG, "Unable to retrieve the provided root.", e);
             }
         }
     }
@@ -255,26 +275,26 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        Log.i(TAGNAME, "onActivityResult, requestCode: "+requestCode+", resultCode:"+resultCode+", Data:"+data);
+        Log.i(TAG, "onActivityResult, requestCode: "+requestCode+", resultCode:"+resultCode+", Data:"+data);
         try {
+
             if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+                Log.i(TAG, "Setup profile picture from camera success.");
                 setPic();
                 Bitmap temp = BitmapFactory.decodeFile(mCurrentPhotoPath);
-
-               profilePictureBitmap = BitmapUtils.cropBitmap(300,300, temp);
-
+                profilePictureBitmap = BitmapUtils.cropBitmap(300,300, temp);
+                profilePictureBase64 = ProfileImageUtils.convertToBase64(profilePictureBitmap);
             }else if (requestCode == REQUEST_PICTURE_FROM_GALLERY && resultCode == RESULT_OK && data != null && data.getData() != null) {
-
+                Log.i(TAG, "Setup profile picture from gallery success.");
                 Uri uri = data.getData();
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 setPicFromBitmap(bitmap);
                 profilePictureBitmap = BitmapUtils.cropBitmap(300,300, bitmap);
-
-
-
+                profilePictureBase64 = ProfileImageUtils.convertToBase64(profilePictureBitmap);
             }
+
         }catch (Exception e){
-            Log.e(TAGNAME, "Failed to capture image return from intent.", e);
+            Log.e(TAG, "Failed to capture image return from intent.", e);
         }
     }
 
@@ -283,11 +303,8 @@ public class WelcomeActivity extends AppCompatActivity {
         int targetH = addProfileImageView.getHeight();
 
         Bitmap processedBitmap = ProfileImageUtils.processOptimizedRoundBitmap(targetH,targetW,bitmap);
-
         addProfileImageView.setImageBitmap(processedBitmap);
-
         proceedTextView.setText("Next");
-        flagProfilePictureSelected();
     }
 
     private void setPic() {
@@ -295,11 +312,8 @@ public class WelcomeActivity extends AppCompatActivity {
         int targetH = addProfileImageView.getHeight();
 
         Bitmap bitmap = ProfileImageUtils.processOptimizedRoundBitmap(targetH,targetW,mCurrentPhotoPath);
-
         addProfileImageView.setImageBitmap(bitmap);
-
         proceedTextView.setText("Next");
-        flagProfilePictureSelected();
     }
 
     private void saveProfilePictureToDisk(Bitmap bitmapImage){
@@ -315,7 +329,7 @@ public class WelcomeActivity extends AppCompatActivity {
             // Use the compress method on the BitMap object to write image to the OutputStream
             bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
         } catch (Exception e) {
-            Log.e(TAGNAME, "Unable to save file to",e);
+            Log.e(TAG, "Unable to save file to",e);
         } finally {
             try {
                 fos.close();
@@ -352,8 +366,83 @@ public class WelcomeActivity extends AppCompatActivity {
     }*/
 
 
+    private class GroomifyUpdateProfileTask extends AsyncTask<Void, String, UserInfoResponse> {
+
+        @Override
+        protected UserInfoResponse doInBackground(Void... params) {
+            String authToken = SharedPreferencesHelper.getAuthToken(WelcomeActivity.this);
+            String fbId = SharedPreferencesHelper.getFbId(WelcomeActivity.this);
+            Realm innerRealm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+            GroomifyUser realmUser = innerRealm.where(GroomifyUser.class).findFirst();
+
+            changeViewState(true);
+            try {
+                Log.i(TAG, "Update profile picture to back-end system..");
+                UpdateUserInfoRequest updateUserInfoRequest = new UpdateUserInfoRequest();
+                FbUser fbUser = new FbUser();
+                fbUser.setProfilePicture(profilePictureBase64);
+                updateUserInfoRequest.setFbUser(fbUser);
+                Log.i(TAG, "Request ready to post:"+updateUserInfoRequest);
+
+                Response<UserInfoResponse> restResponse = client.getApiService().updateUser(fbId, authToken, realmUser.getId(), updateUserInfoRequest).execute();
+
+                if(restResponse.isSuccessful()){
+                    Log.i(TAG, "Calling update user api success");
+                    return restResponse.body();
+                }else{
+                    Log.i(TAG, "Calling update user api failed. response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to call update user api.",e);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(UserInfoResponse userInfoResponse) {
+            //TODO get the runner_id
+
+            super.onPostExecute(userInfoResponse);
+            if (userInfoResponse != null) {
+                Log.i(TAG, "Update user info success, returning:" + userInfoResponse.toString());
+                Realm innerRealm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+                innerRealm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+
+                        GroomifyUser realmUser = realm.where(GroomifyUser.class).findFirst();
+                        realmUser.setProfilePictureBase64(profilePictureBase64);
+                    }
+                });
+                flagProfilePictureSelected();
+
+            } else {
+                Toast.makeText(WelcomeActivity.this, "Unable to change profile picture at this moment. Please try again later.", Toast.LENGTH_SHORT).show();
+                changeViewState(false);
+            }
+
+
+        }
+    }
+
+    private void changeViewState(final boolean loading){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(loading){
+                    progressBar.setVisibility(View.VISIBLE);
+                    proceedTextView.setVisibility(View.GONE);
+                }else{
+                    progressBar.setVisibility(View.GONE);
+                    proceedTextView.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+    }
+
     private void launchTeamSelectScreen(){
-        Log.i(TAGNAME, "Team selection screen launched");
+        changeViewState(false);
+        Log.i(TAG, "Team selection screen launched");
         Intent intent;
         intent = new Intent(WelcomeActivity.this, TeamSelectActivity.class);
 
@@ -376,5 +465,11 @@ public class WelcomeActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("No", null)
                 .show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
     }
 }

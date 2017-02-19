@@ -3,11 +3,11 @@ package com.groomify.hollavirun.rest.models.response;
 import java.io.Serializable;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class UpdateRunnerInfoResponse implements Serializable, Parcelable
+public class RunnerInfoResponse implements Serializable, Parcelable
 {
 
     @SerializedName("name")
@@ -22,14 +22,14 @@ public class UpdateRunnerInfoResponse implements Serializable, Parcelable
     @SerializedName("url")
     @Expose
     private String url;
-    public final static Parcelable.Creator<UpdateRunnerInfoResponse> CREATOR = new Creator<UpdateRunnerInfoResponse>() {
+    public final static Parcelable.Creator<RunnerInfoResponse> CREATOR = new Creator<RunnerInfoResponse>() {
 
 
         @SuppressWarnings({
                 "unchecked"
         })
-        public UpdateRunnerInfoResponse createFromParcel(Parcel in) {
-            UpdateRunnerInfoResponse instance = new UpdateRunnerInfoResponse();
+        public RunnerInfoResponse createFromParcel(Parcel in) {
+            RunnerInfoResponse instance = new RunnerInfoResponse();
             instance.name = ((String) in.readValue((String.class.getClassLoader())));
             instance.team = ((String) in.readValue((String.class.getClassLoader())));
             instance.runBibNo = ((String) in.readValue((String.class.getClassLoader())));
@@ -37,8 +37,8 @@ public class UpdateRunnerInfoResponse implements Serializable, Parcelable
             return instance;
         }
 
-        public UpdateRunnerInfoResponse[] newArray(int size) {
-            return (new UpdateRunnerInfoResponse[size]);
+        public RunnerInfoResponse[] newArray(int size) {
+            return (new RunnerInfoResponse[size]);
         }
 
     }
@@ -88,4 +88,13 @@ public class UpdateRunnerInfoResponse implements Serializable, Parcelable
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "RunnerInfoResponse{" +
+                "name='" + name + '\'' +
+                ", team='" + team + '\'' +
+                ", runBibNo='" + runBibNo + '\'' +
+                ", url='" + url + '\'' +
+                '}';
+    }
 }

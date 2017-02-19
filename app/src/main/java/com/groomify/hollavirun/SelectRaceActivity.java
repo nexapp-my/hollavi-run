@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.groomify.hollavirun.constants.AppConstant;
+import com.groomify.hollavirun.entities.GroomifyUser;
 import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.entities.Races;
 import com.groomify.hollavirun.rest.RestClient;
@@ -30,6 +31,7 @@ import com.groomify.hollavirun.rest.models.response.JoinRaceResponse;
 import com.groomify.hollavirun.rest.models.response.RaceDetailResponse;
 import com.groomify.hollavirun.rest.models.response.RaceResponse;
 import com.groomify.hollavirun.utils.BitmapUtils;
+import com.groomify.hollavirun.utils.RealmUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.groomify.hollavirun.view.ViewPagerCarouselView;
 
@@ -59,26 +61,21 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
     long carouselSlideInterval = 999999; // 3 SECONDS
     private static final String TAG = SelectRaceActivity.class.getSimpleName();
 
-    private volatile String bibNo = null;
+    private volatile String bibNo = AppConstant.DEFAULT_BIB_NO;
 
     private final static int MAX_BIB_NO = 5;
 
     private DecimalFormat decimalFormat = new DecimalFormat("00");
 
-    private Realm realm;
+    //private Realm realm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Realm.init(this);
-        RealmConfiguration config = new RealmConfiguration
-                .Builder()
-                .deleteRealmIfMigrationNeeded()
-                .build();
-
-        realm = Realm.getInstance(config);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_race);
 
+        //TODO Currently API does not return badge and minimap, waiting API to enhance.
         Bitmap miniMap = BitmapUtils.cropBitmap(183, 183, BitmapFactory.decodeResource(getResources(), R.drawable.ic_map_mini));
         Bitmap badge = BitmapUtils.cropBitmap(183, 183, BitmapFactory.decodeResource(getResources(), R.drawable.ic_finisher_badge));
 
@@ -88,23 +85,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         miniMap.compress(Bitmap.CompressFormat.PNG, 50, miniMapByteArr);
         badge.compress(Bitmap.CompressFormat.PNG, 50, badgeByteArr);
 
-        races = new Races[]{
-                /*new Races(1, "GROOMIFY RUN 2016", "Putrajaya Sentral", "10", "5", miniMapByteArr.toByteArray(), badgeByteArr.toByteArray()),
-                new Races(2, "GROOMIFY RUN 2017", "KL Sentral", "15", "5", miniMapByteArr.toByteArray(), badgeByteArr.toByteArray()),
-                new Races(3, "GROOMIFY RUN 2018", "Penang Sentral", "20", "10", miniMapByteArr.toByteArray(), badgeByteArr.toByteArray()),*/
-        };
-
-        /*
-        Bitmap b;
-        ByteArrayOutputStream bs = new ByteArrayOutputStream();
-        b.compress(Bitmap.CompressFormat.PNG, 50, bs);
-        i.putExtra("byteArray", bs.toByteArray());
-        */
-
         viewPagerCarouselView = (ViewPagerCarouselView) findViewById(R.id.carousel_view);
-
-
-
         joinRaceButton = findViewById(R.id.join_race_button);
         runAsGuestButton = (TextView) findViewById(R.id.run_as_guest_button);
         progressBar = (ProgressBar) findViewById(R.id.race_list_loading_circle);
@@ -122,7 +103,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         runAsGuestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                runAsGuest();
+                joinRace(true);
             }
         });
 
@@ -130,18 +111,14 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
     }
 
-    private  void runAsGuest(){
-        SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_RUN_SELECTED, true);
-        SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.INTEGER, AppConstant.PREFS_RUN_SELECTED_ID, -1);
-        launchWelcomeScreen();
-    }
-
-    private void joinRace(){
+    private void joinRace(boolean asGuest){
         Races race = SelectRaceActivity.races[currentPosition];
-        //Toast.makeText(SelectRaceActivity.this, "Race "+race.getRaceName()+" has been selected. Bib no:"+bibNo, Toast.LENGTH_LONG).show();
-        SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_RUN_SELECTED, true);
-        SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.INTEGER, AppConstant.PREFS_RUN_SELECTED_ID, race.getId());
-        //launchWelcomeScreen();
+
+        if(asGuest){
+            SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, AppConstant.DEFAULT_BIB_NO);
+        }else{
+            SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, bibNo);
+        }
 
         new GroomifyJoinRaceTask().execute(""+race.getId());
     }
@@ -169,8 +146,8 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         builder.setCancelable(false)
                 .setPositiveButton("OK",
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                if(input.getText().length() > 0 && input.getText().toString().trim().length() > 0){
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (input.getText().length() > 0 && input.getText().toString().trim().length() > 0) {
                                     bibNo = input.getText().toString();
                                     //joinRace();
                                     populateRaceDetails();
@@ -179,7 +156,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                         })
                 .setNegativeButton("Cancel",
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                            public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
                         });
@@ -191,24 +168,16 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
         input.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onTextChanged(CharSequence s, int start, int before,
-                                      int count) {
-            }
-
+            public void onTextChanged(CharSequence s, int start, int before,int count) {}
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count,
-                                          int after) {
-            }
-
+            public void beforeTextChanged(CharSequence s, int start, int count,int after) {}
             @Override
             public void afterTextChanged(Editable s) {
                 // Check if edittext is empty
                 if (TextUtils.isEmpty(s)) {
-                    // Disable ok button
                     ((AlertDialog) alertDialog).getButton(
                             AlertDialog.BUTTON_POSITIVE).setEnabled(false);
                 } else {
-                    // Something into edit text. Enable the button.
                     ((AlertDialog) alertDialog).getButton(
                             AlertDialog.BUTTON_POSITIVE).setEnabled(true);
                 }
@@ -222,9 +191,6 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
     private void populateRaceDetails(){
         Races race = SelectRaceActivity.races[currentPosition];
-        Toast.makeText(SelectRaceActivity.this, "Race "+race.getRaceName()+" has been selected. Bib no:"+bibNo, Toast.LENGTH_LONG).show();
-        SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_RUN_SELECTED, true);
-        SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.INTEGER, AppConstant.PREFS_RUN_SELECTED_ID, race.getId());
         new GroomifyLoadRaceDetailTask().execute(""+race.getId());
     }
 
@@ -232,10 +198,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
         @Override
         protected List<RaceResponse> doInBackground(Void... params) {
-
-
             Log.i(TAG, "#doInBackground Load to groomify race list.");
-
             try{
 
                 String authToken = SharedPreferencesHelper.getAuthToken(SelectRaceActivity.this);
@@ -260,37 +223,37 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         }
 
         @Override
-        protected void onPostExecute(List<RaceResponse> raceResponseList) {
-            if(raceResponseList != null){
+        protected void onPostExecute(final List<RaceResponse> raceResponseList) {
+            if(raceResponseList != null) {
 
-                realm.beginTransaction();
-                realm.delete(Races.class);//truncate the tables.
-                //TODO populate the race list
-                races = new Races[raceResponseList.size()];
-                int totalActive = 0;
-                for(int i = 0; i < raceResponseList.size(); i++){
-                    RaceResponse raceDetail = raceResponseList.get(i);
-                    //new Races(2, "GROOMIFY RUN 2017", "KL Sentral", "15", "5", miniMapByteArr.toByteArray(), badgeByteArr.toByteArray())
-                    if(true || raceDetail.getStatus()){ //TODO temporary debug since race is disable now.
-                        Races race = realm.createObject(Races.class, i + 1); //TODO change to proper rest response race id
-                        race.setDistance(""+raceDetail.getDistance());
-                        race.setRaceLocation(raceDetail.getLocation());
-                        race.setRaceName(raceDetail.getName());
-                        race.setTotalMission(""+raceDetail.getMissionNo());
-                        //Races race = new Races(i, raceDetail.getName(), ""+raceDetail.getLocation(), ""+raceDetail.getDistance(), ""+raceDetail.getMissionNo(), null, null);
-                        races[totalActive] = race;
-                        totalActive++;
+                Realm realm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        realm.delete(Races.class);//truncate the tables.
+                        //TODO populate the race list
+                        races = new Races[raceResponseList.size()];
+                        int totalActive = 0;
+                        for(int i = 0; i < raceResponseList.size(); i++){
+                            RaceResponse raceDetail = raceResponseList.get(i);
+                            if(raceDetail.getStatus()){
+                                Races race = realm.createObject(Races.class, raceDetail.getId());
+                                race.setDistance(""+raceDetail.getDistance());
+                                race.setRaceLocation(raceDetail.getLocation());
+                                race.setRaceName(raceDetail.getName());
+                                race.setTotalMission(""+raceDetail.getMissionNo());
+                                //Races race = new Races(i, raceDetail.getName(), ""+raceDetail.getLocation(), ""+raceDetail.getDistance(), ""+raceDetail.getMissionNo(), null, null);
+                                races[totalActive] = race;
+                                totalActive++;
+                            }
+                        }
+                        races = java.util.Arrays.copyOf(races, totalActive);
                     }
-                }
-                races = java.util.Arrays.copyOf(races, totalActive);
+                });
 
                 viewPagerCarouselView.setData(getSupportFragmentManager(), races, carouselSlideInterval, SelectRaceActivity.this);
                 joinRaceButton.setVisibility(View.VISIBLE);
                 runAsGuestButton.setVisibility(View.VISIBLE);
-
-                realm.commitTransaction();
-
-
             }else{
                 //TODO retry again
                 Toast.makeText(SelectRaceActivity.this, "Failed to load race list", Toast.LENGTH_SHORT).show();
@@ -301,7 +264,6 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
 
     private class GroomifyLoadRaceDetailTask extends AsyncTask<String, String, RaceDetailResponse> {
-
         @Override
         protected RaceDetailResponse doInBackground(String... params) {
             String authToken = SharedPreferencesHelper.getAuthToken(SelectRaceActivity.this);
@@ -323,40 +285,44 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         }
 
         @Override
-        protected void onPostExecute(RaceDetailResponse raceDetail) {
+        protected void onPostExecute(final RaceDetailResponse raceDetail) {
             super.onPostExecute(raceDetail);
 
             if(raceDetail != null){
-                realm.beginTransaction();
-                Races races = new Races(1, raceDetail.getName(),
-                        raceDetail.getLocation(),
-                        ""+raceDetail.getDistance(),
-                        ""+raceDetail.getMissionNo(),
-                        raceDetail.getStatus(),
-                        raceDetail.getEndTime(),
-                        raceDetail.getFirstAid(),
-                        raceDetail.getGrSupport());
 
-                races.missions = new RealmList<>();
-                realm.delete(Mission.class);
+                Realm realm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+                try {
 
-                for(int i = 0; i < raceDetail.getMissions().size(); i++) {
-                    com.groomify.hollavirun.rest.models.response.Mission missionResponse = raceDetail.getMissions().get(i);
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            Races races = new Races(raceDetail.getId(), raceDetail.getName(),
+                                    raceDetail.getLocation(),
+                                    "" + raceDetail.getDistance(),
+                                    "" + raceDetail.getMissionNo(),
+                                    raceDetail.getStatus(),
+                                    raceDetail.getEndTime(),
+                                    raceDetail.getFirstAid(),
+                                    raceDetail.getGrSupport());
+                            races.missions = new RealmList<>();
+                            realm.delete(Mission.class);
 
-                    Mission mission = new Mission(i + 1, decimalFormat.format(i + 1), missionResponse.getTitle(), missionResponse.getDescription(), 0, false);
-                    Log.i(TAG, "Adding mission into database. "+mission.toString());
+                            for (int i = 0; i < raceDetail.getMissions().size(); i++) {
+                                com.groomify.hollavirun.rest.models.response.Mission missionResponse = raceDetail.getMissions().get(i);
+                                //public Mission(boolean unlocked, String coverPhotoUrl, String missionDesc, int missionNumber, String missionNumberString, String missionTitle) {
+                                Mission mission = new Mission(false, missionResponse.getUrl(), missionResponse.getDescription(), i + 1, decimalFormat.format(i + 1), missionResponse.getTitle());
+                                Log.i(TAG, "Adding mission into database. " + mission.toString());
 
-                    races.missions.add(i, mission);
+                                races.missions.add(i, mission);
+                            }
+                            Races realRaces = realm.copyToRealmOrUpdate(races);
+                            joinRace(false);
+                        }
+                    });
+                }finally {
+                    realm.close();
                 }
-
-                Races realRaces = realm.copyToRealmOrUpdate(races);
-                realm.commitTransaction();
-
-                joinRace();
             }
-
-
-
         }
     }
 
@@ -383,18 +349,37 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         }
 
         @Override
-        protected void onPostExecute(JoinRaceResponse joinRace) {
-            //TODO get the runner_id
+        protected void onPostExecute(final JoinRaceResponse joinRace) {
+
             super.onPostExecute(joinRace);
             if(joinRace != null){
                 Log.i(TAG, "Join race success, runner id:"+joinRace.getRunnerId());
                 SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_RUNNER_ID, ""+joinRace.getRunnerId());
+
+                Realm innerRealm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+                try {
+                    innerRealm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            GroomifyUser realmUser = realm.where(GroomifyUser.class).findFirst();
+                            Log.i(TAG, "After join race API call success. GroomifyUser: ("+realmUser+")");
+
+                            realmUser.setCurrentBibNo(""+bibNo);
+                            realmUser.setCurrentRunnerId("" + joinRace.getRunnerId());
+                            realmUser.setCurrentRaceId(SelectRaceActivity.races[currentPosition].getId());
+
+                            Log.i(TAG, "User saved in database: "+realmUser.getCurrentRaceId());
+
+                            SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_RUN_SELECTED, true);
+                            SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.LONG, AppConstant.PREFS_RUN_SELECTED_ID, races[currentPosition].getId());
+                        }
+                    });
+                }finally {
+                    innerRealm.close();
+                }
+            }
                 launchWelcomeScreen();
             }
-
-            //TODO temporary skip join race.
-
-        }
     }
 
 

@@ -34,7 +34,6 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="#2017"
             android:id="@+id/item_user_ranking_no"
-
             android:textColor="@color/rustyRed"
             android:textStyle="bold"
             android:textSize="15sp"

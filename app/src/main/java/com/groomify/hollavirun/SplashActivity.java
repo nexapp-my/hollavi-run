@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,18 +25,29 @@ import com.facebook.Profile;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.groomify.hollavirun.constants.AppConstant;
+import com.groomify.hollavirun.entities.GroomifyUser;
 import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.response.RaceDetailResponse;
+import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
+import com.groomify.hollavirun.utils.ActivityUtils;
+import com.groomify.hollavirun.utils.AppUtils;
+import com.groomify.hollavirun.utils.DebugUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import retrofit2.Response;
+
+import static com.groomify.hollavirun.utils.ActivityUtils.launchMainScreen;
+import static com.groomify.hollavirun.utils.ActivityUtils.launchOnboardingScreen;
+import static com.groomify.hollavirun.utils.ActivityUtils.launchRaceSelectionScreen;
+import static com.groomify.hollavirun.utils.ActivityUtils.launchTeamSelectionScreen;
+import static com.groomify.hollavirun.utils.ActivityUtils.launchWelcomeScreen;
 
 /**
  * Created by Valkyrie1988 on 9/17/2016.
@@ -44,24 +56,29 @@ public class SplashActivity extends AppCompatActivity {
 
     private final static String TAG = SplashActivity.class.getSimpleName();
 
-    CallbackManager callbackManager;
     private final static long SPLASH_DISPLAY_LENGTH = 0;
     private static final int PERMISSIONS_REQUEST = 100;
 
     boolean isDebug = false;
 
     RestClient client = new RestClient();
+    private Realm realm;
+
+    GroomifyUser groomifyUserRealmObj;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /*if(!isPermissionGranted()){
-            Log.i(TAG, "Permission is not granted.");
-            requestPermission();
-        }else{
-            Log.i(TAG, "Permission granted.");
-        }*/
+        Realm.init(this);
+        RealmConfiguration config = new RealmConfiguration
+                .Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
+
+        realm = Realm.getInstance(config);
+
+        AppEventsLogger.activateApp(this.getApplication());
 
         if(isDebug){
             SharedPreferences settings = this.getSharedPreferences(AppConstant.PREFS_NAME, 0);
@@ -70,12 +87,7 @@ public class SplashActivity extends AppCompatActivity {
         }
 
         boolean exitApp = false;
-        try {
-            if(!isOnline()){
-                exitApp = true;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(!AppUtils.isOnline()){
             exitApp = true;
         }
 
@@ -95,13 +107,8 @@ public class SplashActivity extends AppCompatActivity {
 
                     }).show();
         }else{
-            FacebookSdk.sdkInitialize(getApplicationContext());
-            AppEventsLogger.activateApp(SplashActivity.this);
-            printKeyHash();
-
-
-        /* New Handler to start the Menu-Activity
-         * and close this Splash-Screen after some seconds.*/
+            /* New Handler to start the Menu-Activity
+            * and close this Splash-Screen after some seconds.*/
             new Handler().postDelayed(new Runnable(){
                 @Override
                 public void run() {
@@ -116,81 +123,114 @@ public class SplashActivity extends AppCompatActivity {
 
                     //TODO another mechanism to determine user authenticated if user is not login with facebook.
                     if(AccessToken.getCurrentAccessToken() != null && Profile.getCurrentProfile() != null && userLoggedIn){
-
-                        boolean profileUpdated = settings.getBoolean(AppConstant.PREFS_PROFILE_PIC_UPDATED, false);
-                        boolean teamSelected = settings.getBoolean(AppConstant.PREFS_TEAM_SELECTED, false);
-                        boolean runSelected = settings.getBoolean(AppConstant.PREFS_RUN_SELECTED, false);
-
-                        Log.i(TAG,"profileUpdated: "+profileUpdated+", teamSelected: "+teamSelected+", runSelected: "+runSelected);
-
-                        //TODO check is the race expired, relaunch with race selection again.
-                        //TODO check is facebook login success and groomify failed. If failed perform groomify login here.
-
-                        if(runSelected && isSelectedRaceValid()){
-
-                        }
-
-                        if(profileUpdated && teamSelected && runSelected){
-                            launchMainScreen();
-                        }else if(!runSelected || (runSelected && isSelectedRaceValid())){
-                            launchRaceSelectionScreen();
-                        }
-                        else if (!teamSelected){
-                            launchTeamSelectionScreen();
-                        }
-                        else{
-                            launchWelcomeScreen();
-                        }
-
+                        new GroomifyGetUserTask().execute();
                     }else{
-                        launchOnboardingScreen();
+                        launchOnboardingScreen(SplashActivity.this, true);
                     }
                 }
             }, SPLASH_DISPLAY_LENGTH);
         }
-
-
-
     }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    recreate();
+
+    private class GroomifyGetUserTask extends AsyncTask<Void, String, UserInfoResponse> {
+
+        @Override
+        protected UserInfoResponse doInBackground(Void... params) {
+            try {
+                String authToken = SharedPreferencesHelper.getAuthToken(SplashActivity.this);
+                String fbId = SharedPreferencesHelper.getFbId(SplashActivity.this);
+
+                Response<UserInfoResponse> restResponse = client.getApiService().getUser(fbId, authToken).execute();
+
+                if(restResponse.isSuccessful()){
+                    Log.i(TAG, "Calling get user api success");
+                    return restResponse.body();
+                }else{
+                    Log.i(TAG, "Calling get user api failed, response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
                 }
-            } else {
-                Toast.makeText(this, "This application needs your permission to proceed.", Toast.LENGTH_SHORT).show();
-                finish();
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to call join race api.",e);
+                Toast.makeText(SplashActivity.this, "Unable to get user detail.", Toast.LENGTH_SHORT).show();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(UserInfoResponse userInfoResponse) {
+            super.onPostExecute(userInfoResponse);
+
+            if(userInfoResponse != null) {
+                Log.i(TAG, "API return user info: "+userInfoResponse.toString());
+                realm.beginTransaction();
+                GroomifyUser groomifyUser = new GroomifyUser();
+                groomifyUser.setAuthToken(userInfoResponse.getAuthToken());
+                groomifyUser.setCountry(userInfoResponse.getCountry());
+                groomifyUser.setEmail(userInfoResponse.getEmail());
+                groomifyUser.setEmergencyContactName(userInfoResponse.getEmergencyContactPerson());
+                groomifyUser.setEmergencyContactPhoneNo(userInfoResponse.getEmergencyContactPhone());
+                groomifyUser.setFacebookId(userInfoResponse.getFbId());
+                groomifyUser.setId(new Long(userInfoResponse.getId())); //Unsafe if user id null.
+                groomifyUser.setLastRank(userInfoResponse.getLastRank());
+                groomifyUser.setName(userInfoResponse.getName());
+                groomifyUser.setPhoneNo(userInfoResponse.getPhoneNo());
+                groomifyUser.setTotalRuns(userInfoResponse.getNumberOfRuns());
+                groomifyUser.setProfilePictureUrl(userInfoResponse.getProfilePicture().getUrl());
+                groomifyUser.setFacebookId(userInfoResponse.getFbId());
+
+                if (Profile.getCurrentProfile() != null && Profile.getCurrentProfile().getName() != null) {
+                    groomifyUser.setFacebookDisplayName(Profile.getCurrentProfile().getName());
+                }
+                groomifyUserRealmObj = realm.copyToRealmOrUpdate(groomifyUser);
+
+                Log.i(TAG, "Groomify user in database: "+groomifyUserRealmObj.toString());
+
+                realm.commitTransaction();
+
+                launchNextScreen();
             }
         }
     }
 
-    private void launchRaceSelectionScreen(){
-        Intent sosIntent = new Intent(this, SelectRaceActivity.class);
-        startActivity(sosIntent);
-        finish();
+    private void launchNextScreen(){
+        SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+
+        boolean profileUpdated = settings.getBoolean(AppConstant.PREFS_PROFILE_PIC_UPDATED, false);
+        boolean teamSelected = settings.getBoolean(AppConstant.PREFS_TEAM_SELECTED, false);
+        boolean runSelected = settings.getBoolean(AppConstant.PREFS_RUN_SELECTED, false);
+
+        boolean alreadySetup = settings.getBoolean(AppConstant.PREFS_FIRST_TIME_SETUP_COMPLETE, false);
+
+        Log.i(TAG,"profileUpdated: "+profileUpdated+", teamSelected: "+teamSelected+", runSelected: "+runSelected);
+
+        if(alreadySetup){
+            launchMainScreen(SplashActivity.this, true);
+        }else{
+            if(!runSelected){
+                launchRaceSelectionScreen(SplashActivity.this, true);
+            }else if(!profileUpdated){
+                launchWelcomeScreen(SplashActivity.this, true);
+            }else if(!teamSelected){
+                launchTeamSelectionScreen(SplashActivity.this, true);
+            }
+        }
+
+        //TODO check is facebook login success and groomify failed. If failed perform groomify login here.
+
+     /*   if(profileUpdated && teamSelected && runSelected){
+            launchMainScreen(SplashActivity.this, true);
+        }else if(!runSelected ){
+            launchRaceSelectionScreen(SplashActivity.this, true);
+        }
+        else if (!teamSelected){
+            launchTeamSelectionScreen(SplashActivity.this, true);
+        }
+        else{
+            launchWelcomeScreen(SplashActivity.this, true);
+        }*/
+
     }
 
-    private void launchTeamSelectionScreen(){
-        Intent intent = new Intent(this, TeamSelectActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
-    private void launchOnboardingScreen(){
-        Intent intent = new Intent(this, OnboardingActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
-    private void launchMainScreen(){
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
-    private void launchWelcomeScreen(){
+    /*private void launchWelcomeScreen(){
         GraphRequest request = GraphRequest.newMeRequest(
                 AccessToken.getCurrentAccessToken(),
                 new GraphRequest.GraphJSONObjectCallback() {
@@ -216,70 +256,12 @@ public class SplashActivity extends AppCompatActivity {
         parameters.putString("fields", "id,name,email");
         request.setParameters(parameters);
         request.executeAsync();
+    }*/
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
     }
-    //To add key into Development phone.
-    private void printKeyHash(){
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo(
-                    "com.groomify.hollavirun",
-                    PackageManager.GET_SIGNATURES);
-            for (Signature signature : info.signatures) {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(signature.toByteArray());
-                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG,"Failed to print key hash.", e);
-        } catch (NoSuchAlgorithmException e) {
-            Log.e(TAG,"Failed to print key hash.", e);
-        }
-    }
-
-    private boolean isSelectedRaceValid(){
-       /* SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
-        Integer raceId = settings.getInt(AppConstant.PREFS_RUN_SELECTED_ID, 0);
-
-        String authToken = SharedPreferencesHelper.getAuthToken(this);
-        String fbId = SharedPreferencesHelper.getAuthToken(this);
-
-        if(raceId == null || raceId == 0){
-            Log.i(TAG, "Race is not selected.");
-            return false;
-        }else if(raceId == -1){
-            Log.i(TAG, "Selected race id is -1: Run as guest.");
-            return true;
-        }else {
-            Log.i(TAG, "Selected race id is "+raceId);
-            try {
-                Response<RaceDetailResponse> raceDetailResponse = client.getApiService().raceDetail(fbId, authToken, raceId.toString()).execute();
-                if(raceDetailResponse.isSuccessful()){
-                    return raceDetailResponse.body().getStatus();
-                }else{
-                    return false;
-                }
-
-            } catch (IOException e) {
-                Log.e(TAG, "Failed to get race info.", e);
-
-            }
-        }*/
-        return true;
-
-    }
-
-    public boolean isOnline() throws IOException {
-
-        Runtime runtime = Runtime.getRuntime();
-        try {
-
-            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
-            int     exitValue = ipProcess.waitFor();
-            return (exitValue == 0);
-
-        } catch (IOException e)          { e.printStackTrace(); }
-        catch (InterruptedException e) { e.printStackTrace(); }
-
-        return false;
-    }
-
 }

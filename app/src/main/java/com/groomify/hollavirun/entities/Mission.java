@@ -17,42 +17,29 @@ public class Mission extends RealmObject implements Parcelable {
     private String missionNumberString;
     private String missionTitle;
     private String missionDesc;
-    private int missionImageId;
+    private String coverPhotoUrl;
     private boolean unlocked;
 
     public Mission(){
 
     }
 
-    public Mission(int missionNumber, String missionNumberString, String missionTitle, String missionDesc, int missionImageId, boolean unlocked) {
+    public Mission(boolean unlocked, String coverPhotoUrl, String missionDesc, int missionNumber, String missionNumberString, String missionTitle) {
+        this.unlocked = unlocked;
+        this.coverPhotoUrl = coverPhotoUrl;
         this.missionDesc = missionDesc;
-        this.missionImageId = missionImageId;
         this.missionNumber = missionNumber;
         this.missionNumberString = missionNumberString;
         this.missionTitle = missionTitle;
-        this.unlocked = unlocked;
     }
 
-    protected Mission(Parcel in) {
-        missionNumber = in.readInt();
-        missionNumberString = in.readString();
-        missionTitle = in.readString();
-        missionDesc = in.readString();
-        missionImageId = in.readInt();
-        unlocked = in.readByte() != 0;
+    public String getCoverPhotoUrl() {
+        return coverPhotoUrl;
     }
 
-    public static final Creator<Mission> CREATOR = new Creator<Mission>() {
-        @Override
-        public Mission createFromParcel(Parcel in) {
-            return new Mission(in);
-        }
-
-        @Override
-        public Mission[] newArray(int size) {
-            return new Mission[size];
-        }
-    };
+    public void setCoverPhotoUrl(String coverPhotoUrl) {
+        this.coverPhotoUrl = coverPhotoUrl;
+    }
 
     public String getMissionDesc() {
         return missionDesc;
@@ -60,14 +47,6 @@ public class Mission extends RealmObject implements Parcelable {
 
     public void setMissionDesc(String missionDesc) {
         this.missionDesc = missionDesc;
-    }
-
-    public int getMissionImageId() {
-        return missionImageId;
-    }
-
-    public void setMissionImageId(int missionImageId) {
-        this.missionImageId = missionImageId;
     }
 
     public int getMissionNumber() {
@@ -109,23 +88,32 @@ public class Mission extends RealmObject implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(missionNumber);
-        dest.writeString(missionNumberString);
-        dest.writeString(missionTitle);
-        dest.writeString(missionDesc);
-        dest.writeInt(missionImageId);
-        dest.writeByte((byte) (unlocked ? 1 : 0));
+        dest.writeInt(this.missionNumber);
+        dest.writeString(this.missionNumberString);
+        dest.writeString(this.missionTitle);
+        dest.writeString(this.missionDesc);
+        dest.writeString(this.coverPhotoUrl);
+        dest.writeByte(this.unlocked ? (byte) 1 : (byte) 0);
     }
 
-    @Override
-    public String toString() {
-        return "Mission{" +
-                "missionDesc='" + missionDesc + '\'' +
-                ", missionNumber=" + missionNumber +
-                ", missionNumberString='" + missionNumberString + '\'' +
-                ", missionTitle='" + missionTitle + '\'' +
-                ", missionImageId=" + missionImageId +
-                ", unlocked=" + unlocked +
-                '}';
+    protected Mission(Parcel in) {
+        this.missionNumber = in.readInt();
+        this.missionNumberString = in.readString();
+        this.missionTitle = in.readString();
+        this.missionDesc = in.readString();
+        this.coverPhotoUrl = in.readString();
+        this.unlocked = in.readByte() != 0;
     }
+
+    public static final Creator<Mission> CREATOR = new Creator<Mission>() {
+        @Override
+        public Mission createFromParcel(Parcel source) {
+            return new Mission(source);
+        }
+
+        @Override
+        public Mission[] newArray(int size) {
+            return new Mission[size];
+        }
+    };
 }
