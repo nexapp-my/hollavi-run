@@ -51,4 +51,10 @@ public class ProfilePicture implements Serializable, Parcelable
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "ProfilePicture{" +
+                "url='" + url + '\'' +
+                '}';
+    }
 }

@@ -82,7 +82,7 @@ public class SOSActivity extends AppCompatActivity {
         groomifyUser = realm.where(GroomifyUser.class).findFirst();
         Log.i(TAG,"Current race id: "+groomifyUser.getCurrentRaceId());
 
-        currentRaces = realm.where(Races.class).equalTo("id", groomifyUser.getCurrentRaceId()).findFirst();
+        currentRaces = realm.where(Races.class).equalTo("id", SharedPreferencesHelper.getSelectedRaceId(this)).findFirst();
         Log.i(TAG,"Current race query: "+currentRaces);
 
         emergencyContactName = groomifyUser.getEmergencyContactName();

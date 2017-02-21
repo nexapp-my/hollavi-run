@@ -11,6 +11,10 @@ import com.google.gson.annotations.SerializedName;
 public class Cover implements Serializable, Parcelable
 {
 
+    @SerializedName("url")
+    @Expose
+    private String url;
+
     @SerializedName("cover")
     @Expose
     private Cover_ cover;
@@ -50,4 +54,11 @@ public class Cover implements Serializable, Parcelable
         return  0;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 }

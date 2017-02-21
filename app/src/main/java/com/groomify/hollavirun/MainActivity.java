@@ -569,7 +569,7 @@ public class MainActivity extends AppCompatActivity
                     newsFeed.setContent(infos.get(i).getContent());
                     newsFeed.setHeader(infos.get(i).getTitle());
                     newsFeed.setTimeStamp("1 min ago");//TODO missing timestamp
-                    newsFeed.setCoverPhotoUrl(infos.get(i).getCover().getCover().getUrl());
+                    newsFeed.setCoverPhotoUrl(infos.get(i).getCover().getUrl());
 
                     realm.copyToRealmOrUpdate(newsFeed);
                 }
