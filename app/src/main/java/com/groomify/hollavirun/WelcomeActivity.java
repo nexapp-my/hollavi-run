@@ -34,6 +34,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
+import com.facebook.FacebookRequestError;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
 import com.facebook.Profile;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.GroomifyUser;
@@ -43,11 +47,18 @@ import com.groomify.hollavirun.rest.models.request.UpdateUserInfoRequest;
 import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
 import com.groomify.hollavirun.utils.BitmapUtils;
+import com.groomify.hollavirun.utils.DialogUtils;
+import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.PathUtils;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
 import com.groomify.hollavirun.utils.RealmUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.groomify.hollavirun.view.ProfilePictureView;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+
+import org.json.JSONException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -87,7 +98,9 @@ public class WelcomeActivity extends AppCompatActivity {
 
     RestClient client = new RestClient();
 
-    private String profilePictureBase64;
+    private final boolean DEBUG_FACEBOOK_GRAPH_API = false;
+
+    private AlertDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +109,7 @@ public class WelcomeActivity extends AppCompatActivity {
         Realm.init(this);
         realm = Realm.getInstance(RealmUtils.getRealmConfiguration());
 
+        ImageLoadUtils.initImageLoader(this);
         setContentView(R.layout.activity_welcome);
 
         ActionBar actionBar = getSupportActionBar();
@@ -150,6 +164,12 @@ public class WelcomeActivity extends AppCompatActivity {
             }
         });
 
+        if(DEBUG_FACEBOOK_GRAPH_API || groomifyUser.getProfilePictureUrl() == null || groomifyUser.getProfilePictureUrl().trim().length() == 0){
+            pullFacebookProfilePicture(groomifyUser.getFacebookId());
+        }else{
+            renderPreviousProfilePicture(groomifyUser.getProfilePictureUrl());
+
+        }
         proceedTextView.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -163,8 +183,11 @@ public class WelcomeActivity extends AppCompatActivity {
                 }
             }
         });
-        //pullFacebookProfilePicture();
+
+        loadingDialog = DialogUtils.buildLoadingDialog(this);
     }
+
+    private String profilePictureBase64;
 
     private void flagProfilePictureSelected(){
         if(profilePictureBitmap == null){
@@ -302,7 +325,8 @@ public class WelcomeActivity extends AppCompatActivity {
         int targetW = addProfileImageView.getWidth();
         int targetH = addProfileImageView.getHeight();
 
-        Bitmap processedBitmap = ProfileImageUtils.processOptimizedRoundBitmap(targetH,targetW,bitmap);
+        Log.i(TAG, "Original bitmap dimension: "+bitmap.getWidth()+", "+bitmap.getHeight());
+        Bitmap processedBitmap = ProfileImageUtils.processOptimizedRoundBitmap(120,120,bitmap);
         addProfileImageView.setImageBitmap(processedBitmap);
         proceedTextView.setText("Next");
     }
@@ -311,7 +335,7 @@ public class WelcomeActivity extends AppCompatActivity {
         int targetW = addProfileImageView.getWidth();
         int targetH = addProfileImageView.getHeight();
 
-        Bitmap bitmap = ProfileImageUtils.processOptimizedRoundBitmap(targetH,targetW,mCurrentPhotoPath);
+        Bitmap bitmap = ProfileImageUtils.processOptimizedRoundBitmap(120,120,mCurrentPhotoPath);
         addProfileImageView.setImageBitmap(bitmap);
         proceedTextView.setText("Next");
     }
@@ -339,31 +363,108 @@ public class WelcomeActivity extends AppCompatActivity {
         }
     }
 
-    /*private void pullFacebookProfilePicture(){
-        if(AccessToken.getCurrentAccessToken() != null){
-            facebookUserId = AccessToken.getCurrentAccessToken().getUserId();
-            //(String) savedInstanceState.get("facebookUserId");
+    private void pullFacebookProfilePicture(Long fbId){
 
-            if(facebookUserId != null && facebookUserId.length() > 0){
-                if(Profile.getCurrentProfile() != null){
-
-                    Log.i(TAGNAME, "Name: "+Profile.getCurrentProfile().getName());
-                    Log.i(TAGNAME, "Email: "+getIntent().getExtras().getString("email"));
-                    Log.i(TAGNAME, "Token ID: "+AccessToken.getCurrentAccessToken().getToken());
-                    Log.i(TAGNAME, "User ID: "+AccessToken.getCurrentAccessToken().getUserId());
-                    Log.i(TAGNAME, "App ID: "+AccessToken.getCurrentAccessToken().getApplicationId());
-
-                    usernameTextView.setAllCaps(true);
-                    usernameTextView.setText("HELLO " +Profile.getCurrentProfile().getName());
-
-                    profilePictureView.setProfileId(facebookUserId);
-                    profilePictureView.setDrawingCacheEnabled(true);
-                    Log.i(TAGNAME, "Profile photo acquired");
-                }
+        String url = "https://graph.facebook.com/" + fbId + "/picture?type=large";
+        ImageLoader.getInstance().loadImage(url, ImageLoadUtils.getDisplayImageOptions(), new ImageLoadingListener() {
+            @Override
+            public void onLoadingStarted(String imageUri, View view) {
 
             }
-        }
-    }*/
+
+            @Override
+            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+
+            }
+
+            @Override
+            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                Log.d(TAG, "Render url into bitmap.");
+                profilePictureBitmap = loadedImage.copy(loadedImage.getConfig(), true);
+                profilePictureBase64 = ProfileImageUtils.convertToBase64(profilePictureBitmap);
+                setPicFromBitmap(profilePictureBitmap);
+            }
+
+            @Override
+            public void onLoadingCancelled(String imageUri, View view) {
+
+            }
+        });
+        /*new GraphRequest(
+                AccessToken.getCurrentAccessToken(),
+                "/{user-id}/picture?type=large",
+                null,
+                HttpMethod.GET,
+                new GraphRequest.Callback() {
+                    public void onCompleted(GraphResponse response) {
+                        try {
+                            Log.d(TAG, "GraphResponse"+response.getRawResponse());
+                            String url = response.getJSONObject().getJSONObject("data").getString("url");
+                            Log.d(TAG, "URL from graph API: "+url);
+                            //ImageLoader.getInstance().displayImage(url, addProfileImageView, ImageLoadUtils.getDisplayImageOptions());
+                            //Log.d(TAG, "Render url into image view.");
+                            ImageLoader.getInstance().loadImage(url, new ImageLoadingListener() {
+                                @Override
+                                public void onLoadingStarted(String imageUri, View view) {
+
+                                }
+
+                                @Override
+                                public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+
+                                }
+
+                                @Override
+                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                    Log.d(TAG, "Render url into bitmap.");
+                                    profilePictureBitmap = loadedImage.copy(loadedImage.getConfig(), true);
+                                    profilePictureBase64 = ProfileImageUtils.convertToBase64(profilePictureBitmap);
+                                    setPicFromBitmap(profilePictureBitmap);
+                                }
+
+                                @Override
+                                public void onLoadingCancelled(String imageUri, View view) {
+
+                                }
+                            });
+
+                        } catch (JSONException e) {
+                            Log.e(TAG, "Unable to get facebook profile image url.",e);
+                        }
+                    }
+
+
+                }
+        ).executeAsync();*/
+    }
+
+    private void renderPreviousProfilePicture(String url){
+
+        ImageLoader.getInstance().loadImage(url, ImageLoadUtils.getDisplayImageOptions(), new ImageLoadingListener() {
+            @Override
+            public void onLoadingStarted(String imageUri, View view) {
+
+            }
+
+            @Override
+            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+
+            }
+
+            @Override
+            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                Log.d(TAG, "Render url into bitmap.");
+                profilePictureBitmap = loadedImage.copy(loadedImage.getConfig(), true);
+                profilePictureBase64 = ProfileImageUtils.convertToBase64(profilePictureBitmap);
+                setPicFromBitmap(profilePictureBitmap);
+            }
+
+            @Override
+            public void onLoadingCancelled(String imageUri, View view) {
+
+            }
+        });
+    }
 
 
     private class GroomifyUpdateProfileTask extends AsyncTask<Void, String, UserInfoResponse> {
@@ -430,18 +531,20 @@ public class WelcomeActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if(loading){
-                    progressBar.setVisibility(View.VISIBLE);
-                    proceedTextView.setVisibility(View.GONE);
+                    //progressBar.setVisibility(View.VISIBLE);
+                    //proceedTextView.setVisibility(View.GONE);
+                    loadingDialog.show();
                 }else{
-                    progressBar.setVisibility(View.GONE);
-                    proceedTextView.setVisibility(View.VISIBLE);
+                    //progressBar.setVisibility(View.GONE);
+                    //proceedTextView.setVisibility(View.VISIBLE);
+                    loadingDialog.hide();
                 }
             }
         });
     }
 
     private void launchTeamSelectScreen(){
-        changeViewState(false);
+
         Log.i(TAG, "Team selection screen launched");
         Intent intent;
         intent = new Intent(WelcomeActivity.this, TeamSelectActivity.class);

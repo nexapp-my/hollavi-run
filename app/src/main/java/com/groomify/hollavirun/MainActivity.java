@@ -47,8 +47,11 @@ import com.groomify.hollavirun.rest.models.response.RaceRankingResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
+import com.groomify.hollavirun.utils.RealmUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -125,13 +128,11 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         Realm.init(this);
-        RealmConfiguration config = new RealmConfiguration
-                .Builder()
-                .deleteRealmIfMigrationNeeded()
-                .build();
-
-        realm = Realm.getInstance(config);
+        realm = Realm.getInstance(RealmUtils.getRealmConfiguration());
         groomifyUser = realm.where(GroomifyUser.class).findFirst();
+
+        ImageLoadUtils.initImageLoader(this);
+
 
         if(getSupportActionBar() != null)
             getSupportActionBar().hide();
@@ -170,7 +171,7 @@ public class MainActivity extends AppCompatActivity
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.main_placeholder, new MainFragment()).commit();
 
-        menuBarGreetingText.setText("Good Morning, " +groomifyUser.getName());
+        menuBarGreetingText.setText("Hello, " +groomifyUser.getName());
 
         pictureView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -223,9 +224,35 @@ public class MainActivity extends AppCompatActivity
     private void loadProfilePicture()
     {
         try{
-            ImageLoader.getInstance().displayImage(groomifyUser.getProfilePictureUrl(), pictureView, ImageLoadUtils.getDisplayImageOptions());
+
+            ImageLoader.getInstance().loadImage(groomifyUser.getProfilePictureUrl(),ImageLoadUtils.getDisplayImageOptions() ,new ImageLoadingListener() {
+                @Override
+                public void onLoadingStarted(String imageUri, View view) {
+
+                }
+
+                @Override
+                public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+
+                }
+
+                @Override
+                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+
+                    Log.i(TAG, "LoadedImage: "+loadedImage.getConfig().toString());
+                    Bitmap processedBitmap = ProfileImageUtils.processOptimizedRoundBitmap(30,30, loadedImage);
+                    pictureView.setImageBitmap(processedBitmap);
+                }
+
+                @Override
+                public void onLoadingCancelled(String imageUri, View view) {
+
+                }
+            });
+
+            //ImageLoader.getInstance().displayImage(groomifyUser.getProfilePictureUrl(), pictureView, ImageLoadUtils.getDisplayImageOptions());
         }catch (Exception e){
-            Log.i(TAG, "Faild to load profile picture.");
+            Log.i(TAG, "Faild to load profile picture.", e);
         }
 
     }
@@ -322,7 +349,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
                 }else{
-                    AppPermissionHelper.requestPermission(MainActivity.this);
+                    AppPermissionHelper.requestCameraAndStoragePermission(MainActivity.this);
                 }
             }
         });
@@ -435,12 +462,13 @@ public class MainActivity extends AppCompatActivity
 
                 SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
-                editor.remove(AppConstant.PREFS_USER_LOGGGED_IN);
+                editor.clear();
+                /*editor.remove(AppConstant.PREFS_USER_LOGGGED_IN);
                 editor.remove(AppConstant.PREFS_PROFILE_PIC_UPDATED);
                 editor.remove(AppConstant.PREFS_TEAM_SELECTED);
                 editor.remove(AppConstant.PREFS_RUN_SELECTED);
                 editor.remove(AppConstant.PREFS_EMERGENCY_CONTACT_NUM);
-                editor.remove(AppConstant.PREFS_EMERGENCY_CONTACT_NAME);
+                editor.remove(AppConstant.PREFS_EMERGENCY_CONTACT_NAME);*/
 
 
 

@@ -50,6 +50,16 @@ public class ImageLoadUtils {
         }
 
         return displayImageOptions;
+    }
 
+    public static ImageLoaderConfiguration getImageLoaderConfiguration(Context context){
+        ImageLoaderConfiguration.Builder config = new ImageLoaderConfiguration.Builder(context);
+        config.threadPriority(Thread.NORM_PRIORITY - 2);
+        config.denyCacheImageMultipleSizesInMemory();
+        config.diskCacheFileNameGenerator(new Md5FileNameGenerator());
+        config.diskCacheSize(50 * 1024 * 1024); // 50 MiB
+        config.tasksProcessingOrder(QueueProcessingType.LIFO);
+        config.writeDebugLogs(); // Remove for release app
+        return config.build();
     }
 }

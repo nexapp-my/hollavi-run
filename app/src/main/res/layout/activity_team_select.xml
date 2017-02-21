@@ -99,7 +99,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:indeterminate="true"
-        android:id="@+id/team_update_loading_circle"
+        android:id="@+id/loading_progress_bar"
         android:layout_alignParentTop="false"
         android:layout_centerHorizontal="false"
         android:layout_centerInParent="true" />

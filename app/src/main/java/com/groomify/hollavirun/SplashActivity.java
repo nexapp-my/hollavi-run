@@ -32,6 +32,7 @@ import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
 import com.groomify.hollavirun.utils.ActivityUtils;
 import com.groomify.hollavirun.utils.AppUtils;
 import com.groomify.hollavirun.utils.DebugUtils;
+import com.groomify.hollavirun.utils.RealmUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
 import org.json.JSONException;
@@ -62,7 +63,7 @@ public class SplashActivity extends AppCompatActivity {
     boolean isDebug = false;
 
     RestClient client = new RestClient();
-    private Realm realm;
+    //private Realm realm;
 
     GroomifyUser groomifyUserRealmObj;
 
@@ -76,7 +77,7 @@ public class SplashActivity extends AppCompatActivity {
                 .deleteRealmIfMigrationNeeded()
                 .build();
 
-        realm = Realm.getInstance(config);
+        //realm = Realm.getInstance(config);
 
         AppEventsLogger.activateApp(this.getApplication());
 
@@ -156,11 +157,56 @@ public class SplashActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(UserInfoResponse userInfoResponse) {
+        protected void onPostExecute(final UserInfoResponse userInfoResponse) {
             super.onPostExecute(userInfoResponse);
 
             if(userInfoResponse != null) {
                 Log.i(TAG, "API return user info: "+userInfoResponse.toString());
+                Realm innerRealm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+                try {
+                    innerRealm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            GroomifyUser groomifyUser = realm.where(GroomifyUser.class).equalTo("id", new Long(userInfoResponse.getId())).findFirst();
+
+                            if(groomifyUser == null){
+                                groomifyUser = new GroomifyUser();
+                                groomifyUser.setId(new Long(userInfoResponse.getId())); //Unsafe if user id null.
+                            }
+
+                            Log.i(TAG, "Before update user info. GroomifyUser: ("+groomifyUser+")");
+                            groomifyUser.setAuthToken(userInfoResponse.getAuthToken());
+                            groomifyUser.setCountry(userInfoResponse.getCountry());
+                            groomifyUser.setEmail(userInfoResponse.getEmail());
+                            groomifyUser.setEmergencyContactName(userInfoResponse.getEmergencyContactPerson());
+                            groomifyUser.setEmergencyContactPhoneNo(userInfoResponse.getEmergencyContactPhone());
+                            groomifyUser.setFacebookId(userInfoResponse.getFbId());
+
+                            groomifyUser.setLastRank(userInfoResponse.getLastRank());
+                            groomifyUser.setName(userInfoResponse.getName());
+                            groomifyUser.setPhoneNo(userInfoResponse.getPhoneNo());
+                            groomifyUser.setTotalRuns(userInfoResponse.getNumberOfRuns());
+                            groomifyUser.setProfilePictureUrl(userInfoResponse.getProfilePicture().getUrl());
+                            groomifyUser.setFacebookId(userInfoResponse.getFbId());
+
+                            if (Profile.getCurrentProfile() != null && Profile.getCurrentProfile().getName() != null) {
+                                groomifyUser.setFacebookDisplayName(Profile.getCurrentProfile().getName());
+                            }
+                            groomifyUserRealmObj = realm.copyToRealmOrUpdate(groomifyUser);
+                            Log.i(TAG, "Groomify user in database: "+groomifyUserRealmObj.toString());
+
+                            SharedPreferencesHelper.savePreferences(SplashActivity.this, SharedPreferencesHelper.PreferenceValueType.LONG, AppConstant.PREFS_USER_ID, new Long(userInfoResponse.getId()));
+
+                            launchNextScreen();
+
+
+                        }
+                    });
+                }finally {
+                    innerRealm.close();
+                }
+
+                /*
                 realm.beginTransaction();
                 GroomifyUser groomifyUser = new GroomifyUser();
                 groomifyUser.setAuthToken(userInfoResponse.getAuthToken());
@@ -181,12 +227,10 @@ public class SplashActivity extends AppCompatActivity {
                     groomifyUser.setFacebookDisplayName(Profile.getCurrentProfile().getName());
                 }
                 groomifyUserRealmObj = realm.copyToRealmOrUpdate(groomifyUser);
-
                 Log.i(TAG, "Groomify user in database: "+groomifyUserRealmObj.toString());
-
                 realm.commitTransaction();
-
-                launchNextScreen();
+                SharedPreferencesHelper.savePreferences(SplashActivity.this, SharedPreferencesHelper.PreferenceValueType.LONG, AppConstant.PREFS_USER_ID, new Long(userInfoResponse.getId()));
+                launchNextScreen();*/
             }
         }
     }
@@ -200,7 +244,7 @@ public class SplashActivity extends AppCompatActivity {
 
         boolean alreadySetup = settings.getBoolean(AppConstant.PREFS_FIRST_TIME_SETUP_COMPLETE, false);
 
-        Log.i(TAG,"profileUpdated: "+profileUpdated+", teamSelected: "+teamSelected+", runSelected: "+runSelected);
+        Log.i(TAG,"profileUpdated: "+profileUpdated+", teamSelected: "+teamSelected+", runSelected: "+runSelected+", alreadySetup: "+alreadySetup);
 
         if(alreadySetup){
             launchMainScreen(SplashActivity.this, true);
@@ -262,6 +306,5 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        realm.close();
     }
 }

@@ -18,19 +18,21 @@ public class Mission extends RealmObject implements Parcelable {
     private String missionTitle;
     private String missionDesc;
     private String coverPhotoUrl;
+    private String validationCode = "0000";
     private boolean unlocked;
 
     public Mission(){
 
     }
 
-    public Mission(boolean unlocked, String coverPhotoUrl, String missionDesc, int missionNumber, String missionNumberString, String missionTitle) {
+    public Mission(boolean unlocked, String coverPhotoUrl, String missionDesc, int missionNumber, String missionNumberString, String missionTitle, String validationCode) {
         this.unlocked = unlocked;
         this.coverPhotoUrl = coverPhotoUrl;
         this.missionDesc = missionDesc;
         this.missionNumber = missionNumber;
         this.missionNumberString = missionNumberString;
         this.missionTitle = missionTitle;
+        this.validationCode = validationCode;
     }
 
     public String getCoverPhotoUrl() {

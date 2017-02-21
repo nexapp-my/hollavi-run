@@ -19,6 +19,8 @@ public class Coupon implements Parcelable{
 
     private byte[] imageByteArr;
 
+    private boolean redeemed;
+
     public Coupon(int id, String name, String description, Date expirationTime, byte[] imageByteArr) {
         this.id = id;
         this.name = name;
@@ -84,6 +86,14 @@ public class Coupon implements Parcelable{
 
     public void setImageByteArr(byte[] imageByteArr) {
         this.imageByteArr = imageByteArr;
+    }
+
+    public boolean isRedeemed() {
+        return redeemed;
+    }
+
+    public void setRedeemed(boolean redeemed) {
+        this.redeemed = redeemed;
     }
 
     @Override

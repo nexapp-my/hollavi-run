@@ -44,6 +44,8 @@ public class QRActivity extends AppCompatActivity {
     private TextView cancelTextView;
     private ImageView qrHelpImageView;
 
+    private String helpText = "Having trouble finding QR codes? Here is a picture to show you what it looks like.";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -73,12 +75,14 @@ public class QRActivity extends AppCompatActivity {
         if(qrHelpImageView == null){
             qrHelpImageView = (ImageView) findViewById(R.id.qr_help_image_view);
         }
+        helpText = getResources().getString(R.string.qr_help_text);
+
 
         qrHelpImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //TODO launch help activity
-                Toast.makeText(QRActivity.this, "Having trouble finding QR codes? Here is a picture to show you what it looks like.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(QRActivity.this, helpText, Toast.LENGTH_SHORT).show();
             }
         });
     }

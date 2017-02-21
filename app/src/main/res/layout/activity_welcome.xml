@@ -41,7 +41,7 @@
         android:id="@+id/welcome_header"
         android:textStyle="bold"
         android:textSize="18sp"
-        android:layout_below="@+id/image_view_add_profile_pic"
+        android:layout_below="@id/image_view_add_profile_pic"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="255dp"
         android:textColor="@color/rustyRed"

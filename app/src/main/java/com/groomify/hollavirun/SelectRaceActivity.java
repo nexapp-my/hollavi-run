@@ -63,7 +63,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
     private volatile String bibNo = AppConstant.DEFAULT_BIB_NO;
 
-    private final static int MAX_BIB_NO = 5;
+    private final static int MAX_BIB_NO = 4;
 
     private DecimalFormat decimalFormat = new DecimalFormat("00");
 
@@ -133,7 +133,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
     private void promptBibNoInputDialog(){
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Enter your bib number");
+        builder.setMessage("Please enter your bib number");
         // Set up the input
         final EditText input = new EditText(this);
         InputFilter[] filterArray = new InputFilter[1];
@@ -310,7 +310,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                             for (int i = 0; i < raceDetail.getMissions().size(); i++) {
                                 com.groomify.hollavirun.rest.models.response.Mission missionResponse = raceDetail.getMissions().get(i);
                                 //public Mission(boolean unlocked, String coverPhotoUrl, String missionDesc, int missionNumber, String missionNumberString, String missionTitle) {
-                                Mission mission = new Mission(false, missionResponse.getUrl(), missionResponse.getDescription(), i + 1, decimalFormat.format(i + 1), missionResponse.getTitle());
+                                Mission mission = new Mission(false, missionResponse.getUrl(), missionResponse.getDescription(), i + 1, decimalFormat.format(i + 1), missionResponse.getTitle(), "0000");
                                 Log.i(TAG, "Adding mission into database. " + mission.toString());
 
                                 races.missions.add(i, mission);
@@ -361,14 +361,16 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                     innerRealm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
-                            GroomifyUser realmUser = realm.where(GroomifyUser.class).findFirst();
+                            Long userId = SharedPreferencesHelper.getUserRaceId(SelectRaceActivity.this);
+                            GroomifyUser realmUser = realm.where(GroomifyUser.class).equalTo("id", userId).findFirst();
                             Log.i(TAG, "After join race API call success. GroomifyUser: ("+realmUser+")");
 
                             realmUser.setCurrentBibNo(""+bibNo);
                             realmUser.setCurrentRunnerId("" + joinRace.getRunnerId());
                             realmUser.setCurrentRaceId(SelectRaceActivity.races[currentPosition].getId());
 
-                            Log.i(TAG, "User saved in database: "+realmUser.getCurrentRaceId());
+                            Log.i(TAG, "User saved in database: "+realmUser);
+                            realm.copyToRealmOrUpdate(realmUser);
 
                             SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_RUN_SELECTED, true);
                             SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.LONG, AppConstant.PREFS_RUN_SELECTED_ID, races[currentPosition].getId());

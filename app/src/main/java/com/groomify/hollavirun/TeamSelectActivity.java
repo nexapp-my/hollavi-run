@@ -19,7 +19,7 @@ import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.request.Runner;
 import com.groomify.hollavirun.rest.models.request.UpdateRunnerInfoRequest;
 import com.groomify.hollavirun.rest.models.response.RunnerInfoResponse;
-import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
+import com.groomify.hollavirun.utils.DialogUtils;
 import com.groomify.hollavirun.utils.RealmUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
@@ -44,13 +44,15 @@ public class TeamSelectActivity extends AppCompatActivity {
 
     RestClient client = new RestClient();
 
+    AlertDialog loadingDialog ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_team_select);
+        Realm.init(this);
 
-
-        progressBar = (ProgressBar) findViewById(R.id.team_update_loading_circle);
+        progressBar = (ProgressBar) findViewById(R.id.loading_progress_bar);
         progressBar.setVisibility(View.GONE);
 
         teamSelectionOneTextView = (TextView) findViewById(R.id.text_view_team_one);
@@ -92,6 +94,8 @@ public class TeamSelectActivity extends AppCompatActivity {
               selectTeam();
             }
         });
+
+        loadingDialog = DialogUtils.buildLoadingDialog(this);
 
     }
 
@@ -155,12 +159,14 @@ public class TeamSelectActivity extends AppCompatActivity {
         protected RunnerInfoResponse doInBackground(Void... params) {
             String authToken = SharedPreferencesHelper.getAuthToken(TeamSelectActivity.this);
             String fbId = SharedPreferencesHelper.getFbId(TeamSelectActivity.this);
+            Long userId = SharedPreferencesHelper.getUserRaceId(TeamSelectActivity.this);
             Realm innerRealm = Realm.getInstance(RealmUtils.getRealmConfiguration());
-            GroomifyUser realmUser = innerRealm.where(GroomifyUser.class).findFirst();
+            GroomifyUser realmUser = innerRealm.where(GroomifyUser.class).equalTo("id", userId).findFirst();
 
             changeViewState(true);
             try {
 
+                Log.d(TAG, "User information: "+realmUser);
                 UpdateRunnerInfoRequest updateRunnerInfoRequest = new UpdateRunnerInfoRequest();
                 Runner runner = new Runner();
                 runner.setRunBibNo(realmUser.getCurrentBibNo());
@@ -213,11 +219,13 @@ public class TeamSelectActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if(loading){
-                    progressBar.setVisibility(View.VISIBLE);
-                    letsGoTextView.setVisibility(View.GONE);
+                   // progressBar.setVisibility(View.VISIBLE);
+                    //letsGoTextView.setVisibility(View.GONE);
+                    loadingDialog.show();
                 }else{
-                    progressBar.setVisibility(View.GONE);
-                    letsGoTextView.setVisibility(View.VISIBLE);
+                    //progressBar.setVisibility(View.GONE);
+                    //letsGoTextView.setVisibility(View.VISIBLE);
+                    loadingDialog.hide();
                 }
             }
         });

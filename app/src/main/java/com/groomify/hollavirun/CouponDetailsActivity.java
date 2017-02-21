@@ -59,11 +59,15 @@ public class CouponDetailsActivity extends AppCompatActivity {
         if (requestCode == QR_REQUEST) {
             String result = "";
             if (resultCode == Activity.RESULT_OK) {
-                result = "Coupon redeemed. QR Data:";
-                result += data.getStringExtra(QRActivity.EXTRA_QR_RESULT);
+                String qrCodeData = data.getStringExtra(QRActivity.EXTRA_QR_RESULT);
+                if(getResources().getString(R.string.coupon_validation_code).equals(qrCodeData)){
+                    result = "QR Code validation success. Coupon redeemed.";
+                }else{
+                    result = "Invalid redemption code.";
+                }
                 Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
             } else {
-                result = "Error";
+                result = "Unable to verify QR Code";
             }
         }
     }

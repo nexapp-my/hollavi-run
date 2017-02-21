@@ -71,6 +71,9 @@ public class SOSActivity extends AppCompatActivity {
     GroomifyUser groomifyUser;
     Races currentRaces;
 
+    private String dialogContentFirstAid;
+    private String dialogContentGroomifySupport;
+    private String dialogContentEmergencyContact;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +104,10 @@ public class SOSActivity extends AppCompatActivity {
         Log.i(TAG, "First aid number: "+firstAidNumber);
         Log.i(TAG, "Support number: "+supportNumber);
 
+        dialogContentFirstAid = getResources().getString(R.string.sos_call_dialog_first_aid);
+        dialogContentGroomifySupport = getResources().getString(R.string.sos_call_dialog_support);
+        dialogContentEmergencyContact = getResources().getString(R.string.sos_call_dialog_emergency_contact);
+
         if(firstAidPanel == null){
             firstAidPanel = findViewById(R.id.first_aid_panel);
         }
@@ -108,7 +115,7 @@ public class SOSActivity extends AppCompatActivity {
         firstAidPanel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                prompCallConfirmationDialog(currentRaces.getFirstAid(), "Call for first aid: "+currentRaces.getFirstAid()+" ?");
+                prompCallConfirmationDialog(currentRaces.getFirstAid(), dialogContentFirstAid);
             }
         });
 
@@ -119,7 +126,7 @@ public class SOSActivity extends AppCompatActivity {
         groomifySupportPanel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                prompCallConfirmationDialog(currentRaces.getGroomifySupport(), "Call for groomify support now?");
+                prompCallConfirmationDialog(currentRaces.getGroomifySupport(), dialogContentGroomifySupport);
             }
         });
 
@@ -130,8 +137,9 @@ public class SOSActivity extends AppCompatActivity {
         emergencyContactPanel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String dialogContent = dialogContentEmergencyContact.replaceAll("EC_NAME", emergencyContactName).replaceAll("EC_NO", emergencyContactNumber);
                 if(SOSActivity.emergencyContactSelected){
-                    prompCallConfirmationDialog(emergencyContactNumber, "Call emergency contact "+emergencyContactName+" ?");
+                    prompCallConfirmationDialog(emergencyContactNumber, dialogContent);
                 }else{
                     Log.i(TAG, "Emergency contact is not set, prompt user to setup now.");
                     new AlertDialog.Builder(SOSActivity.this)

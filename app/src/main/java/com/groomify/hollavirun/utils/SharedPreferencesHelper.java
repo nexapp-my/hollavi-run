@@ -46,4 +46,9 @@ public class SharedPreferencesHelper {
         SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
         return settings.getLong(AppConstant.PREFS_RUN_SELECTED_ID, -1);
     }
+
+    public static Long getUserRaceId(Context context){
+        SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        return settings.getLong(AppConstant.PREFS_USER_ID, -1);
+    }
 }

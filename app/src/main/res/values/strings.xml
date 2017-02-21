@@ -27,7 +27,7 @@
     <string name="title_activity_onboarding">OnboardingActivity</string>
 
 
-    <string name="onboarding_header">COMPLETE CHALLENGES</string>
+    <string name="onboarding_header">Run to change, Change to run</string>
     <string name="onboarding_what_is">Join a team, take on missions, co-operate and take part in something bigger.</string>
     <string name="onboarding_menu_signup">SIGN UP</string>
     <string name="onboarding_menu_login">LOG IN WITH FACEBOOK</string>
@@ -37,13 +37,17 @@
 
     <string name="team_select_header">PICK A TEAM</string>
     <string name="team_select_description">Enter your email to receive instructions on how to reset your password.</string>
-
     <string name="team_select_one">A</string>
     <string name="team_select_two">B</string>
     <string name="team_select_three">C</string>
 
+    <string name="sos_call_dialog_first_aid">Call for first aid?</string>
+    <string name="sos_call_dialog_support">Call for Groomify support?</string>
+    <string name="sos_call_dialog_emergency_contact">Call for emergency contact: EC_NAME(EC_NO)?</string>
+
     <string name="mission_detail_scan_qr_btn">SCAN QR TO ACTIVATE</string>
     <string name="coupon_detail_scan_qr_btn">SCAN QR TO REDEEM</string>
+    <string name="qr_help_text">QR Code only available on Run-site</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -51,5 +55,16 @@
 
     <integer name="viewfinder_border_width">4</integer>
     <integer name="viewfinder_border_length">60</integer>
+
+    <string name="dialog_loading_text">Loading ...</string>
+
+
+
+    <string name="coupon_validation_code">0000</string>
+    <string name="mission1_validation_code">0000</string>
+    <string name="mission2_validation_code">0000</string>
+    <string name="mission3_validation_code">0000</string>
+    <string name="mission4_validation_code">0000</string>
+    <string name="mission5_validation_code">0000</string>
 
 </resources>

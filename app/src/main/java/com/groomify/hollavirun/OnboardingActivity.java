@@ -230,6 +230,7 @@ public class OnboardingActivity extends AppCompatActivity {
                 groomifyUser.setFacebookId(userInfoResponse.getFbId());
                 realm.copyToRealmOrUpdate(groomifyUser);
                 realm.commitTransaction();
+                SharedPreferencesHelper.savePreferences(OnboardingActivity.this, SharedPreferencesHelper.PreferenceValueType.LONG, AppConstant.PREFS_USER_ID, new Long(userInfoResponse.getId()));
                 Log.i(TAG, "User info saved into realm. "+groomifyUser);
                 launchRaceSelectionScreen();
             }else{

@@ -205,7 +205,7 @@ public class GroomifyUser extends RealmObject  {
                 ", emergencyContactName='" + emergencyContactName + '\'' +
                 ", emergencyContactPhoneNo='" + emergencyContactPhoneNo + '\'' +
                 ", profilePictureUrl='" + profilePictureUrl + '\'' +
-                ", profilePictureBase64='" + profilePictureBase64 + '\'' +
+//                ", profilePictureBase64='" + profilePictureBase64 + '\'' +
                 ", totalRuns=" + totalRuns +
                 ", lastRank=" + lastRank +
                 ", currentRaceId=" + currentRaceId +
