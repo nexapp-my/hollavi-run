@@ -1,6 +1,7 @@
 package com.groomify.hollavirun;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -69,6 +70,13 @@ public class LatestUpdateActivity extends ListActivity {
         super.onListItemClick(l, v, position, id);
         Log.i(TAG, "News feed clicked on "+position+", item: "+newsFeeds[position]);
         //TODO launch the news info page.
+
+        Intent intent = new Intent(this, LatestUpdateDetailsActivity.class);
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("LATEST_NEWS", newsFeeds[position]);
+        intent.putExtra("EXTRA_LATEST_NEWS", bundle);
+        startActivity(intent);
 
     }
 

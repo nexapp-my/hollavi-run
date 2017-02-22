@@ -2,7 +2,6 @@ package com.groomify.hollavirun;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -15,7 +14,6 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -30,6 +28,8 @@ import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.response.JoinRaceResponse;
 import com.groomify.hollavirun.rest.models.response.RaceDetailResponse;
 import com.groomify.hollavirun.rest.models.response.RaceResponse;
+import com.groomify.hollavirun.rest.models.response.RunnerInfoResponse;
+import com.groomify.hollavirun.utils.ActivityUtils;
 import com.groomify.hollavirun.utils.BitmapUtils;
 import com.groomify.hollavirun.utils.RealmUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
@@ -38,11 +38,9 @@ import com.groomify.hollavirun.view.ViewPagerCarouselView;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import io.realm.RealmList;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -67,6 +65,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
     private DecimalFormat decimalFormat = new DecimalFormat("00");
 
+    boolean runAsGuest = false;
     //private Realm realm;
 
     @Override
@@ -96,7 +95,8 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         joinRaceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                promptBibNoInputDialog();
+                //promptBibNoInputDialog();
+                joinRace(false);
             }
         });
 
@@ -115,19 +115,14 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         Races race = SelectRaceActivity.races[currentPosition];
 
         if(asGuest){
-            SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, AppConstant.DEFAULT_BIB_NO);
+            runAsGuest = true;
+            //SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, AppConstant.DEFAULT_BIB_NO);
         }else{
-            SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, bibNo);
+            runAsGuest = false;
+            //SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, bibNo);
         }
 
         new GroomifyJoinRaceTask().execute(""+race.getId());
-    }
-
-    private void launchWelcomeScreen(){
-
-        Intent intent = new Intent(this, WelcomeActivity.class);
-        startActivity(intent);
-        finish();
     }
 
     private void promptBibNoInputDialog(){
@@ -242,6 +237,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                                 race.setRaceLocation(raceDetail.getLocation());
                                 race.setRaceName(raceDetail.getName());
                                 race.setTotalMission(""+raceDetail.getMissionNo());
+                                race.setEndTime(raceDetail.getEndTime());
                                 //Races race = new Races(i, raceDetail.getName(), ""+raceDetail.getLocation(), ""+raceDetail.getDistance(), ""+raceDetail.getMissionNo(), null, null);
                                 races[totalActive] = race;
                                 totalActive++;
@@ -316,9 +312,11 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                                 races.missions.add(i, mission);
                             }
                             Races realRaces = realm.copyToRealmOrUpdate(races);
-                            joinRace(false);
+
+                            //joinRace(false);
                         }
                     });
+                    launchNextScreen();
                 }finally {
                     realm.close();
                 }
@@ -337,9 +335,31 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
                 if(joinRaceResponse.isSuccessful()){
                     Log.i(TAG, "Calling join race api success");
-                    return joinRaceResponse.body();
+                    String  runnerId = ""+joinRaceResponse.body().getRunnerId();
+                    Log.i(TAG, "Runner info for this race: "+runnerId);
+
+                    Response<RunnerInfoResponse> restResponse = client.getApiService().getRunnerInfo(fbId, authToken, runnerId).execute();
+                    if(restResponse.isSuccessful()){
+                        RunnerInfoResponse runnerInfoResponse = restResponse.body();
+                        if(runnerInfoResponse.getRunBibNo() != null && runnerInfoResponse.getTeam().trim().length() > 0){
+                            bibNo = runnerInfoResponse.getRunBibNo();
+                            SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, bibNo);
+                        }
+
+                        if(runnerInfoResponse.getTeam() != null && runnerInfoResponse.getTeam().trim().length() > 0){
+                            SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_TEAM_SELECTED, true);
+                            SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_TEAM_SELECTED_ID, runnerInfoResponse.getTeam());
+                        }
+
+                        return joinRaceResponse.body();
+
+                    }else{
+                        return null;
+                    }
+
                 }else{
                     Log.i(TAG, "Calling join race api failed, race id: "+params[0]+", response code: "+joinRaceResponse.code()+", error body: "+joinRaceResponse.errorBody().string());
+                    return null;
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Unable to call join race api.",e);
@@ -361,11 +381,10 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                     innerRealm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
-                            Long userId = SharedPreferencesHelper.getUserRaceId(SelectRaceActivity.this);
+                            Long userId = SharedPreferencesHelper.getUserId(SelectRaceActivity.this);
                             GroomifyUser realmUser = realm.where(GroomifyUser.class).equalTo("id", userId).findFirst();
                             Log.i(TAG, "After join race API call success. GroomifyUser: ("+realmUser+")");
 
-                            realmUser.setCurrentBibNo(""+bibNo);
                             realmUser.setCurrentRunnerId("" + joinRace.getRunnerId());
                             realmUser.setCurrentRaceId(SelectRaceActivity.races[currentPosition].getId());
 
@@ -374,14 +393,54 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
                             SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_RUN_SELECTED, true);
                             SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.LONG, AppConstant.PREFS_RUN_SELECTED_ID, races[currentPosition].getId());
+
+                            if(SharedPreferencesHelper.getBibNo(SelectRaceActivity.this) != null || runAsGuest){
+                                populateRaceDetails();
+                            }else{
+                                promptBibNoInputDialog();
+                            }
+
+
                         }
                     });
                 }finally {
                     innerRealm.close();
                 }
             }
-                launchWelcomeScreen();
+
             }
+    }
+
+    private void launchNextScreen(){
+
+        Realm innerRealm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+
+        innerRealm.executeTransaction(new Realm.Transaction()
+        {
+              @Override
+              public void execute(Realm realm) {
+                  Long userId = SharedPreferencesHelper.getUserId(SelectRaceActivity.this);
+                  GroomifyUser realmUser = realm.where(GroomifyUser.class).equalTo("id", userId).findFirst();
+
+                  if(runAsGuest){
+                      SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, AppConstant.DEFAULT_BIB_NO);
+                      realmUser.setCurrentBibNo(AppConstant.DEFAULT_BIB_NO);
+                  }else{
+                      SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, bibNo);
+                      realmUser.setCurrentBibNo(bibNo);
+                  }
+                  realm.copyToRealmOrUpdate(realmUser);
+
+                  if(!SharedPreferencesHelper.isProfilePictureUpdated(SelectRaceActivity.this)){
+                      ActivityUtils.launchWelcomeScreen(SelectRaceActivity.this, true);
+                  }else if(!SharedPreferencesHelper.isTeamSelected(SelectRaceActivity.this)){
+                      ActivityUtils.launchTeamSelectionScreen(SelectRaceActivity.this, true);
+                  }else{
+                      ActivityUtils.launchMainScreen(SelectRaceActivity.this, true);
+                  }
+              }
+        });
+
     }
 
 

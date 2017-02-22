@@ -1,19 +1,15 @@
 package com.groomify.hollavirun;
 
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -27,11 +23,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
-import com.facebook.Profile;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.GroomifyUser;
 import com.groomify.hollavirun.entities.NewsFeed;
-import com.groomify.hollavirun.entities.Races;
 import com.groomify.hollavirun.entities.Ranking;
 import com.groomify.hollavirun.fragment.CouponsListFragment;
 import com.groomify.hollavirun.fragment.MainFragment;
@@ -41,7 +35,6 @@ import com.groomify.hollavirun.fragment.RankingListFragment;
 import com.groomify.hollavirun.fragment.dummy.MissionContent;
 import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.response.Info;
-import com.groomify.hollavirun.rest.models.response.JoinRaceResponse;
 import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
 import com.groomify.hollavirun.rest.models.response.RaceRankingResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
@@ -54,8 +47,6 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -63,8 +54,6 @@ import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmResults;
 import retrofit2.Response;
 
 /**
@@ -129,7 +118,7 @@ public class MainActivity extends AppCompatActivity
 
         Realm.init(this);
         realm = Realm.getInstance(RealmUtils.getRealmConfiguration());
-        groomifyUser = realm.where(GroomifyUser.class).findFirst();
+        groomifyUser = realm.where(GroomifyUser.class).equalTo("id", SharedPreferencesHelper.getUserId(this)).findFirst();
 
         ImageLoadUtils.initImageLoader(this);
 
@@ -463,15 +452,6 @@ public class MainActivity extends AppCompatActivity
                 SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.clear();
-                /*editor.remove(AppConstant.PREFS_USER_LOGGGED_IN);
-                editor.remove(AppConstant.PREFS_PROFILE_PIC_UPDATED);
-                editor.remove(AppConstant.PREFS_TEAM_SELECTED);
-                editor.remove(AppConstant.PREFS_RUN_SELECTED);
-                editor.remove(AppConstant.PREFS_EMERGENCY_CONTACT_NUM);
-                editor.remove(AppConstant.PREFS_EMERGENCY_CONTACT_NAME);*/
-
-
-
                 // Commit the edits!
                 editor.commit();
 
@@ -480,6 +460,10 @@ public class MainActivity extends AppCompatActivity
                 finish();
 
                 Toast.makeText(this, "Logging out", Toast.LENGTH_SHORT).show();
+            }else if( resultCode == ProfileActivity.RESULT_PROFILE_UPDATED){
+                groomifyUser = realm.where(GroomifyUser.class).equalTo("id", SharedPreferencesHelper.getUserId(this)).findFirst();
+                //TODO setname and the profile picture.
+                menuBarGreetingText.setText("Hello, " +groomifyUser.getName());
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -671,7 +655,7 @@ public class MainActivity extends AppCompatActivity
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        GroomifyUser groomifyUser = realm.where(GroomifyUser.class).findFirst();
+                        GroomifyUser groomifyUser = realm.where(GroomifyUser.class).equalTo("id", SharedPreferencesHelper.getUserId(MainActivity.this)).findFirst();
                         groomifyUser.setMyRanking(realmRanking);
                         Log.i(TAG, "User info from database: "+groomifyUser.toString());
                     }

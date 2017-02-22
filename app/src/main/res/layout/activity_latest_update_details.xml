@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_latest_update_details"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.groomify.hollavirun.LatestUpdateDetailsActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        app:navigationIcon="@drawable/ic_chevron_left"
+        android:layout_width="56dp"
+        android:layout_height="56dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+    android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:text="WELCOME TO GROOMIFY RUN"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/latest_news_cover_photo"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/latest_news_header"
+                android:textAlignment="center"
+                android:textStyle="normal|bold"
+                android:textSize="12sp"
+                android:layout_marginTop="32dp" />
+
+            <TextView
+                android:text="There are not many cities that have experienced such social and political extremes in recent history as Amsterdam. In the 20th century alone, Amsterdam faced the atrocities of war for the first time in 400 years, became the radical center of 1960s social movements and witnessed a complete about-face in its core economy. Amsterdam’s progressive, multicultural, conscientious and contentious attitude wipes out images of a more docile past and ranks this capital city among the top 5 for European travel destinations. Precariously positioned on the banks of both the IJ Bay and the Amstel River headwaters, Amsterdam made an early mark on the world with its dominant seafaring fleet and colonial aspirations in the 17th and 18th centuries. Amsterdam’s economy turned inward once England emerged as the seafaring superpower. Consequently, most of the enchantingly crooked mansions and townhouses alone the canals are now inhabited by eclectic stores, businesses and engaging galleries and the majority of Amsterdammers live outside of the canal belt. Museums, Music and a Barrage of Culture To gain a better understanding of how such a metropolitan city emerged from bogs, swamps and floodplains, visit the Amsterdams Historisch Museum. Extensive documentation covering centuries of growth spans the walls of the exhibits and a detailed segment is dedicated to modern day issues, conflicts and controversies surrounding Amsterdam’s path to becoming a free and tolerant society. Then, explore Amsterdam’s historic relationship with water aboard the Nederlands Scheepvaart Museum, a dry-docked ship from the East India Company. For a more refined jaunt into the past, a trip to the colossal Rijksmuseum will indulge the senses with fine art from Dutch masters throughout history. As evening approaches, leave your museum voice behind and dive dancing and drinking into Amsterdam’s edgy and rowdy nightlife. The pubs and coffee shops that line the canals are a vibrant mix of locals and visitors, and the perfect place to begin your evening. Enjoy an extensive array of domestic ale or have a taste of the unique Dutch gin. Musically, Amsterdam has something for everyone. Visit Mulligans Pub for authentic Irish entertainment, kick back to some jazz in Dylan’s stylish lobby bar or go electro at the famed mega-club, Ministry. For a moment of contemplation or a summer picnic, Amsterdam offers some of the best urban park spaces among European cities. Bikes are available for rental to take in the scenery at a faster pace, just beware of the tram tracks that crisscross most roadways and footpaths. Of European cities, Amsterdam is most likely to surprise, excite and intrigue its visitors in a most unexpected fashion. Travel to Amsterdam to enjoy the perfect balance of open spaces, a lively urban pulse and a gracefully multiethnic ambiance."
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/latest_news_content"
+                android:layout_below="@+id/latest_news_header"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_margin="20dp"
+                android:textAlignment="center" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="182dp"
+                app:srcCompat="@android:color/white"
+                android:id="@+id/latest_news_cover_photo"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+        </RelativeLayout>
+    </ScrollView>
+
+
+</RelativeLayout>

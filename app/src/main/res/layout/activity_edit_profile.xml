@@ -58,26 +58,12 @@
         android:ems="10"
         android:layout_below="@+id/profile_picture_image_view"
         android:layout_centerHorizontal="true"
-        android:id="@+id/first_name_field"
+        android:id="@+id/full_name_field"
         android:layout_marginTop="30dp"
         android:textSize="12sp"
-        android:hint="First Name"
+        android:hint="Full Name"
         android:background="@drawable/drawable_edit_text_bg" />
 
-
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:layout_below="@+id/first_name_field"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/last_name_field"
-        android:layout_marginTop="10dp"
-        android:textSize="12sp"
-        android:hint="Last Name"
-        android:background="@drawable/drawable_edit_text_bg" />
 
     <EditText
         android:layout_width="match_parent"
@@ -85,12 +71,14 @@
         android:inputType="date"
         android:ems="10"
         android:id="@+id/dob_field"
-        android:layout_below="@+id/last_name_field"
+        android:layout_below="@+id/full_name_field"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
         android:hint="Date of Birth"
         android:textSize="12sp"
-        android:background="@drawable/drawable_edit_text_bg" />
+        android:background="@drawable/drawable_edit_text_bg"
+        android:cursorVisible="true"
+        android:visibility="gone" />
 
     <Spinner
         android:layout_width="match_parent"

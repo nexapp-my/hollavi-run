@@ -5,8 +5,13 @@ import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.groomify.hollavirun.view.ProfilePictureView;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import java.io.ByteArrayOutputStream;
 
@@ -99,6 +104,5 @@ public class ProfileImageUtils {
         Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
         return decodedByte;
     }
-
 
 }

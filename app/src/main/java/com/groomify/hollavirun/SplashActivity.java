@@ -149,8 +149,8 @@ public class SplashActivity extends AppCompatActivity {
                 }else{
                     Log.i(TAG, "Calling get user api failed, response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
                 }
-            } catch (IOException e) {
-                Log.e(TAG, "Unable to call join race api.",e);
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to call get user api.",e);
                 Toast.makeText(SplashActivity.this, "Unable to get user detail.", Toast.LENGTH_SHORT).show();
             }
             return null;
@@ -187,6 +187,10 @@ public class SplashActivity extends AppCompatActivity {
                             groomifyUser.setPhoneNo(userInfoResponse.getPhoneNo());
                             groomifyUser.setTotalRuns(userInfoResponse.getNumberOfRuns());
                             groomifyUser.setProfilePictureUrl(userInfoResponse.getProfilePicture().getUrl());
+                            if(userInfoResponse.getProfilePicture() != null && userInfoResponse.getProfilePicture().getUrl().trim().length() > 0){
+                                SharedPreferencesHelper.savePreferences(SplashActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_PROFILE_PIC_UPDATED, true);
+                            }
+
                             groomifyUser.setFacebookId(userInfoResponse.getFbId());
 
                             if (Profile.getCurrentProfile() != null && Profile.getCurrentProfile().getName() != null) {
@@ -255,6 +259,8 @@ public class SplashActivity extends AppCompatActivity {
                 launchWelcomeScreen(SplashActivity.this, true);
             }else if(!teamSelected){
                 launchTeamSelectionScreen(SplashActivity.this, true);
+            }else{
+                launchMainScreen(SplashActivity.this, true);
             }
         }
 

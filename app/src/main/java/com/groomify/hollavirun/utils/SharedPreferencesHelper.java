@@ -47,8 +47,25 @@ public class SharedPreferencesHelper {
         return settings.getLong(AppConstant.PREFS_RUN_SELECTED_ID, -1);
     }
 
-    public static Long getUserRaceId(Context context){
+    public static Long getUserId(Context context){
         SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
         return settings.getLong(AppConstant.PREFS_USER_ID, -1);
+    }
+
+    public static Boolean isProfilePictureUpdated(Context context){
+        SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        return settings.getBoolean(AppConstant.PREFS_PROFILE_PIC_UPDATED, false);
+    }
+    public static Boolean isTeamSelected(Context context){
+        SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        return settings.getBoolean(AppConstant.PREFS_TEAM_SELECTED, false);
+    }
+    public static String getTeamId(Context context){
+        SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        return settings.getString(AppConstant.PREFS_TEAM_SELECTED_ID, null);
+    }
+    public static String getBibNo(Context context){
+        SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        return settings.getString(AppConstant.PREFS_BIB_NO, null);
     }
 }

@@ -1,5 +1,8 @@
 package com.groomify.hollavirun.entities;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import io.realm.Realm;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -7,7 +10,7 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by Valkyrie1988 on 9/18/2016.
  */
-public class NewsFeed extends RealmObject{
+public class NewsFeed extends RealmObject implements Parcelable {
 
     @PrimaryKey
     private int id;
@@ -76,4 +79,39 @@ public class NewsFeed extends RealmObject{
                 ", coverPhotoUrl='" + coverPhotoUrl + '\'' +
                 '}';
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.id);
+        dest.writeString(this.header);
+        dest.writeString(this.content);
+        dest.writeString(this.timeStamp);
+        dest.writeString(this.coverPhotoUrl);
+    }
+
+    protected NewsFeed(Parcel in) {
+        this.id = in.readInt();
+        this.header = in.readString();
+        this.content = in.readString();
+        this.timeStamp = in.readString();
+        this.coverPhotoUrl = in.readString();
+    }
+
+    public static final Parcelable.Creator<NewsFeed> CREATOR = new Parcelable.Creator<NewsFeed>() {
+        @Override
+        public NewsFeed createFromParcel(Parcel source) {
+            return new NewsFeed(source);
+        }
+
+        @Override
+        public NewsFeed[] newArray(int size) {
+            return new NewsFeed[size];
+        }
+    };
 }

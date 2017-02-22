@@ -26,7 +26,7 @@
         android:layout_below="@+id/textView12"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:id="@+id/textView13"
+        android:id="@+id/user_bib_no_text_view"
         android:layout_marginRight="20dp"
         android:textColor="@color/primaryTextColour" />
 
@@ -34,7 +34,7 @@
         android:id="@+id/profile_picture_image_view"
         android:layout_width="72dp"
         android:layout_height="72dp"
-        android:layout_below="@+id/textView13"
+        android:layout_below="@id/user_bib_no_text_view"
         android:layout_centerHorizontal="true" />
 
     <TextView
@@ -87,7 +87,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/drawable_profile_count_bg"
         android:id="@+id/profile_count_panel"
-        android:layout_below="@+id/country_text_view"
+        android:layout_below="@id/country_text_view"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_margin="10dp">
@@ -97,7 +97,7 @@
             <TextView
                 android:id="@+id/total_mission_text_view"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:text="3"
+                android:layout_height="wrap_content" android:text="0"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="5dp"
@@ -109,7 +109,8 @@
                 android:textSize="9sp"
                 android:layout_below="@+id/total_mission_text_view"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="5dp" />
+                android:layout_marginTop="5dp"
+                android:id="@+id/total_mission_label" />
         </RelativeLayout>
         <RelativeLayout
             android:layout_width="match_parent"
@@ -117,7 +118,7 @@
             <TextView
                 android:id="@+id/total_runs_text_view"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:text="1"
+                android:layout_height="wrap_content" android:text="0"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:textColor="@android:color/black"
@@ -127,9 +128,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:text="RUNS"
                 android:textSize="9sp"
-                android:layout_below="@+id/total_runs_text_view"
+                android:layout_below="@id/total_runs_text_view"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="5dp" />
+                android:layout_marginTop="5dp"
+                android:id="@+id/total_run_label" />
         </RelativeLayout>
     </LinearLayout>
 

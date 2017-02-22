@@ -106,8 +106,7 @@ public interface GroomifyAPIServices {
     Call<RunnerInfoResponse> getRunnerInfo(
             @Header("fb_id") String facebookId,
             @Header("auth_token") String authToken,
-            @Path("id") String id, //Pending clarification
-            @Body UpdateRunnerInfoRequest updateRunnerInfoRequest
+            @Path("id") String id
     );
 
     @GET("/search/runner")

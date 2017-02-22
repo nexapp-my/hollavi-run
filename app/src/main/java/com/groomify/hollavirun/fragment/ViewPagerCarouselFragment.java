@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,10 @@ import android.widget.Toast;
 
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.entities.Races;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by Valkyrie1988 on 11/27/2016.
@@ -30,9 +35,13 @@ public class ViewPagerCarouselFragment extends Fragment {
     private TextView raceLocationTextView;
     private TextView raceDistanceTextView;
     private TextView raceTotalMissionTextView;
+    private TextView raceDateTextView;
 
     private ImageView miniMapImageView;
     private ImageView finisherBadgeImageView;
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
+    private static final SimpleDateFormat jsonDateFormat = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'");
 
     @Nullable
     @Override
@@ -51,12 +60,30 @@ public class ViewPagerCarouselFragment extends Fragment {
 
         miniMapImageView = (ImageView) v.findViewById(R.id.mini_map_image_view);
 
-        finisherBadgeImageView = (ImageView) v.findViewById(R.id.finisher_badge_image_view);
+        //finisherBadgeImageView = (ImageView) v.findViewById(R.id.finisher_badge_image_view);
+
+        raceDateTextView = (TextView) v.findViewById(R.id.date_text_view);
 
         raceTitleTextView.setText(race.getRaceName());
         raceLocationTextView.setText(race.getRaceLocation());
         raceTotalMissionTextView.setText(race.getTotalMission());
         raceDistanceTextView.setText(race.getDistance() + " KM");
+        Date jsonDate = null;
+
+        if(race.getEndTime() != null){
+            try {
+                Log.i("DEBUG", "The damn race end time:"+race.getEndTime());
+                jsonDate = jsonDateFormat.parse(race.getEndTime());
+            } catch (ParseException e) {
+                e.printStackTrace();//Ignore
+            }
+            if(jsonDate != null){
+                raceDateTextView.setText(sdf.format(jsonDate));
+            }else{
+                raceDateTextView.setText("-");
+            }
+
+        }
 
         miniMapImageView = new ImageView(this.getContext());
 
@@ -65,12 +92,12 @@ public class ViewPagerCarouselFragment extends Fragment {
             miniMapImageView.setImageBitmap(miniMapBitmap);
         }
 
-        finisherBadgeImageView = new ImageView(this.getContext());
+        //finisherBadgeImageView = new ImageView(this.getContext());
 
-        if(race.getMiniMapByteArr() != null){
+        /*if(race.getMiniMapByteArr() != null){
             Bitmap finisherBadgeBitmap = BitmapFactory.decodeByteArray(race.getCompletetionBadgeByteArr(), 0, race.getCompletetionBadgeByteArr().length);
             finisherBadgeImageView.setImageBitmap(finisherBadgeBitmap);
-        }
+        }*/
 
 
         /*ivCarouselImage = (ImageView) v.findViewById(R.id.iv_carousel_image);

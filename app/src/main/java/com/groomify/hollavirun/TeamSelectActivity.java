@@ -159,7 +159,7 @@ public class TeamSelectActivity extends AppCompatActivity {
         protected RunnerInfoResponse doInBackground(Void... params) {
             String authToken = SharedPreferencesHelper.getAuthToken(TeamSelectActivity.this);
             String fbId = SharedPreferencesHelper.getFbId(TeamSelectActivity.this);
-            Long userId = SharedPreferencesHelper.getUserRaceId(TeamSelectActivity.this);
+            Long userId = SharedPreferencesHelper.getUserId(TeamSelectActivity.this);
             Realm innerRealm = Realm.getInstance(RealmUtils.getRealmConfiguration());
             GroomifyUser realmUser = innerRealm.where(GroomifyUser.class).equalTo("id", userId).findFirst();
 

@@ -42,7 +42,7 @@
             android:layout_alignBottom="@+id/distance_text_view"
             android:layout_centerHorizontal="true" />
 
-        <ImageView
+      <!--  <ImageView
             android:layout_width="64dp"
             android:layout_height="64dp"
             app:srcCompat="@drawable/ic_finisher_badge"
@@ -51,7 +51,7 @@
             android:layout_marginRight="25dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true" />-->
 
         <TextView
             android:text="DISTANCE"
@@ -75,6 +75,31 @@
             android:layout_alignBottom="@+id/distance_label_text_view"
             android:layout_centerHorizontal="true" />
 
+
+        <TextView
+            android:text="04/15/17"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/date_text_view"
+            android:textColor="@android:color/black"
+            android:textSize="18dp"
+            android:textStyle="normal|bold"
+            android:layout_alignBaseline="@+id/total_mission_text_view"
+            android:layout_alignBottom="@+id/total_mission_text_view"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="20dp" />
+
+        <TextView
+            android:text="DATE"
+            android:layout_height="wrap_content"
+            android:id="@+id/date_label_text_view"
+            android:textColor="@color/primaryTextColour"
+            android:textSize="12sp"
+            android:layout_width="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="265dp"
+            android:layout_marginRight="30dp" />
 
     </RelativeLayout>
 

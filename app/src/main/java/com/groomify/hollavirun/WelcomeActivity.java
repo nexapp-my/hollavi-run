@@ -493,7 +493,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 }else{
                     Log.i(TAG, "Calling update user api failed. response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Unable to call update user api.",e);
             }
             return null;
@@ -511,7 +511,7 @@ public class WelcomeActivity extends AppCompatActivity {
                     @Override
                     public void execute(Realm realm) {
 
-                        GroomifyUser realmUser = realm.where(GroomifyUser.class).findFirst();
+                        GroomifyUser realmUser = realm.where(GroomifyUser.class).equalTo("id", SharedPreferencesHelper.getUserId(WelcomeActivity.this)).findFirst();
                         realmUser.setProfilePictureBase64(profilePictureBase64);
                     }
                 });
