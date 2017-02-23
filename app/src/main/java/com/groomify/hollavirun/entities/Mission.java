@@ -12,67 +12,85 @@ import io.realm.annotations.PrimaryKey;
 
 public class Mission extends RealmObject implements Parcelable {
     @PrimaryKey
-    private int missionNumber;
+    private int id;
 
-    private String missionNumberString;
-    private String missionTitle;
-    private String missionDesc;
-    private String coverPhotoUrl;
+    private int sequenceNumber;
+    private String title;
+    private String description;
+    private String coverPhotoBase64;
+    private int coverPhotoDefaultResourceId;
     private String validationCode = "0000";
     private boolean unlocked;
+    private String latitude;
+    private String longitude;
 
-    public Mission(){
-
-    }
-
-    public Mission(boolean unlocked, String coverPhotoUrl, String missionDesc, int missionNumber, String missionNumberString, String missionTitle, String validationCode) {
+    public Mission(String coverPhotoBase64, int coverPhotoDefaultResourceId,String description, int id, String latitude, String longitude, int sequenceNumber, String title, boolean unlocked, String validationCode) {
+        this.coverPhotoBase64 = coverPhotoBase64;
+        this.coverPhotoDefaultResourceId = coverPhotoDefaultResourceId;
+        this.description = description;
+        this.id = id;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.sequenceNumber = sequenceNumber;
+        this.title = title;
         this.unlocked = unlocked;
-        this.coverPhotoUrl = coverPhotoUrl;
-        this.missionDesc = missionDesc;
-        this.missionNumber = missionNumber;
-        this.missionNumberString = missionNumberString;
-        this.missionTitle = missionTitle;
         this.validationCode = validationCode;
     }
 
-    public String getCoverPhotoUrl() {
-        return coverPhotoUrl;
+    public String getCoverPhotoBase64() {
+        return coverPhotoBase64;
     }
 
-    public void setCoverPhotoUrl(String coverPhotoUrl) {
-        this.coverPhotoUrl = coverPhotoUrl;
+    public void setCoverPhotoBase64(String coverPhotoBase64) {
+        this.coverPhotoBase64 = coverPhotoBase64;
     }
 
-    public String getMissionDesc() {
-        return missionDesc;
+    public String getDescription() {
+        return description;
     }
 
-    public void setMissionDesc(String missionDesc) {
-        this.missionDesc = missionDesc;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public int getMissionNumber() {
-        return missionNumber;
+    public int getId() {
+        return id;
     }
 
-    public void setMissionNumber(int missionNumber) {
-        this.missionNumber = missionNumber;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public String getMissionNumberString() {
-        return missionNumberString;
+    public String getLatitude() {
+        return latitude;
     }
 
-    public void setMissionNumberString(String missionNumberString) {
-        this.missionNumberString = missionNumberString;
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
     }
 
-    public String getMissionTitle() {
-        return missionTitle;
+    public String getLongitude() {
+        return longitude;
     }
 
-    public void setMissionTitle(String missionTitle) {
-        this.missionTitle = missionTitle;
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    public int getSequenceNumber() {
+        return sequenceNumber;
+    }
+
+    public void setSequenceNumber(int sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public boolean isUnlocked() {
@@ -83,6 +101,25 @@ public class Mission extends RealmObject implements Parcelable {
         this.unlocked = unlocked;
     }
 
+    public String getValidationCode() {
+        return validationCode;
+    }
+
+    public void setValidationCode(String validationCode) {
+        this.validationCode = validationCode;
+    }
+
+    public int getCoverPhotoDefaultResourceId() {
+        return coverPhotoDefaultResourceId;
+    }
+
+    public void setCoverPhotoDefaultResourceId(int coverPhotoDefaultResourceId) {
+        this.coverPhotoDefaultResourceId = coverPhotoDefaultResourceId;
+    }
+
+    public Mission() {
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -90,21 +127,29 @@ public class Mission extends RealmObject implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.missionNumber);
-        dest.writeString(this.missionNumberString);
-        dest.writeString(this.missionTitle);
-        dest.writeString(this.missionDesc);
-        dest.writeString(this.coverPhotoUrl);
+        dest.writeInt(this.id);
+        dest.writeInt(this.sequenceNumber);
+        dest.writeString(this.title);
+        dest.writeString(this.description);
+        dest.writeString(this.coverPhotoBase64);
+        dest.writeInt(this.coverPhotoDefaultResourceId);
+        dest.writeString(this.validationCode);
         dest.writeByte(this.unlocked ? (byte) 1 : (byte) 0);
+        dest.writeString(this.latitude);
+        dest.writeString(this.longitude);
     }
 
     protected Mission(Parcel in) {
-        this.missionNumber = in.readInt();
-        this.missionNumberString = in.readString();
-        this.missionTitle = in.readString();
-        this.missionDesc = in.readString();
-        this.coverPhotoUrl = in.readString();
+        this.id = in.readInt();
+        this.sequenceNumber = in.readInt();
+        this.title = in.readString();
+        this.description = in.readString();
+        this.coverPhotoBase64 = in.readString();
+        this.coverPhotoDefaultResourceId = in.readInt();
+        this.validationCode = in.readString();
         this.unlocked = in.readByte() != 0;
+        this.latitude = in.readString();
+        this.longitude = in.readString();
     }
 
     public static final Creator<Mission> CREATOR = new Creator<Mission>() {

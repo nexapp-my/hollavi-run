@@ -63,8 +63,6 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
     private final static int MAX_BIB_NO = 4;
 
-    private DecimalFormat decimalFormat = new DecimalFormat("00");
-
     boolean runAsGuest = false;
     //private Realm realm;
 
@@ -305,13 +303,19 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
                             for (int i = 0; i < raceDetail.getMissions().size(); i++) {
                                 com.groomify.hollavirun.rest.models.response.Mission missionResponse = raceDetail.getMissions().get(i);
-                                //public Mission(boolean unlocked, String coverPhotoUrl, String missionDesc, int missionNumber, String missionNumberString, String missionTitle) {
-                                Mission mission = new Mission(false, missionResponse.getUrl(), missionResponse.getDescription(), i + 1, decimalFormat.format(i + 1), missionResponse.getTitle(), "0000");
+                                Mission mission = new Mission(missionResponse.getCoverPhoto(),
+                                        0,
+                                        missionResponse.getDescription(),
+                                        i + 1,
+                                        missionResponse.getLatitude(),
+                                        missionResponse.getLongitude(),
+                                        i + 1, missionResponse.getTitle(), false , "0000");
+                                //public Mission(String coverPhotoBase64, String description, int id, String latitude, String longitude, int sequenceNumber, String title, boolean unlocked, String validationCode) {
                                 Log.i(TAG, "Adding mission into database. " + mission.toString());
 
                                 races.missions.add(i, mission);
                             }
-                            Races realRaces = realm.copyToRealmOrUpdate(races);
+                            realm.copyToRealmOrUpdate(races);
 
                             //joinRace(false);
                         }

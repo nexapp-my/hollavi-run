@@ -3,6 +3,9 @@ package com.groomify.hollavirun.utils;
 import android.util.Log;
 import android.widget.Spinner;
 
+import com.groomify.hollavirun.R;
+import com.groomify.hollavirun.entities.Mission;
+
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,5 +81,51 @@ public class AppUtils {
         Pattern pattern = Pattern.compile(EMAIL_PATTERN);
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
+    }
+
+    private static int totalMission = 5;
+
+    private static String missionTitle[] = {
+            "SELFIE WITH STRANGERS",
+            "POKEMON GO",
+            "DONT'T TEXT & DRIVE",
+            "THE 3D JOURNEY",
+            "UPSIDE DOWN WORLD"
+    };
+
+    private static String missionDesc[] = {
+            "Take 3 selfies with your fellow runners",
+            "Spot the real Pikachu",
+            "Prepare to be mindblown",
+            "Meet your favourite Superheroes.",
+            "Meet your favourite Superheroes."
+    };
+
+    private static int missionCoverResourceId[] = {
+            R.drawable.mission_banner_01,
+            R.drawable.mission_banner_02,
+            R.drawable.mission_banner_03,
+            R.drawable.mission_banner_04,
+            R.drawable.mission_banner_05
+    };
+
+    public static Mission[] getDefaultMission(){
+        /*new Mission(1, "01", "SELFIE WITH STRANGERS", "Take 3 selfies with your fellow runners", R.drawable.mission_banner_01, true),
+                new Mission(2, "02", "POKEMON GO", "Spot the real Pikachu", R.drawable.mission_banner_02, false),
+                new Mission(3, "03", "DONT'T TEXT & DRIVE", "Prepare to be mindblown.", R.drawable.mission_banner_03, false),
+                new Mission(4, "04", "INFLATABLE CASTLE", "Meet your favourite Superheroes.", R.drawable.mission_banner_04, false),
+                new Mission(5, "05", "THE 3D JOURNEY", "Meet your favourite Superheroes.", R.drawable.mission_banner_05, false),
+                new Mission(6, "06", "UPSIDE DOWN WORLD", "Meet your favourite Superheroes.", R.drawable.mission_banner_06, false)*/
+        Mission[] missions = new Mission[totalMission];
+        for(int i = 0; i < totalMission; i++) {
+            missions[i] = new Mission(null,
+                    missionCoverResourceId[i],
+                    missionDesc[i],
+                    i + 1,
+                    "",
+                    "",
+                    i + 1, missionTitle[i], false, "0000");
+        }
+        return missions;
     }
 }

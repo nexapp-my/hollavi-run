@@ -32,6 +32,7 @@ public class SharedPreferencesHelper {
         editor.commit();
     }
 
+
     public static String getAuthToken(Context context){
         SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
         return settings.getString(AppConstant.PREFS_AUTH_TOKEN, null);

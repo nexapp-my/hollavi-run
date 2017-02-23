@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 
+import java.io.File;
+
 /**
  * Created by Valkyrie1988 on 11/12/2016.
  */
@@ -75,7 +77,7 @@ public class BitmapUtils {
 
         // Decode the image file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = true;
-        bmOptions.inSampleSize =  BitmapUtils.calculateInSampleSize(bmOptions, targetW, targetH);;
+        bmOptions.inSampleSize =  BitmapUtils.calculateInSampleSize(bmOptions, targetW, targetH);
         bmOptions.inPurgeable = true;
 
         //Bitmap bitmap = BitmapFactory.decodeFile(imagePath, bmOptions);
@@ -85,4 +87,16 @@ public class BitmapUtils {
 
         return bitmap;
     }
+
+    public static Bitmap loadBitmapFromFile(int targetW, int targetH, String photoPath){
+
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(photoPath, options);
+        options.inSampleSize =  BitmapUtils.calculateInSampleSize(options, targetW, targetH);
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(photoPath, options);
+    }
+
+
 }

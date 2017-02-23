@@ -132,10 +132,8 @@ public class QRActivity extends AppCompatActivity {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
                 if (barcodes.size() != 0) {
                     String data = barcodes.valueAt(0).displayValue;
-
                     Log.d(TAG, "Barcode detected: " + data);
                     playBeep();
-
                     returnData(data);
                 }
             }
@@ -179,10 +177,12 @@ public class QRActivity extends AppCompatActivity {
             resultIntent.putExtra(EXTRA_QR_RESULT, data);
             setResult(RESULT_OK, resultIntent);
             Log.i(TAG, "Putting OK: "+data);
+            finish();
         } else {
             setResult(RESULT_CANCELED);
+            finish();
         }
-        finish();
+
     }
 
     @Override

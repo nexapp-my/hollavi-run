@@ -11,6 +11,7 @@ import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.entities.NewsFeed;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 /**
@@ -20,6 +21,8 @@ import java.util.List;
 public class MissionArrayAdapter extends ArrayAdapter<Mission> {
     private final Context context;
     private final Mission[] values;
+
+    private static DecimalFormat decimalFormat = new DecimalFormat("00");
 
     public MissionArrayAdapter(Context context, Mission[] values) {
         super(context, R.layout.item_mission, values);
@@ -41,9 +44,9 @@ public class MissionArrayAdapter extends ArrayAdapter<Mission> {
 
         if(values != null && values[position] != null){
             Mission mission = values[position];
-            missionNumberTextView.setText(mission.getMissionNumberString());
-            missionTitleTextView.setText(mission.getMissionTitle());
-            missionDescTextView.setText(mission.getMissionDesc());
+            missionNumberTextView.setText(decimalFormat.format(mission.getSequenceNumber()));
+            missionTitleTextView.setText(mission.getTitle());
+            missionDescTextView.setText(mission.getDescription());
         }
 
 

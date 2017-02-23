@@ -22,6 +22,7 @@ import com.groomify.hollavirun.adapter.NewsFeedArrayAdapter;
 import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.fragment.dummy.MissionContent;
 import com.groomify.hollavirun.fragment.dummy.MissionContent.MissionItem;
+import com.groomify.hollavirun.utils.AppUtils;
 
 import java.util.Arrays;
 
@@ -96,16 +97,13 @@ public class MissionListFragment extends ListFragment {
 
         realm = Realm.getInstance(config);
 
-         // ... boilerplate omitted for brevity
-        // get all the customers
         RealmResults<Mission> missionRealmResults = realm.where(Mission.class).findAll();
 
         Log.i(TAG, "All missions. "+missionRealmResults.size());
-        // ... build a list adapter and set it to the ListView/RecyclerView/etc
 
-        missions = missionRealmResults.toArray(new Mission[0]);
+        //missions = missionRealmResults.toArray(new Mission[0]);
+        missions = AppUtils.getDefaultMission();
 
-        // set up a Realm change listener
         realmChangeListener = new RealmChangeListener<RealmResults<Mission>>() {
             @Override
             public void onChange(RealmResults<Mission> results) {

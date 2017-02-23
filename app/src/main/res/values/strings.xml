@@ -64,6 +64,6 @@
     <string name="mission2_validation_code">0000</string>
     <string name="mission3_validation_code">0000</string>
     <string name="mission4_validation_code">0000</string>
-    <string name="mission5_validation_code">0000</string>
+    <string name="mission5_validation_code">8888</string>
 
 </resources>

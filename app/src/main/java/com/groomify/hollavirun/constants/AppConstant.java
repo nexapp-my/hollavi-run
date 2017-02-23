@@ -35,4 +35,6 @@ public class AppConstant {
 
     public static final String DEFAULT_BIB_NO = "-99999";
 
+    public static final String PREFS_MISSION_UNLOCK_PREFIX = "mission_unlock_prefix_";
+
 }

@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,20 +34,34 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
+import com.groomify.hollavirun.MainActivity;
 import com.groomify.hollavirun.QRActivity;
 import com.groomify.hollavirun.R;
+import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.utils.BitmapUtils;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
+import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.sromku.simple.storage.SimpleStorage;
+import com.sromku.simple.storage.Storable;
+import com.sromku.simple.storage.Storage;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+
+import io.realm.Realm;
+import pl.aprilapps.easyphotopicker.DefaultCallback;
+import pl.aprilapps.easyphotopicker.EasyImage;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -62,14 +78,13 @@ public class MissionDetailsFragment extends Fragment {
 
     // TODO: Rename and change types of parameters
     private Mission mission;
-
+    private static DecimalFormat decimalFormat = new DecimalFormat("00");
 
     private OnFragmentInteractionListener mListener;
 
     public static final int QR_REQUEST = 111;
     private static final int REQUEST_IMAGE_CAPTURE = 101;
     private static final int REQUEST_PICTURE_FROM_GALLERY = 102;
-    private static final int REQUEST_PICTURE_FROM_FACEBOOK = 103;
     private static final int PERMISSIONS_REQUEST = 100;
 
     private static final int OPTION_CAMERA = 0;
@@ -97,6 +112,8 @@ public class MissionDetailsFragment extends Fragment {
     ShareDialog shareDialog;
     CallbackManager callbackManager;
 
+    String[] verificationCode;
+    Storage storage;
 
     public MissionDetailsFragment() {
         // Required empty public constructor
@@ -116,8 +133,19 @@ public class MissionDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mission = getArguments().getParcelable(PARAM_MISSION);
-            unlocked = mission.isUnlocked();
+            //unlocked = mission.isUnlocked(); //TODO this will be implement in next phase. Currently hardcode at local.
+            SharedPreferences settings = this.getContext().getSharedPreferences(AppConstant.PREFS_NAME, 0);
+
+            unlocked = settings.getBoolean(AppConstant.PREFS_MISSION_UNLOCK_PREFIX + mission.getId(), false);
         }
+
+        verificationCode = new String[]{
+                getResources().getString(R.string.mission1_validation_code),
+                getResources().getString(R.string.mission2_validation_code),
+                getResources().getString(R.string.mission3_validation_code),
+                getResources().getString(R.string.mission4_validation_code),
+                getResources().getString(R.string.mission5_validation_code)
+        };
 
         callbackManager = CallbackManager.Factory.create();
         shareDialog = new ShareDialog(this);
@@ -139,6 +167,9 @@ public class MissionDetailsFragment extends Fragment {
             }
         });
 
+        storage = SimpleStorage.getInternalStorage(getContext());
+
+
     }
 
     @Override
@@ -159,15 +190,23 @@ public class MissionDetailsFragment extends Fragment {
                         //MissionDetailsFragment.this.getActivity().onBackPressed();
                         Log.i(TAG, "Preparing to submit the mission.");
                         if (ShareDialog.canShow(ShareLinkContent.class)){
-                            ShareLinkContent linkContent = new ShareLinkContent.Builder()
+                           /* ShareLinkContent linkContent = new ShareLinkContent.Builder()
                                     .setContentTitle("Welcome to groomify")
                                     .setContentDescription(
-                                            "Mission "+mission.getMissionNumber()+", "+mission.getMissionTitle()+" completed.")
+                                            "Mission "+mission.getSequenceNumber()+", "+mission.getTitle()+" completed.")
                                     .setImageUrl(Uri.parse("https://static.wixstatic.com/media/318669_facfd24b3dce4767907d5f55cc80b12e.jpg"))
                                     .setContentUrl(Uri.parse("http://www.groomify.com/"))
+                                    .build();*/
+
+
+                           /* SharePhoto photo = new SharePhoto.Builder()
+                                    .setBitmap()
+                                    .build();
+                            SharePhotoContent content = new SharePhotoContent.Builder()
+                                    .addPhoto(photo)
                                     .build();
 
-                            shareDialog.show(linkContent);
+                            shareDialog.show(linkContent);*/
                         }
                     }
                 }else{
@@ -223,37 +262,23 @@ public class MissionDetailsFragment extends Fragment {
             missionTitleTxtView = (TextView) view.findViewById(R.id.mission_item_title);
         }
 
-
         if(missionDescTxtView == null){
             missionDescTxtView = (TextView) view.findViewById(R.id.mission_item_desc);
         }
-
-        //hardcoded now, figure out later
-        //Bitmap bm = BitmapFactory.decodeResource(getResources(), mission.getMissionImageId());
-        //missionBannerImgView.setImageBitmap(bm);
-
         Log.i(TAG, "Mission details: "+mission.toString());
-/*
-        if(mission.getMissionNumber() == 1){
-            missionBannerImgView.setImageResource(R.drawable.mission_banner_01);
-        }else if(mission.getMissionNumber() == 2){
-            missionBannerImgView.setImageResource(R.drawable.mission_banner_02);
-        }else if(mission.getMissionNumber() == 3){
-            missionBannerImgView.setImageResource(R.drawable.mission_banner_03);
-        }else if(mission.getMissionNumber() == 4){
-            missionBannerImgView.setImageResource(R.drawable.mission_banner_04);
-        }else if(mission.getMissionNumber() == 5) {
-            missionBannerImgView.setImageResource(R.drawable.mission_banner_05);
-        }else{
-            missionBannerImgView.setImageResource(R.drawable.mission_banner_06);
-        }*/
-        if(mission.getCoverPhotoUrl() != null){
-            ImageLoader.getInstance().displayImage(mission.getCoverPhotoUrl(), missionBannerImgView, ImageLoadUtils.getDisplayImageOptions());
+
+        if(mission.getCoverPhotoBase64() != null){
+            Bitmap bitmap = BitmapUtils.cropBitmap(missionBannerImgView.getWidth(), missionBannerImgView.getHeight(), ProfileImageUtils.decodeFromBase64ToBitmap(mission.getCoverPhotoBase64()));
+            missionBannerImgView.setImageBitmap(bitmap);
+            //ImageLoader.getInstance().displayImage(mission.getCoverPhotoUrl(), missionBannerImgView, ImageLoadUtils.getDisplayImageOptions());
+        }else if(mission.getCoverPhotoDefaultResourceId() > 0){
+            Bitmap bm = BitmapFactory.decodeResource(getResources(), mission.getCoverPhotoDefaultResourceId());
+            missionBannerImgView.setImageBitmap(bm);
         }
 
-        missionNumberTxtView.setText(mission.getMissionNumberString());
-        missionTitleTxtView.setText(mission.getMissionTitle());
-        missionDescTxtView.setText(mission.getMissionDesc());
+        missionNumberTxtView.setText(decimalFormat.format(+mission.getSequenceNumber()));
+        missionTitleTxtView.setText(mission.getTitle());
+        missionDescTxtView.setText(mission.getDescription());
 
         return view;
     }
@@ -281,6 +306,7 @@ public class MissionDetailsFragment extends Fragment {
 
     public void requestQRCodeScan(View v) {
         Intent qrScanIntent = new Intent(getContext(), QRActivity.class);
+        qrScanIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivityForResult(qrScanIntent, QR_REQUEST);
     }
 
@@ -290,18 +316,26 @@ public class MissionDetailsFragment extends Fragment {
         callbackManager.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == QR_REQUEST) {
-            String result = "";
             if (resultCode == Activity.RESULT_OK) {
-                unlocked = true;
-                toggleMissionPanel();
-                result = "Mission unlocked. QR Data:";
-                result += data.getStringExtra(QRActivity.EXTRA_QR_RESULT);
-                Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT).show();
+                String qrCodeResult = data.getStringExtra(QRActivity.EXTRA_QR_RESULT);
+                String message = "";
+                if(verificationCode[mission.getSequenceNumber() - 1].equals(qrCodeResult)){
+                    Log.i(TAG, "Mission verification code match. Mission unlocked.");
+                    unlocked = true;
+                    SharedPreferencesHelper.savePreferences(MissionDetailsFragment.this.getContext(), SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_MISSION_UNLOCK_PREFIX + mission.getId(), true);
+
+                    message = "Valid verification code. Mission unlocked";
+                    toggleMissionPanel();
+                }else{
+                    Log.i(TAG, "Mission verification code not match.");
+                    message = "Invalid verification code. Please try again.";
+                }
+                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
             }
             else {
-                result = "Error";
+                Toast.makeText(getActivity(), "Unable to get QR code.", Toast.LENGTH_SHORT).show();
             }
-        }else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
+        }/*else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             Log.i(TAG, "Mission image captured.");
             setPic();
             if(checkIsMissionReadyToSubmit()){
@@ -321,12 +355,51 @@ public class MissionDetailsFragment extends Fragment {
             if(checkIsMissionReadyToSubmit()){
                 Toast.makeText(this.getContext(), "Mission is ready to submit :) ", Toast.LENGTH_SHORT).show();
             }
-        }
+        }*/
+
+        EasyImage.handleActivityResult(requestCode, resultCode, data, MissionDetailsFragment.this.getActivity(), new DefaultCallback() {
+            @Override
+            public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
+                //Some error handling
+                Log.e(TAG, "onImagePickerError", e);
+                //e.printStackTrace();
+            }
+
+            @Override
+            public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
+                onPhotosReturned(imageFile);
+            }
+
+            @Override
+            public void onCanceled(EasyImage.ImageSource source, int type) {
+                //Cancel handling, you might wanna remove taken photo if it was canceled
+                if (source == EasyImage.ImageSource.CAMERA) {
+                    File photoFile = EasyImage.lastlyTakenButCanceledPhoto(MissionDetailsFragment.this.getContext());
+                    if (photoFile != null) photoFile.delete();
+                }
+            }
+        });
+
 
         if(checkIsMissionReadyToSubmit()){
             scanQRButton.setEnabled(true);
         }
 
+
+    }
+
+
+    private void onPhotosReturned(File imageFile){
+
+        if(!storage.isDirectoryExists("Groomify")){
+            storage.createDirectory("Groomify", true);
+            Log.i(TAG, "Directory not exists, creating directory.");
+        }
+
+        Log.i(TAG, "File name: "+imageFile.getAbsolutePath());
+
+        //String fileName = "Groomify_Mission_"+mission.getId()+"_"+currentSelectedImage+
+        //storage.createFile("Groomify", )
 
     }
 
@@ -362,16 +435,6 @@ public class MissionDetailsFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
@@ -389,13 +452,15 @@ public class MissionDetailsFragment extends Fragment {
                         Log.i(TAG, "Upload profile picture, option "+which+" selected.");
                         if(which == OPTION_CAMERA){
                             if(isPermissionGranted()){
-                                dispatchTakePictureIntent();
+                                //dispatchTakePictureIntent();
+                                EasyImage.openCamera(MissionDetailsFragment.this, 0);
                             }else{
                                 requestPermission();
                             }
                         }else if(which == OPTION_GALLERY){
                             if(isPermissionGranted()){
-                                dispatchSelectPhotoIntent();
+                                //dispatchSelectPhotoIntent();
+                                EasyImage.openGallery(MissionDetailsFragment.this, 0);
                             }else{
                                 requestPermission();
                             }
@@ -447,7 +512,8 @@ public class MissionDetailsFragment extends Fragment {
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         // Always show the chooser (if there are multiple options available)
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_PICTURE_FROM_GALLERY);
+        //startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_PICTURE_FROM_GALLERY);
+        startActivityForResult(intent, REQUEST_PICTURE_FROM_GALLERY);
     }
 
     @Override
@@ -504,9 +570,6 @@ public class MissionDetailsFragment extends Fragment {
         Bitmap processedBitmap = BitmapUtils.cropBitmap(targetH,targetW,bitmap);
 
         missionSubmissionImageView.setImageBitmap(processedBitmap);
-
-        //proceedTextView.setText("Next");
-        //flagProfilePictureSelected();
     }
 
     private void setPic() {
@@ -530,8 +593,6 @@ public class MissionDetailsFragment extends Fragment {
 
         missionSubmissionImageView.setImageBitmap(bitmap);
 
-        //proceedTextView.setText("Next");
-        //flagProfilePictureSelected();
     }
 
     private void saveProfilePictureToDisk(Bitmap bitmapImage){
