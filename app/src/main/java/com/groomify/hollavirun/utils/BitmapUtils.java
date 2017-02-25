@@ -4,7 +4,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
+import android.util.Base64;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 /**
@@ -98,5 +100,62 @@ public class BitmapUtils {
         return BitmapFactory.decodeFile(photoPath, options);
     }
 
+    public static String convertToBase64(String imagePath)
+    {
+        Bitmap bm = BitmapFactory.decodeFile(imagePath);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] byteArrayImage = baos.toByteArray();
+        String encodedImage = "data:image/jpeg;base64,"+ Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+        return encodedImage;
+    }
 
+    public static String convertToBase64(Bitmap originalBitmap)
+    {
+        Bitmap bm = originalBitmap.copy(originalBitmap.getConfig(), true);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] byteArrayImage = baos.toByteArray();
+        String encodedImage = "data:image/jpeg;base64,"+Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+        return encodedImage;
+    }
+
+    public static Bitmap decodeFromBase64ToBitmap(String encodedImage)
+    {
+        byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        return decodedByte;
+    }
+
+
+    public static byte[] loadFileToJpegByte(int targetW, int targetH, String photoPath){
+
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(photoPath, options);
+        options.inSampleSize =  BitmapUtils.calculateInSampleSize(options, targetW, targetH);
+        options.inJustDecodeBounds = false;
+        Bitmap bm = BitmapFactory.decodeFile(photoPath, options);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] byteArrayImage = baos.toByteArray();
+        return byteArrayImage;
+    }
+
+    public static String loadFileToJpegBase64(int targetW, int targetH, String photoPath){
+
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(photoPath, options);
+        options.inSampleSize =  BitmapUtils.calculateInSampleSize(options, targetW, targetH);
+        options.inJustDecodeBounds = false;
+        Bitmap bm = BitmapFactory.decodeFile(photoPath, options);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] byteArrayImage = baos.toByteArray();
+        String encodedImage = "data:image/jpeg;base64,"+Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+        return encodedImage;
+    }
 }

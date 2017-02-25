@@ -3,6 +3,7 @@ package com.groomify.hollavirun.entities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -18,35 +19,18 @@ public class Coupon implements Parcelable{
     private Date expirationTime;
 
     private byte[] imageByteArr;
+    private byte[] originalImageByteArr;
 
     private boolean redeemed;
 
-    public Coupon(int id, String name, String description, Date expirationTime, byte[] imageByteArr) {
+    public Coupon(int id, String name, String description, Date expirationTime, byte[] imageByteArr, byte[] originalImageByteArr) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.expirationTime = expirationTime;
         this.imageByteArr = imageByteArr;
+        this.originalImageByteArr = originalImageByteArr;
     }
-
-    protected Coupon(Parcel in) {
-        id = in.readInt();
-        name = in.readString();
-        description = in.readString();
-        imageByteArr = in.createByteArray();
-    }
-
-    public static final Creator<Coupon> CREATOR = new Creator<Coupon>() {
-        @Override
-        public Coupon createFromParcel(Parcel in) {
-            return new Coupon(in);
-        }
-
-        @Override
-        public Coupon[] newArray(int size) {
-            return new Coupon[size];
-        }
-    };
 
     public int getId() {
         return id;
@@ -96,6 +80,15 @@ public class Coupon implements Parcelable{
         this.redeemed = redeemed;
     }
 
+    public byte[] getOriginalImageByteArr() {
+        return originalImageByteArr;
+    }
+
+    public void setOriginalImageByteArr(byte[] originalImageByteArr) {
+        this.originalImageByteArr = originalImageByteArr;
+    }
+
+
     @Override
     public int describeContents() {
         return 0;
@@ -103,9 +96,35 @@ public class Coupon implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeString(name);
-        dest.writeString(description);
-        dest.writeByteArray(imageByteArr);
+        dest.writeInt(this.id);
+        dest.writeString(this.name);
+        dest.writeString(this.description);
+        dest.writeLong(this.expirationTime != null ? this.expirationTime.getTime() : -1);
+        dest.writeByteArray(this.imageByteArr);
+        dest.writeByteArray(this.originalImageByteArr);
+        dest.writeByte(this.redeemed ? (byte) 1 : (byte) 0);
     }
+
+    protected Coupon(Parcel in) {
+        this.id = in.readInt();
+        this.name = in.readString();
+        this.description = in.readString();
+        long tmpExpirationTime = in.readLong();
+        this.expirationTime = tmpExpirationTime == -1 ? null : new Date(tmpExpirationTime);
+        this.imageByteArr = in.createByteArray();
+        this.originalImageByteArr = in.createByteArray();
+        this.redeemed = in.readByte() != 0;
+    }
+
+    public static final Creator<Coupon> CREATOR = new Creator<Coupon>() {
+        @Override
+        public Coupon createFromParcel(Parcel source) {
+            return new Coupon(source);
+        }
+
+        @Override
+        public Coupon[] newArray(int size) {
+            return new Coupon[size];
+        }
+    };
 }

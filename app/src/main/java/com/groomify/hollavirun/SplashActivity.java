@@ -67,6 +67,8 @@ public class SplashActivity extends AppCompatActivity {
 
     GroomifyUser groomifyUserRealmObj;
 
+    int totalAttemp = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,9 +90,9 @@ public class SplashActivity extends AppCompatActivity {
         }
 
         boolean exitApp = false;
-        if(!AppUtils.isOnline()){
+       /* if(!AppUtils.isOnline()){
             exitApp = true;
-        }
+        }*/
 
         if(exitApp){
             new AlertDialog.Builder(this)
@@ -137,6 +139,7 @@ public class SplashActivity extends AppCompatActivity {
 
         @Override
         protected UserInfoResponse doInBackground(Void... params) {
+            showToast();
             try {
                 String authToken = SharedPreferencesHelper.getAuthToken(SplashActivity.this);
                 String fbId = SharedPreferencesHelper.getFbId(SplashActivity.this);
@@ -210,33 +213,22 @@ public class SplashActivity extends AppCompatActivity {
                     innerRealm.close();
                 }
 
-                /*
-                realm.beginTransaction();
-                GroomifyUser groomifyUser = new GroomifyUser();
-                groomifyUser.setAuthToken(userInfoResponse.getAuthToken());
-                groomifyUser.setCountry(userInfoResponse.getCountry());
-                groomifyUser.setEmail(userInfoResponse.getEmail());
-                groomifyUser.setEmergencyContactName(userInfoResponse.getEmergencyContactPerson());
-                groomifyUser.setEmergencyContactPhoneNo(userInfoResponse.getEmergencyContactPhone());
-                groomifyUser.setFacebookId(userInfoResponse.getFbId());
-                groomifyUser.setId(new Long(userInfoResponse.getId())); //Unsafe if user id null.
-                groomifyUser.setLastRank(userInfoResponse.getLastRank());
-                groomifyUser.setName(userInfoResponse.getName());
-                groomifyUser.setPhoneNo(userInfoResponse.getPhoneNo());
-                groomifyUser.setTotalRuns(userInfoResponse.getNumberOfRuns());
-                groomifyUser.setProfilePictureUrl(userInfoResponse.getProfilePicture().getUrl());
-                groomifyUser.setFacebookId(userInfoResponse.getFbId());
-
-                if (Profile.getCurrentProfile() != null && Profile.getCurrentProfile().getName() != null) {
-                    groomifyUser.setFacebookDisplayName(Profile.getCurrentProfile().getName());
+            }else{
+                totalAttemp++;
+                if(totalAttemp <= 3){
+                    new GroomifyGetUserTask().execute();
                 }
-                groomifyUserRealmObj = realm.copyToRealmOrUpdate(groomifyUser);
-                Log.i(TAG, "Groomify user in database: "+groomifyUserRealmObj.toString());
-                realm.commitTransaction();
-                SharedPreferencesHelper.savePreferences(SplashActivity.this, SharedPreferencesHelper.PreferenceValueType.LONG, AppConstant.PREFS_USER_ID, new Long(userInfoResponse.getId()));
-                launchNextScreen();*/
             }
         }
+    }
+
+    private void showToast(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(SplashActivity.this, "Initializing...", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void launchNextScreen(){

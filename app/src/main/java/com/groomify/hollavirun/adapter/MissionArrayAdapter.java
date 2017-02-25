@@ -5,11 +5,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.entities.NewsFeed;
+import com.groomify.hollavirun.utils.SharedPreferencesHelper;
+
+import org.w3c.dom.Text;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -24,10 +28,13 @@ public class MissionArrayAdapter extends ArrayAdapter<Mission> {
 
     private static DecimalFormat decimalFormat = new DecimalFormat("00");
 
+    private Long raceId;
+
     public MissionArrayAdapter(Context context, Mission[] values) {
         super(context, R.layout.item_mission, values);
         this.context = context;
         this.values = values;
+        raceId = SharedPreferencesHelper.getSelectedRaceId(context);
     }
 
 
@@ -47,6 +54,11 @@ public class MissionArrayAdapter extends ArrayAdapter<Mission> {
             missionNumberTextView.setText(decimalFormat.format(mission.getSequenceNumber()));
             missionTitleTextView.setText(mission.getTitle());
             missionDescTextView.setText(mission.getDescription());
+            if(SharedPreferencesHelper.isMissionSubmitted(context, raceId, mission.getId())){
+                missionNumberTextView.setVisibility(View.INVISIBLE);
+                ImageView completeIcon = (ImageView) rowView.findViewById(R.id.mission_ic_tick);
+                completeIcon.setVisibility(View.VISIBLE);
+            }
         }
 
 

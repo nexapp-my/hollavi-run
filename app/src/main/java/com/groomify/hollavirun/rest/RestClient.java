@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.groomify.hollavirun.rest.services.GroomifyAPIServices;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -26,7 +27,7 @@ public class RestClient {
 
     public RestClient()
     {
-        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder().readTimeout(30, TimeUnit.SECONDS).connectTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS);
 
         httpClient.addInterceptor(new Interceptor() {
             @Override

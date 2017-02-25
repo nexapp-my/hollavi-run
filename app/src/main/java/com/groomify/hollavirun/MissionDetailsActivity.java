@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -22,6 +23,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -31,6 +33,7 @@ import android.widget.Toast;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.login.widget.LoginButton;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareHashtag;
 import com.facebook.share.model.ShareLinkContent;
@@ -43,8 +46,14 @@ import com.groomify.hollavirun.fragment.MissionDetailsFragment;
 import com.groomify.hollavirun.fragment.MissionFragment;
 import com.groomify.hollavirun.fragment.MissionListFragment;
 import com.groomify.hollavirun.fragment.RankingListFragment;
+import com.groomify.hollavirun.rest.RestClient;
+import com.groomify.hollavirun.rest.models.request.MissionTransaction;
+import com.groomify.hollavirun.rest.models.request.MissionTransactionRequest;
+import com.groomify.hollavirun.rest.models.request.PhotosAttribute;
+import com.groomify.hollavirun.rest.models.response.MissionSubmissionResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
 import com.groomify.hollavirun.utils.BitmapUtils;
+import com.groomify.hollavirun.utils.DialogUtils;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.sromku.simple.storage.SimpleStorage;
@@ -52,58 +61,63 @@ import com.sromku.simple.storage.Storage;
 import com.sromku.simple.storage.helpers.OrderType;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
+import retrofit2.Response;
 
 public class MissionDetailsActivity extends AppCompatActivity {
 
     private final static String TAG = MissionDetailsActivity.class.getSimpleName();
-    //private TabLayout tabLayout;
-    //private ViewPager viewPager;
-    //MissionDetailsFragment missionDetailFragment;
-    Mission mission = null;
+    private final SimpleDateFormat sdf = new SimpleDateFormat(AppConstant.DATE_FORMAT);
 
-    private Toolbar toolbar;
-
+    private Mission mission = null;
 
     public static final int QR_REQUEST = 111;
-    private static final int REQUEST_IMAGE_CAPTURE = 101;
-    private static final int REQUEST_PICTURE_FROM_GALLERY = 102;
-    private static final int PERMISSIONS_REQUEST = 100;
+
     private static final int OPTION_CAMERA = 0;
     private static final int OPTION_GALLERY = 1;
-
     private static DecimalFormat decimalFormat = new DecimalFormat("00");
 
-    ImageView imgPlaceHolderOne;
-    ImageView imgPlaceHolderTwo;
-    ImageView imgPlaceHolderThree;
+    private RestClient client = new RestClient();
+    private ShareDialog shareDialog;
+    private CallbackManager callbackManager;
 
-    Button scanQRButton;
+    private Toolbar toolbar;
+    private ImageView imgPlaceHolderOne;
+    private ImageView imgPlaceHolderTwo;
+    private ImageView imgPlaceHolderThree;
+    private ImageView missionBannerImgView;
+    private TextView missionNumberTxtView;
+    private TextView missionTitleTxtView;
+    private TextView missionDescTxtView;
+    private AlertDialog loadingDialog;
+    private Button scanQRButton;
 
-    boolean unlocked = false;
+    private boolean unlocked = false;
+    private boolean submitted = false;
 
-    ImageView missionBannerImgView;
-    TextView missionNumberTxtView;
-    TextView missionTitleTxtView;
-    TextView missionDescTxtView;
+    private int currentSelectedImage = 1;
 
-    int currentSelectedImage = 1;
+    private boolean[] missionFilled = {false, false, false};
+    private String[] originalMissionImagePath = new String[3];
+    private String[] missionBase64 = new String[3];
 
-    boolean[] missionFilled = {false, false, false};
-    String[] originalMissionImagePath = new String[3];
+    private String[] verificationCode;
+    private Storage storage;
 
-    ShareDialog shareDialog;
-    CallbackManager callbackManager;
+    private String fileNameOne, fileNameTwo, fileNameThree;
+    private String directoryName;
 
-    String[] verificationCode;
-    Storage storage;
-
-
+    private Long raceId;
+    private String runnerId;
+    private Long userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,10 +137,18 @@ public class MissionDetailsActivity extends AppCompatActivity {
             }
         });
 
+        raceId = SharedPreferencesHelper.getSelectedRaceId(this);
+        userId = SharedPreferencesHelper.getUserId(this);
+        runnerId = SharedPreferencesHelper.getRunnerId(this);
         //unlocked = mission.isUnlocked(); //TODO this will be implement in next phase. Currently hardcode at local.
-        SharedPreferences settings = this.getSharedPreferences(AppConstant.PREFS_NAME, 0);
-        unlocked = settings.getBoolean(AppConstant.PREFS_MISSION_UNLOCK_PREFIX + mission.getId(), false);
+        unlocked = SharedPreferencesHelper.isMissionUnlocked(this, raceId, mission.getId());
+        submitted = SharedPreferencesHelper.isMissionSubmitted(this, raceId, mission.getId());
 
+        fileNameOne = "MISSION_"+mission.getId()+"_1.jpg";
+        fileNameTwo = "MISSION_"+mission.getId()+"_2.jpg";
+        fileNameThree = "MISSION_"+mission.getId()+"_3.jpg";
+        directoryName = "Groomify_"+userId+"_Mission_"+mission.getId();
+        
         verificationCode = new String[]{
                 getResources().getString(R.string.mission1_validation_code),
                 getResources().getString(R.string.mission2_validation_code),
@@ -140,40 +162,27 @@ public class MissionDetailsActivity extends AppCompatActivity {
         shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
             @Override
             public void onSuccess(Sharer.Result result) {
-                onBackPressed();
+                //onBackPressed();
                 //TODO save those photo to storage so it is retrivable.
-                Toast.makeText(MissionDetailsActivity.this, "Mission shared :)", Toast.LENGTH_SHORT).show();
+                new GroomifySubmitMissionTask().execute();
             }
 
             @Override
             public void onCancel() {
-                Toast.makeText(MissionDetailsActivity.this, "Post cancel :(", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MissionDetailsActivity.this, "Post cancel :(", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onError(FacebookException error) {
-                Toast.makeText(MissionDetailsActivity.this, "Failed to share facebook post: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Failed to share content to facebook.Errors: "+error.getMessage(),error.getCause() );
+
+                Toast.makeText(MissionDetailsActivity.this, "Failed to share facebook post. Please try again.", Toast.LENGTH_SHORT).show();
             }
         });
 
         storage = SimpleStorage.getInternalStorage(this);
-
         createView();
-
-
-
-        /*viewPager = (ViewPager) findViewById(R.id.viewpager);
-
-        Log.i(TAG, "Is view page there? --->"+viewPager);
-
-        setupViewPager(viewPager);
-
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
-
-        tabLayout.setSelectedTabIndicatorColor(getResources().getColor((R.color.rustyRed)));
-        tabLayout.setSelectedTabIndicatorHeight((int) (3 * getResources().getDisplayMetrics().density));
-        tabLayout.setTabTextColors(getResources().getColor((R.color.primaryTextColour)), getResources().getColor((R.color.rustyRed)));*/
+        loadingDialog = DialogUtils.buildLoadingDialog(this);
     }
 
     private void createView(){
@@ -184,17 +193,8 @@ public class MissionDetailsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(unlocked){
                     if(checkIsMissionReadyToSubmit()){
-                        //MissionDetailsFragment.this.getActivity().onBackPressed();
                         Log.i(TAG, "Preparing to submit the mission.");
-                        if (ShareDialog.canShow(ShareLinkContent.class)){
-                           /* ShareLinkContent linkContent = new ShareLinkContent.Builder()
-                                    .setContentTitle("Welcome to groomify")
-                                    .setContentDescription(
-                                            "Mission "+mission.getSequenceNumber()+", "+mission.getTitle()+" completed.")
-                                    .setImageUrl(Uri.parse("https://static.wixstatic.com/media/318669_facfd24b3dce4767907d5f55cc80b12e.jpg"))
-                                    .setContentUrl(Uri.parse("http://www.groomify.com/"))
-                                    .build(); shareDialog.show(linkContent);*/
-
+                        if (ShareDialog.canShow(SharePhotoContent.class)){
                            SharePhoto photo_0 = new SharePhoto.Builder()
                                     .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[0]))
                                     .build();
@@ -214,6 +214,8 @@ public class MissionDetailsActivity extends AppCompatActivity {
 
                             shareDialog.show(content);
 
+                        }else{
+                            Toast.makeText(MissionDetailsActivity.this, "Your device does not support facebook share.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 }else{
@@ -231,31 +233,35 @@ public class MissionDetailsActivity extends AppCompatActivity {
         imgPlaceHolderOne.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Select first picture.", Toast.LENGTH_SHORT).show();
-                currentSelectedImage = 1;
-                prompPictureSelectionDialog();
+                if(!submitted) {
+                    Toast.makeText(v.getContext(), "Select first picture.", Toast.LENGTH_SHORT).show();
+                    currentSelectedImage = 1;
+                    prompPictureSelectionDialog();
+                }
             }
         });
 
         imgPlaceHolderTwo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Select second picture.", Toast.LENGTH_SHORT).show();
-                currentSelectedImage = 2;
-                prompPictureSelectionDialog();
+                if(!submitted) {
+                    Toast.makeText(v.getContext(), "Select second picture.", Toast.LENGTH_SHORT).show();
+                    currentSelectedImage = 2;
+                    prompPictureSelectionDialog();
+                }
             }
         });
 
         imgPlaceHolderThree.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Select third picture.", Toast.LENGTH_SHORT).show();
-                currentSelectedImage = 3;
-                prompPictureSelectionDialog();
+                if(!submitted) {
+                    Toast.makeText(v.getContext(), "Select third picture.", Toast.LENGTH_SHORT).show();
+                    currentSelectedImage = 3;
+                    prompPictureSelectionDialog();
+                }
             }
         });
-
-        toggleMissionPanel();
 
         if(missionBannerImgView == null){
             missionBannerImgView = (ImageView) findViewById(R.id.mission_banner_image_view);
@@ -275,7 +281,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
         Log.i(TAG, "Mission details: "+mission.toString());
 
         if(mission.getCoverPhotoBase64() != null){
-            Bitmap bitmap = BitmapUtils.cropBitmap(missionBannerImgView.getWidth(), missionBannerImgView.getHeight(), ProfileImageUtils.decodeFromBase64ToBitmap(mission.getCoverPhotoBase64()));
+            Bitmap bitmap = BitmapUtils.cropBitmap(missionBannerImgView.getWidth(), missionBannerImgView.getHeight(), BitmapUtils.decodeFromBase64ToBitmap(mission.getCoverPhotoBase64()));
             missionBannerImgView.setImageBitmap(bitmap);
             //ImageLoader.getInstance().displayImage(mission.getCoverPhotoUrl(), missionBannerImgView, ImageLoadUtils.getDisplayImageOptions());
         }else if(mission.getCoverPhotoDefaultResourceId() > 0){
@@ -286,15 +292,34 @@ public class MissionDetailsActivity extends AppCompatActivity {
         missionNumberTxtView.setText(decimalFormat.format(+mission.getSequenceNumber()));
         missionTitleTxtView.setText(mission.getTitle());
         missionDescTxtView.setText(mission.getDescription());
+
+        toggleMissionPanel();
+
     }
 
-    private void toggleMissionPanel(){
-        if(!unlocked){
+
+
+    private void toggleMissionPanel() {
+        if (!unlocked) {
             imgPlaceHolderOne.setVisibility(View.INVISIBLE);
             imgPlaceHolderTwo.setVisibility(View.INVISIBLE);
             imgPlaceHolderThree.setVisibility(View.INVISIBLE);
             scanQRButton.setText("SCAN QR TO ACTIVE");
             scanQRButton.setEnabled(true);
+        }else if(submitted){
+            scanQRButton.setText("MISSION COMPLETED");
+            scanQRButton.setEnabled(false);
+            //scanQRButton.setVisibility(View.GONE);
+
+            File missionImageOne = storage.getFile(directoryName, fileNameOne);
+            File missionImageTwo = storage.getFile(directoryName, fileNameTwo);
+            File missionImageThree = storage.getFile(directoryName, fileNameThree);
+
+            renderThumnailFromBitmap(missionImageOne.getAbsolutePath(), 1);
+            renderThumnailFromBitmap(missionImageTwo.getAbsolutePath(), 2);
+            renderThumnailFromBitmap(missionImageThree.getAbsolutePath(), 3);
+
+
         }else{
             imgPlaceHolderOne.setVisibility(View.VISIBLE);
             imgPlaceHolderTwo.setVisibility(View.VISIBLE);
@@ -311,7 +336,10 @@ public class MissionDetailsActivity extends AppCompatActivity {
 
     public void requestQRCodeScan(View v) {
         Intent qrScanIntent = new Intent(this, QRActivity.class);
-        qrScanIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //qrScanIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        //qrScanIntent.setClassName("com.groomify.hollavirun", "com.groomify.hollavirun.QRActivity");
+        //startActivityForResult(myIntent, 600);
         startActivityForResult(qrScanIntent, QR_REQUEST);
     }
 
@@ -327,8 +355,8 @@ public class MissionDetailsActivity extends AppCompatActivity {
                 if(verificationCode[mission.getSequenceNumber() - 1].equals(qrCodeResult)){
                     Log.i(TAG, "Mission verification code match. Mission unlocked.");
                     unlocked = true;
-                    SharedPreferencesHelper.savePreferences(MissionDetailsActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_MISSION_UNLOCK_PREFIX + mission.getId(), true);
-
+                    SharedPreferencesHelper.setMissionUnlocked(MissionDetailsActivity.this, raceId, mission.getId(), true);
+                    SharedPreferencesHelper.setMissionUnlockedTime(MissionDetailsActivity.this, raceId, mission.getId(), sdf.format(new Date()));
                     message = "Valid verification code. Mission unlocked";
                     toggleMissionPanel();
                 }else{
@@ -340,27 +368,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
             else {
                 Toast.makeText(MissionDetailsActivity.this, "Unable to get QR code.", Toast.LENGTH_SHORT).show();
             }
-        }/*else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
-            Log.i(TAG, "Mission image captured.");
-            setPic();
-            if(checkIsMissionReadyToSubmit()){
-                Toast.makeText(this.getContext(), "Mission is ready to submit :) ", Toast.LENGTH_SHORT).show();
-            }
-        }else if (requestCode == REQUEST_PICTURE_FROM_GALLERY && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
-
-            Uri uri = data.getData();
-            Bitmap bitmap = null;
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(this.getActivity().getContentResolver(), uri);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Log.i(TAG, "Mission image selected.");
-            setPicFromBitmap(bitmap);
-            if(checkIsMissionReadyToSubmit()){
-                Toast.makeText(this.getContext(), "Mission is ready to submit :) ", Toast.LENGTH_SHORT).show();
-            }
-        }*/
+        }
 
         EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
             @Override
@@ -396,33 +404,45 @@ public class MissionDetailsActivity extends AppCompatActivity {
 
     private void onPhotosReturned(File imageFile){
 
-        /*String directoryName = "Groomify/Mission-"+mission.getId()+"/"+currentSelectedImage;
+        Log.i(TAG, "Decoding file: "+imageFile.getAbsolutePath());
+        renderThumnailFromBitmap(imageFile.getAbsolutePath(), currentSelectedImage);
+        originalMissionImagePath[currentSelectedImage - 1] = imageFile.getAbsolutePath();
 
+    }
+
+    private void saveImagesToStorage(){
+        
         if(!storage.isDirectoryExists(directoryName)){
             storage.createDirectory(directoryName, true);
             Log.i(TAG, "Directory not exists, creating directory.");
         }else{
+            Log.i(TAG, "Purging old files.");
             List<File> files = storage.getFiles("MyDirName", OrderType.DATE);
             for(File file: files){
                 try{file.delete();}catch (Exception e){Log.e(TAG,"Failed to delete file:"+file.getAbsolutePath(), e);}
             }
         }
-        Log.i(TAG, "File name: "+imageFile.getAbsolutePath());
 
+        byte[] imageOneByte = BitmapUtils.loadFileToJpegByte(600, 800, originalMissionImagePath[0]);
+        byte[] imageTwoByte = BitmapUtils.loadFileToJpegByte(600, 800, originalMissionImagePath[1]);
+        byte[] imageThreeByte = BitmapUtils.loadFileToJpegByte(600, 800, originalMissionImagePath[2]);
+        /*missionBase64[0] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[0]);
+        missionBase64[1] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[1]);
+        missionBase64[2] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[2]);*/
 
-        String fileName = currentSelectedImage+"_"+imageFile.getName();
+        if(!storage.createFile(directoryName, fileNameOne, imageOneByte)){
+            Log.i(TAG, "Unable to write first mission image file");
+        }
 
-        storage.createFile(directoryName, fileName, BitmapUtils.loadBitmapFromFile(600, 400,imageFile.getAbsolutePath()));*/
-        Log.i(TAG, "Decoding file: "+imageFile.getAbsolutePath());
+        if(!storage.createFile(directoryName, fileNameTwo, imageTwoByte)){
+            Log.i(TAG, "Unable to write second mission image file");
+        }
 
-        //Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-        renderThumnailFromBitmap(imageFile.getAbsolutePath());
-        originalMissionImagePath[currentSelectedImage - 1] = imageFile.getAbsolutePath();
-        //renderThumnailFromBitmap(BitmapUtils.loadBitmapFromFile(600, 400,imageFile.getAbsolutePath()));
+        if(!storage.createFile(directoryName, fileNameThree, imageThreeByte)){
+            Log.i(TAG, "Unable to write third mission image file");
+        }
 
-        //String fileName = "Groomify_Mission_"+mission.getId()+"_"+currentSelectedImage+
-        //storage.createFile("Groomify", )
-
+        Log.i(TAG, "Writing file to storage complete.");
     }
 
     private boolean checkIsMissionReadyToSubmit(){
@@ -456,14 +476,14 @@ public class MissionDetailsActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    private void renderThumnailFromBitmap(String filePath){
+    private void renderThumnailFromBitmap(String filePath, int selectedImage){
 
         ImageView missionSubmissionImageView;
 
-        if(currentSelectedImage == 1){
+        if(selectedImage == 1){
             missionSubmissionImageView = imgPlaceHolderOne;
             missionFilled[0] = true;
-        }else if(currentSelectedImage == 2){
+        }else if(selectedImage == 2){
             missionSubmissionImageView = imgPlaceHolderTwo;
             missionFilled[1] = true;
         }else{
@@ -473,6 +493,14 @@ public class MissionDetailsActivity extends AppCompatActivity {
         //TODO update the thumbnail
         int targetW = missionSubmissionImageView.getWidth();
         int targetH = missionSubmissionImageView.getHeight();
+        Log.i(TAG, "H/W of view: "+targetH+"/"+targetW);
+
+        int dimension = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 75, getResources().getDisplayMetrics());
+
+        if(targetH == 0|| targetW == 0){
+            targetH = dimension;
+            targetW = dimension;
+        }
 
         Bitmap processedBitmap = BitmapUtils.cropBitmap(targetH,targetW,filePath);
 
@@ -480,71 +508,91 @@ public class MissionDetailsActivity extends AppCompatActivity {
     }
 
 
+    private class GroomifySubmitMissionTask extends AsyncTask<Void, String, MissionSubmissionResponse> {
 
 
+        @Override
+        protected MissionSubmissionResponse doInBackground(Void... params) {
+            changeLoadingState(true);
+            runnerId = SharedPreferencesHelper.getRunnerId(MissionDetailsActivity.this);
+            Long raceId = SharedPreferencesHelper.getSelectedRaceId(MissionDetailsActivity.this);
+            String facebookId = SharedPreferencesHelper.getFbId(MissionDetailsActivity.this);
+            String authToken = SharedPreferencesHelper.getAuthToken(MissionDetailsActivity.this);
+            String missionUnlockedTime = SharedPreferencesHelper.getMissionUnlockTime(MissionDetailsActivity.this, raceId, mission.getId());
 
-
-
-
-
-
-
-
-
-
-
-   /* @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.i(TAG, "onActivityResult, requestCode: "+requestCode+", resultCode: "+resultCode+", data:"+data);
-
-        if (requestCode == QR_REQUEST) {
-            String result;
-            if (resultCode == RESULT_OK) {
-                result = data.getStringExtra(QRActivity.EXTRA_QR_RESULT);
-
-            } else {
-                result = "Error";
+            MissionTransactionRequest missionTransactionRequest = new MissionTransactionRequest();
+            MissionTransaction missionTransaction = new MissionTransaction();
+            missionTransaction.setMissionId(mission.getId());
+            missionTransaction.setRunnerId(Integer.parseInt(runnerId));
+            Long missionTime = 300L;
+            try {
+                if(missionUnlockedTime != null){
+                    Date unlockedTime = sdf.parse(missionUnlockedTime);
+                    missionTime = (new Date().getTime() - unlockedTime.getTime()) / 1000;
+                }
+            }catch (Exception e){
+                Log.i(TAG, "Failed to parse mission unlocked time.");
             }
-            Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
-            //mResultTextView.setText(result);
-            //mResultTextView.setVisibility(View.VISIBLE);
-        }
-    }*/
+            missionTransaction.setMissionTime(missionTime.intValue());
+            //Photo attribute
+            missionBase64[0] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[0]);
+            missionBase64[1] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[1]);
+            missionBase64[2] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[2]);
 
-   /* private void setupViewPager(ViewPager viewPager) {
-        MissionDetailsActivity.ViewPagerAdapter adapter = new MissionDetailsActivity.ViewPagerAdapter(getSupportFragmentManager());
-        missionDetailFragment = MissionDetailsFragment.newInstance(mission);
-        adapter.addFragment(missionDetailFragment, "DETAILS");
-        //adapter.addFragment(new RankingListFragment(), "RANKINGS");
-        viewPager.setAdapter(adapter);
-    }*/
+            List<PhotosAttribute> photosAttributeList = new ArrayList<PhotosAttribute>();
+            photosAttributeList.add(new PhotosAttribute(missionBase64[0], raceId, Long.parseLong(runnerId)));
+            photosAttributeList.add(new PhotosAttribute(missionBase64[1], raceId, Long.parseLong(runnerId)));
+            photosAttributeList.add(new PhotosAttribute(missionBase64[2], raceId, Long.parseLong(runnerId)));
+            missionTransaction.setPhotosAttributes(photosAttributeList);
 
-   /* class ViewPagerAdapter extends FragmentPagerAdapter {
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
+            missionTransactionRequest.setMissionTransaction(missionTransaction);
 
-        public ViewPagerAdapter(FragmentManager manager) {
-            super(manager);
-        }
+            try {
+                Response<MissionSubmissionResponse> restResponse = client.getApiService().submitMissionTransaction(facebookId, authToken, missionTransactionRequest).execute();
+                if(restResponse.isSuccessful()){
+                    Log.i(TAG, "Calling update submitMissionTransaction api success");
+                    return restResponse.body();
+                }else{
+                    Log.e(TAG, "Calling update submitMissionTransaction api failed."+restResponse.code());
+                    return null;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error while calling submitMissionTransaction api.",e);
+            }
 
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
+            return null;
         }
 
         @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
+        protected void onPostExecute(MissionSubmissionResponse missionSubmissionResponse) {
+            super.onPostExecute(missionSubmissionResponse);
+            changeLoadingState(false);
+            if(missionSubmissionResponse == null){
+                Toast.makeText(MissionDetailsActivity.this, "Unable to submit mission at this moment. Please try again.", Toast.LENGTH_SHORT).show();
+            }else{
+                //TODO update mission submitted.
+                saveImagesToStorage();
+                Toast.makeText(MissionDetailsActivity.this, "Well done fella. Mission submitted.", Toast.LENGTH_SHORT).show();
+                SharedPreferencesHelper.setMissionSubmitted(MissionDetailsActivity.this, raceId, mission.getId(), true);
+                submitted = true;
+                toggleMissionPanel();
+            }
         }
-    }*/
+    }
+    private void changeLoadingState(final boolean loading){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(loading){
+                    //progressBar.setVisibility(View.VISIBLE);
+                    //proceedTextView.setVisibility(View.GONE);
+                    loadingDialog.show();
+                }else{
+                    //progressBar.setVisibility(View.GONE);
+                    //proceedTextView.setVisibility(View.VISIBLE);
+                    loadingDialog.hide();
+                }
+            }
+        });
+    }
 }

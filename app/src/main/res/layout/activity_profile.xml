@@ -11,7 +11,7 @@
         android:text="Profile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView12"
+        android:id="@+id/tool_bar_title"
         android:layout_weight="-1"
         android:textColor="@android:color/black"
         android:textSize="24sp"
@@ -23,7 +23,7 @@
         android:text="ID: A717"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView12"
+        android:layout_below="@id/tool_bar_title"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:id="@+id/user_bib_no_text_view"
@@ -107,7 +107,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:text="MISSIONS"
                 android:textSize="9sp"
-                android:layout_below="@+id/total_mission_text_view"
+                android:layout_below="@id/total_mission_text_view"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="5dp"
                 android:id="@+id/total_mission_label" />
@@ -139,9 +139,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_below="@+id/profile_count_panel"
-        android:layout_alignRight="@+id/close_profile_button"
-        android:layout_alignEnd="@+id/close_profile_button">
+        android:layout_below="@id/profile_count_panel"
+        android:layout_alignRight="@id/close_profile_button"
+        android:layout_alignEnd="@id/close_profile_button">
 
         <RelativeLayout
             android:id="@+id/select_edit_my_profile"
@@ -149,7 +149,7 @@
             android:layout_height="44dp"
             android:layout_weight="-1"
             android:background="@drawable/drawable_profile_edit_bg"
-            android:layout_below="@+id/border_line_2"
+
             android:layout_centerHorizontal="true"
             android:layout_marginTop="25dp"
             android:layout_marginLeft="16dp">
@@ -182,11 +182,11 @@
             android:layout_height="44dp"
             android:layout_weight="-1"
             android:background="@drawable/drawable_profile_edit_bg"
-            android:layout_below="@+id/select_edit_my_profile"
-            android:layout_alignLeft="@+id/select_edit_my_profile"
-            android:layout_alignStart="@+id/select_edit_my_profile"
-            android:layout_alignRight="@+id/select_edit_my_profile"
-            android:layout_alignEnd="@+id/select_edit_my_profile"
+            android:layout_below="@id/select_edit_my_profile"
+            android:layout_alignLeft="@id/select_edit_my_profile"
+            android:layout_alignStart="@id/select_edit_my_profile"
+            android:layout_alignRight="@id/select_edit_my_profile"
+            android:layout_alignEnd="@id/select_edit_my_profile"
             android:layout_marginTop="2dp"
             android:layout_marginLeft="16dp">
 
@@ -216,11 +216,11 @@
             android:layout_height="44dp"
             android:layout_weight="-1"
             android:background="@drawable/drawable_profile_edit_bg"
-            android:layout_below="@+id/select_select_a_run"
-            android:layout_alignLeft="@+id/select_select_a_run"
-            android:layout_alignStart="@+id/select_select_a_run"
-            android:layout_alignRight="@+id/select_select_a_run"
-            android:layout_alignEnd="@+id/select_select_a_run"
+            android:layout_below="@id/select_select_a_run"
+            android:layout_alignLeft="@id/select_select_a_run"
+            android:layout_alignStart="@id/select_select_a_run"
+            android:layout_alignRight="@id/select_select_a_run"
+            android:layout_alignEnd="@id/select_select_a_run"
             android:layout_marginTop="2dp"
             android:layout_marginLeft="16dp">
 
@@ -250,11 +250,11 @@
             android:layout_height="44dp"
             android:layout_weight="-1"
             android:background="@drawable/drawable_profile_edit_bg"
-            android:layout_below="@+id/select_sponsors_and_partner"
-            android:layout_alignLeft="@+id/select_sponsors_and_partner"
-            android:layout_alignStart="@+id/select_sponsors_and_partner"
-            android:layout_alignRight="@+id/select_sponsors_and_partner"
-            android:layout_alignEnd="@+id/select_sponsors_and_partner"
+            android:layout_below="@id/select_sponsors_and_partner"
+            android:layout_alignLeft="@id/select_sponsors_and_partner"
+            android:layout_alignStart="@id/select_sponsors_and_partner"
+            android:layout_alignRight="@id/select_sponsors_and_partner"
+            android:layout_alignEnd="@id/select_sponsors_and_partner"
             android:layout_marginTop="2dp"
             android:layout_marginLeft="16dp">
 

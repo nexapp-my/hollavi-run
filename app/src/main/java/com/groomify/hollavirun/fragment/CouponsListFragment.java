@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,18 +17,22 @@ import android.widget.Toast;
 import com.groomify.hollavirun.CouponDetailsActivity;
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.adapter.CouponArrayAdapter;
+import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.Coupon;
 import com.groomify.hollavirun.utils.BitmapUtils;
+import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
 import java.io.ByteArrayOutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 
 public class CouponsListFragment extends ListFragment {
-    // TODO: Customize parameter argument names
+
     private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
-    private int mColumnCount = 1;
+    private final static String TAG = CouponsListFragment.class.getSimpleName();
 
     //private OnListFragmentInteractionListener mListener;
 
@@ -35,9 +41,12 @@ public class CouponsListFragment extends ListFragment {
 
     Coupon[] coupons = null;
 
+    public static SimpleDateFormat sdf = new SimpleDateFormat(AppConstant.DATE_FORMAT);
+
+    private Date raceFinishDate;
 
     public CouponsListFragment() {
-        // Required empty public constructor
+
     }
 
 
@@ -53,37 +62,51 @@ public class CouponsListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MINUTE, 3);
+        Long raceId = SharedPreferencesHelper.getSelectedRaceId(this.getContext());
+        String raceEndTime = SharedPreferencesHelper.getRaceExpirationTime(this.getContext(), raceId);
 
+        try {
+            raceFinishDate = sdf.parse(raceEndTime);
+        } catch (ParseException e) {
+            Log.e(TAG, "Unable to parse race expiration date.");
+        }
 
-        Bitmap tshirt = BitmapUtils.cropBitmap(72, 72, BitmapFactory.decodeResource(getResources(), R.drawable.t_shirt));
-        Bitmap goodieBag = BitmapUtils.cropBitmap(72, 72, BitmapFactory.decodeResource(getResources(), R.drawable.goodie_bag));
-        Bitmap firstAidKit = BitmapUtils.cropBitmap(72, 72, BitmapFactory.decodeResource(getResources(), R.drawable.first_aid_kit));
-        Bitmap milo = BitmapUtils.cropBitmap(72, 72, BitmapFactory.decodeResource(getResources(), R.drawable.milo));
+        int oriDimension = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 106, getResources().getDisplayMetrics());
+        int dimension = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 72, getResources().getDisplayMetrics());
+
+        Bitmap tshirt = BitmapUtils.cropBitmap(dimension, dimension, BitmapFactory.decodeResource(getResources(), R.drawable.t_shirt));
+        Bitmap goodieBag = BitmapUtils.cropBitmap(dimension, dimension, BitmapFactory.decodeResource(getResources(), R.drawable.goodie_bag));
+        Bitmap firstAidKit = BitmapUtils.cropBitmap(dimension, dimension, BitmapFactory.decodeResource(getResources(), R.drawable.first_aid_kit));
+        Bitmap milo = BitmapUtils.cropBitmap(dimension, dimension, BitmapFactory.decodeResource(getResources(), R.drawable.milo));
 
         ByteArrayOutputStream tshirtByteArr = new ByteArrayOutputStream();
         ByteArrayOutputStream goodieBagByteArr = new ByteArrayOutputStream();
         ByteArrayOutputStream firstAidKitByteArr = new ByteArrayOutputStream();
         ByteArrayOutputStream miloByteArr = new ByteArrayOutputStream();
 
+        ByteArrayOutputStream oriTshirtByteArr = new ByteArrayOutputStream();
+        ByteArrayOutputStream oriGoodieBagByteArr = new ByteArrayOutputStream();
+        ByteArrayOutputStream oriFirstAidKitByteArr = new ByteArrayOutputStream();
+        ByteArrayOutputStream oriMiloByteArr = new ByteArrayOutputStream();
+
         tshirt.compress(Bitmap.CompressFormat.PNG, 50, tshirtByteArr);
         goodieBag.compress(Bitmap.CompressFormat.PNG, 50, goodieBagByteArr);
         firstAidKit.compress(Bitmap.CompressFormat.PNG, 50, firstAidKitByteArr);
         milo.compress(Bitmap.CompressFormat.PNG, 50, miloByteArr);
 
+        BitmapUtils.cropBitmap(oriDimension, oriDimension, BitmapFactory.decodeResource(getResources(), R.drawable.t_shirt)).compress(Bitmap.CompressFormat.PNG, 50, oriTshirtByteArr);
+        BitmapUtils.cropBitmap(oriDimension, oriDimension, BitmapFactory.decodeResource(getResources(), R.drawable.goodie_bag)).compress(Bitmap.CompressFormat.PNG, 50, oriGoodieBagByteArr);
+        BitmapUtils.cropBitmap(oriDimension, oriDimension, BitmapFactory.decodeResource(getResources(), R.drawable.first_aid_kit)).compress(Bitmap.CompressFormat.PNG, 50, oriFirstAidKitByteArr);
+        BitmapUtils.cropBitmap(oriDimension, oriDimension, BitmapFactory.decodeResource(getResources(), R.drawable.milo)).compress(Bitmap.CompressFormat.PNG, 50, oriMiloByteArr);
+
         coupons = new Coupon[]{
-                new Coupon(1, "Free Milo Drink", "Energise yourself", cal.getTime(), miloByteArr.toByteArray()),
-                new Coupon(2, "Goodie Bag", "Everything is inside", cal.getTime(), goodieBagByteArr.toByteArray()),
-                new Coupon(3, "First Aid Kit", "Help yourself", cal.getTime(), firstAidKitByteArr.toByteArray()),
-                new Coupon(4, "Groomify T-Shirt", "Signature T-Shirt", cal.getTime(), tshirtByteArr.toByteArray())
+                new Coupon(1, "Free Milo Drink", "Energise yourself", raceFinishDate, miloByteArr.toByteArray(), oriMiloByteArr.toByteArray()),
+                new Coupon(2, "Goodie Bag", "Everything is inside", raceFinishDate, goodieBagByteArr.toByteArray(), oriGoodieBagByteArr.toByteArray()),
+                new Coupon(3, "First Aid Kit", "Help yourself", raceFinishDate, firstAidKitByteArr.toByteArray(), oriFirstAidKitByteArr.toByteArray()),
+                new Coupon(4, "Groomify T-Shirt", "Signature T-Shirt", raceFinishDate, tshirtByteArr.toByteArray(), oriTshirtByteArr.toByteArray())
         };
 
         super.onCreate(savedInstanceState);
-
-        if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
-        }
 
         setListAdapter(new CouponArrayAdapter(this.getContext(), coupons));
     }

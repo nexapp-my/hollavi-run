@@ -38,6 +38,9 @@ import com.groomify.hollavirun.view.ViewPagerCarouselView;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
@@ -46,6 +49,10 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCarouselView.OnPageScrolledListener {
+
+    private SimpleDateFormat jsonSdf = new SimpleDateFormat(AppConstant.JSON_DATE_FORMAT);
+    private SimpleDateFormat sdf = new SimpleDateFormat(AppConstant.DATE_FORMAT);
+
     ViewPagerCarouselView viewPagerCarouselView;
 
     TextView runAsGuestButton;
@@ -284,6 +291,15 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
             if(raceDetail != null){
 
+                String endDateString = "";
+                try {
+                    Date endDate =  jsonSdf.parse(raceDetail.getEndTime());
+                    endDateString = sdf.format(endDate);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                SharedPreferencesHelper.setRaceExpirationTime(SelectRaceActivity.this, races[currentPosition].getId(), endDateString);
                 Realm realm = Realm.getInstance(RealmUtils.getRealmConfiguration());
                 try {
 
@@ -324,6 +340,8 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                 }finally {
                     realm.close();
                 }
+            }else{
+
             }
         }
     }
@@ -365,9 +383,9 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                     Log.i(TAG, "Calling join race api failed, race id: "+params[0]+", response code: "+joinRaceResponse.code()+", error body: "+joinRaceResponse.errorBody().string());
                     return null;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Unable to call join race api.",e);
-                Toast.makeText(SelectRaceActivity.this, "Unable to get race detail.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SelectRaceActivity.this, "Unable to join race. Please try again.", Toast.LENGTH_SHORT).show();
             }
             return null;
         }
@@ -428,6 +446,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
                   if(runAsGuest){
                       SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, AppConstant.DEFAULT_BIB_NO);
+                      SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_RUN_AS_GUEST, true);
                       realmUser.setCurrentBibNo(AppConstant.DEFAULT_BIB_NO);
                   }else{
                       SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, bibNo);

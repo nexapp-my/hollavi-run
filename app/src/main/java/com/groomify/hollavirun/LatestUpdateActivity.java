@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -37,6 +38,7 @@ public class LatestUpdateActivity extends ListActivity {
 
     private NewsFeed[] newsFeeds;
 
+    Toolbar toolbar;
     ProgressBar progressBar;
 
     @Override
@@ -46,6 +48,14 @@ public class LatestUpdateActivity extends ListActivity {
 
         progressBar = (ProgressBar) findViewById(R.id.latest_update_loading_circle);
         progressBar.setVisibility(View.GONE);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
 
         Realm.init(this);
         RealmConfiguration config = new RealmConfiguration
@@ -95,7 +105,7 @@ public class LatestUpdateActivity extends ListActivity {
                 }else{
                     Log.i(TAG, "Calling race news api failed, race id: "+params[0]+", response code: "+listResponse.code()+", error body: "+listResponse.errorBody().string());
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Unable to get race news.",e);
                 Toast.makeText(LatestUpdateActivity.this, "Unable to get race detail.", Toast.LENGTH_SHORT).show();
             }

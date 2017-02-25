@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_sponsors"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.groomify.hollavirun.SponsorsActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/toolbar_layout">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            app:navigationIcon="@drawable/ic_chevron_left"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:text="Sponsors \u0026  Partners"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tool_bar_title"
+            android:layout_weight="-1"
+            android:textColor="@android:color/black"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar_layout"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/content_scroll_view">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="500dp"
+            android:orientation="vertical"
+            android:id="@+id/sponsor_badge_layout">
+
+            <LinearLayout
+                android:id="@+id/linear_1"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/partner_label"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="50dp">
+
+                <ImageView
+                    android:layout_weight="1"
+                    android:layout_width="50dp"
+                    app:srcCompat="@drawable/spnsors_hollavi"
+                    android:id="@+id/sponsors_iv_hollavi"
+                    android:layout_below="@+id/partner_label"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp" />
+
+                <ImageView
+                    android:layout_weight="1"
+                    app:srcCompat="@drawable/sponsors_sinchew"
+                    android:id="@+id/sponsors_iv_sinchew"
+                    android:layout_below="@+id/partner_label"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp" />
+            </LinearLayout>
+
+            <LinearLayout
+            android:id="@+id/linear_2"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/linear_1"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="50dp">
+
+            <ImageView
+                android:layout_weight="1"
+                android:layout_width="50dp"
+                app:srcCompat="@drawable/sponsors_ricsources"
+                android:id="@+id/sponsors_iv_ricsources"
+                android:layout_below="@+id/partner_label"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_height="50dp"
+                android:layout_margin="10dp" />
+
+            <ImageView
+                android:layout_weight="1"
+                app:srcCompat="@drawable/sponsors_shinoe"
+                android:id="@+id/sponsors_iv_shinoe"
+                android:layout_below="@+id/partner_label"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="10dp" />
+        </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linear_3"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/linear_2"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="50dp">
+
+                <ImageView
+                    android:layout_weight="1"
+                    android:layout_width="50dp"
+                    app:srcCompat="@drawable/sponsors_thepuzzle"
+                    android:id="@+id/sponsors_iv_thepuzzle"
+                    android:layout_below="@+id/partner_label"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp" />
+
+                <ImageView
+                    android:layout_weight="1"
+                    app:srcCompat="@drawable/sponsors_cg"
+                    android:id="@+id/sponsors_iv_cg"
+                    android:layout_below="@+id/partner_label"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp" />
+            </LinearLayout>
+
+            <TextView
+                android:text="Groomify Run would not have been possible without:"
+                android:layout_width="234dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/title_disclaimer"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:textAlignment="center" />
+
+            <TextView
+                android:text="Our partners"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/partner_label"
+                android:textSize="12sp"
+                android:textColor="@android:color/black"
+                android:layout_below="@+id/title_disclaimer"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="24dp" />
+
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

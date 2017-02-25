@@ -49,7 +49,7 @@
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:id="@+id/feeds_image"
-        android:src="@drawable/marathon"
+        android:src="@android:color/white"
         android:scaleType="centerCrop"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"

@@ -45,6 +45,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     View editProfileTouch = null;
 
+    View sponsorsTouch = null;
+
 
     public static final int REQUEST_CODE_EDIT_PROFILE = 100;
     public static final int RESULT_REQUIRE_LOGOUT = 2;
@@ -137,12 +139,28 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+        if(sponsorsTouch == null) {
+            sponsorsTouch = findViewById(R.id.select_sponsors_and_partner);
+        }
+
+        sponsorsTouch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchSponsorsScreen();
+            }
+        });
+
         loadProfilePicture();
     }
 
     private void launchEditProfileScreen(){
         Intent intent = new Intent(this, EditProfileActivity.class);
         startActivityForResult(intent, REQUEST_CODE_EDIT_PROFILE);
+    }
+
+    private void launchSponsorsScreen(){
+        Intent intent = new Intent(this, SponsorsActivity.class);
+        startActivity(intent);
     }
 
 

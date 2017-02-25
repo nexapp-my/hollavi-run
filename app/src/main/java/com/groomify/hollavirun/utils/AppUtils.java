@@ -65,7 +65,7 @@ public class AppUtils {
         int index = 0;
 
         for (int i=0;i<spinner.getCount();i++){
-            Log.i("AppUtils","Comparing "+spinner.getItemAtPosition(i).toString()+" to "+myString);
+            //Log.i("AppUtils","Comparing "+spinner.getItemAtPosition(i).toString()+" to "+myString);
             if (spinner.getItemAtPosition(i).toString().equalsIgnoreCase(myString)){
                 index = i;
                 break;
@@ -88,7 +88,7 @@ public class AppUtils {
     private static String missionTitle[] = {
             "SELFIE WITH STRANGERS",
             "POKEMON GO",
-            "DONT'T TEXT & DRIVE",
+            "INFLATABLE CASTLE OF HERO",
             "THE 3D JOURNEY",
             "UPSIDE DOWN WORLD"
     };
@@ -98,7 +98,7 @@ public class AppUtils {
             "Spot the real Pikachu",
             "Prepare to be mindblown",
             "Meet your favourite Superheroes.",
-            "Meet your favourite Superheroes."
+            "Mindboggling fun awaits."
     };
 
     private static int missionCoverResourceId[] = {

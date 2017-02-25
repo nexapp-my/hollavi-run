@@ -13,48 +13,20 @@ public class PhotosAttribute implements Serializable, Parcelable
 
     @SerializedName("race_id")
     @Expose
-    private Integer raceId;
+    private Long raceId;
     @SerializedName("runner_id")
     @Expose
-    private Integer runnerId;
+    private Long runnerId;
     @SerializedName("content")
     @Expose
     private String content;
-    public final static Creator<PhotosAttribute> CREATOR = new Creator<PhotosAttribute>() {
 
-
-        @SuppressWarnings({
-            "unchecked"
-        })
-        public PhotosAttribute createFromParcel(Parcel in) {
-            PhotosAttribute instance = new PhotosAttribute();
-            instance.raceId = ((Integer) in.readValue((Integer.class.getClassLoader())));
-            instance.runnerId = ((Integer) in.readValue((Integer.class.getClassLoader())));
-            instance.content = ((String) in.readValue((String.class.getClassLoader())));
-            return instance;
-        }
-
-        public PhotosAttribute[] newArray(int size) {
-            return (new PhotosAttribute[size]);
-        }
-
-    }
-    ;
-    private final static long serialVersionUID = 7854938256896548285L;
-
-    public Integer getRaceId() {
-        return raceId;
+    public PhotosAttribute() {
     }
 
-    public void setRaceId(Integer raceId) {
+    public PhotosAttribute(String content, Long raceId, Long runnerId) {
+        this.content = content;
         this.raceId = raceId;
-    }
-
-    public Integer getRunnerId() {
-        return runnerId;
-    }
-
-    public void setRunnerId(Integer runnerId) {
         this.runnerId = runnerId;
     }
 
@@ -66,14 +38,50 @@ public class PhotosAttribute implements Serializable, Parcelable
         this.content = content;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(raceId);
-        dest.writeValue(runnerId);
-        dest.writeValue(content);
+    public Long getRaceId() {
+        return raceId;
     }
 
+    public void setRaceId(Long raceId) {
+        this.raceId = raceId;
+    }
+
+    public Long getRunnerId() {
+        return runnerId;
+    }
+
+    public void setRunnerId(Long runnerId) {
+        this.runnerId = runnerId;
+    }
+
+
+    @Override
     public int describeContents() {
-        return  0;
+        return 0;
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeValue(this.raceId);
+        dest.writeValue(this.runnerId);
+        dest.writeString(this.content);
+    }
+
+    protected PhotosAttribute(Parcel in) {
+        this.raceId = (Long) in.readValue(Long.class.getClassLoader());
+        this.runnerId = (Long) in.readValue(Long.class.getClassLoader());
+        this.content = in.readString();
+    }
+
+    public static final Creator<PhotosAttribute> CREATOR = new Creator<PhotosAttribute>() {
+        @Override
+        public PhotosAttribute createFromParcel(Parcel source) {
+            return new PhotosAttribute(source);
+        }
+
+        @Override
+        public PhotosAttribute[] newArray(int size) {
+            return new PhotosAttribute[size];
+        }
+    };
 }

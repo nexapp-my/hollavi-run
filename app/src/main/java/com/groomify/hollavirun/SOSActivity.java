@@ -444,7 +444,7 @@ public class SOSActivity extends AppCompatActivity {
 
                 Toast.makeText(SOSActivity.this,   emergencyContactName+" ("+emergencyContactNumber+") has been configured as emergency number.", Toast.LENGTH_LONG).show();
                 SharedPreferencesHelper.savePreferences(SOSActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_EMERGENCY_CONTACT_NAME, emergencyContactName);
-                SharedPreferencesHelper.savePreferences(SOSActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_EMERGENCY_CONTACT_NAME, emergencyContactNumber);
+                SharedPreferencesHelper.savePreferences(SOSActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_EMERGENCY_CONTACT_NUM, emergencyContactNumber);
                 emergencyContactSelected = true;
                 toggleSetupEmergencyPanel();
 

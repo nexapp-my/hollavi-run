@@ -306,14 +306,14 @@ public class WelcomeActivity extends AppCompatActivity {
                 setPic();
                 Bitmap temp = BitmapFactory.decodeFile(mCurrentPhotoPath);
                 profilePictureBitmap = BitmapUtils.cropBitmap(300,300, temp);
-                profilePictureBase64 = ProfileImageUtils.convertToBase64(profilePictureBitmap);
+                profilePictureBase64 = BitmapUtils.convertToBase64(profilePictureBitmap);
             }else if (requestCode == REQUEST_PICTURE_FROM_GALLERY && resultCode == RESULT_OK && data != null && data.getData() != null) {
                 Log.i(TAG, "Setup profile picture from gallery success.");
                 Uri uri = data.getData();
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 setPicFromBitmap(bitmap);
                 profilePictureBitmap = BitmapUtils.cropBitmap(300,300, bitmap);
-                profilePictureBase64 = ProfileImageUtils.convertToBase64(profilePictureBitmap);
+                profilePictureBase64 = BitmapUtils.convertToBase64(profilePictureBitmap);
             }
 
         }catch (Exception e){
@@ -381,7 +381,7 @@ public class WelcomeActivity extends AppCompatActivity {
             public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
                 Log.d(TAG, "Render url into bitmap.");
                 profilePictureBitmap = loadedImage.copy(loadedImage.getConfig(), true);
-                profilePictureBase64 = ProfileImageUtils.convertToBase64(profilePictureBitmap);
+                profilePictureBase64 = BitmapUtils.convertToBase64(profilePictureBitmap);
                 setPicFromBitmap(profilePictureBitmap);
             }
 
@@ -455,7 +455,7 @@ public class WelcomeActivity extends AppCompatActivity {
             public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
                 Log.d(TAG, "Render url into bitmap.");
                 profilePictureBitmap = loadedImage.copy(loadedImage.getConfig(), true);
-                profilePictureBase64 = ProfileImageUtils.convertToBase64(profilePictureBitmap);
+                profilePictureBase64 = BitmapUtils.convertToBase64(profilePictureBitmap);
                 setPicFromBitmap(profilePictureBitmap);
             }
 

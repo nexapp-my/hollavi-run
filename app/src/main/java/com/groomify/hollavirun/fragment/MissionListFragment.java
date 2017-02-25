@@ -184,14 +184,15 @@ public class MissionListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-        Toast.makeText(getContext(),"Clicked on mission "+position, Toast.LENGTH_SHORT );
 
-        Intent intent = new Intent(getContext(), MissionDetailsActivity.class);
+        Intent intent = new Intent(getActivity(), MissionDetailsActivity.class);
 
         Bundle bundle = new Bundle();
         bundle.putParcelable("MISSION", missions[position]);
         intent.putExtra("EXTRA_MISSION", bundle);
-        startActivity(intent);
+        getActivity().startActivity(intent);
+
+        missionArrayAdapter.notifyDataSetChanged();
 
     }
 }

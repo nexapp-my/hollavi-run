@@ -45,15 +45,21 @@ import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.sromku.simple.storage.SimpleStorage;
+import com.sromku.simple.storage.Storage;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
+import pl.aprilapps.easyphotopicker.DefaultCallback;
+import pl.aprilapps.easyphotopicker.EasyImage;
 import retrofit2.Response;
 
 /**
@@ -66,14 +72,12 @@ public class MainActivity extends AppCompatActivity
 {
 
     private final static String TAG = MainActivity.class.getSimpleName();
+    private SimpleDateFormat sdf = new SimpleDateFormat(AppConstant.DATE_FORMAT);
 
     private static final int REQUEST_IMAGE_CAPTURE = 101;
-    //private static final int PERMISSIONS_REQUEST = 100;
     private static final int REQUEST_PROFILE_LOGOUT = 102;
 
     private View topMenuBar;
-
-
     private ImageView menuBarLogo;
     private TextView menuBarGreetingText;
     private ImageView pictureView;
@@ -93,10 +97,6 @@ public class MainActivity extends AppCompatActivity
     private TextView alertText;
     private View alertBanner;
 
-    //public MainFragment mainFragment = new MainFragment();
-    //public MissionFragment missionFragment = new MissionFragment();
-    //public CouponsListFragment couponsListFragment = new CouponsListFragment();
-
     private View.OnClickListener granPermissionListener = null;
     private View.OnClickListener updateProfileListener = null;
 
@@ -106,6 +106,15 @@ public class MainActivity extends AppCompatActivity
     private RestClient client = new RestClient();
     private Realm realm;
     GroomifyUser groomifyUser;
+
+    private Storage storage;
+
+    private String directoryName = Environment.DIRECTORY_DCIM + "/Groomify";
+
+    private boolean isRunAsGuest;
+
+    private Date raceEndDate;
+    private Long raceId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +131,13 @@ public class MainActivity extends AppCompatActivity
 
         ImageLoadUtils.initImageLoader(this);
 
+        isRunAsGuest = SharedPreferencesHelper.isRunAsGuest(this);
+        raceId = SharedPreferencesHelper.getSelectedRaceId(this);
+        try {
+            raceEndDate = sdf.parse(SharedPreferencesHelper.getRaceExpirationTime(this, raceId));
+        } catch (ParseException e) {
+            Log.e(TAG, "Unable to get race end date.");
+        }
 
         if(getSupportActionBar() != null)
             getSupportActionBar().hide();
@@ -138,10 +154,6 @@ public class MainActivity extends AppCompatActivity
 
         if(topMenuBar == null){
             topMenuBar = findViewById(R.id.main_menu_bar_top);
-            /*Log.i(TAG, " rootMenuBar: "+rootMenuBar);
-
-            topMenuBar = rootMenuBar.findViewById(R.id.menu_bar_top);
-            Log.i(TAG, " topMenuBar: "+topMenuBar);*/
         }
 
         if(alertBanner == null){
@@ -253,7 +265,6 @@ public class MainActivity extends AppCompatActivity
             R.id.menu_coupons,
             R.id.menu_sos
     };
-    String mCurrentPhotoPath;
 
     private void initializeMenuBarListener(){
 
@@ -273,13 +284,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                 if(currentMenuIndex != 0 ){
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    //mainFragment = new MainFragment();
                     ft.replace(R.id.main_placeholder, new MainFragment()).commit();
-                   /* if(currentFragment != null){
-                        ft.remove(currentFragment);
-                    }
-                    ft.add(R.id.main_placeholder, mainFragment).commit();*/
-                    //currentFragment = mainFragment;
                     currentMenuIndex = 0;
                     toggleMenuState();
                 }
@@ -290,20 +295,12 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if(currentMenuIndex != 1){
-                    try {
-                        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                        //missionFragment = new MissionFragment();
-                        ft.replace(R.id.main_placeholder, new MissionFragment()).commit();
-                        /*if (currentFragment != null) {
-                            ft.remove(currentFragment);
-                        }
-                        ft.add(R.id.main_placeholder, missionFragment).commit();*/
-                        //currentFragment = missionFragment;
-                        currentMenuIndex = 1;
-                        toggleMenuState();
-                    }catch (Exception ex){
-                        Log.e(TAG, ">>>>>>>>>>>>>>>>>>>>>>>>", ex);
-                    }
+
+                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                    ft.replace(R.id.main_placeholder, new MissionFragment()).commit();
+                    currentMenuIndex = 1;
+                    toggleMenuState();
+
                 }
             }
         });
@@ -311,32 +308,14 @@ public class MainActivity extends AppCompatActivity
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(AppPermissionHelper.isCameraPermissionGranted(MainActivity.this)){
-                    /*Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                    }*/
+                if(AppPermissionHelper.isCameraPermissionGranted(MainActivity.this) && AppPermissionHelper.isStoragePermissionGranted(MainActivity.this)){
 
-                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    // Ensure that there's a camera activity to handle the intent
-                    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                        // Create the File where the photo should go
-                        File photoFile = null;
-                        try {
-                            photoFile = createImageFile();
-                        } catch (IOException ex) {
-                            // Error occurred while creating the File
-                            Log.i(TAG, "IOException while saving image.", ex);
-                        }
-                        // Continue only if the File was successfully created
-                        if (photoFile != null) {
-                            Uri photoURI = FileProvider.getUriForFile(MainActivity.this,
-                                    "com.groomify.hollavirun.fileprovider",
-                                    photoFile);
-                            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                        }
+                    if(SimpleStorage.isExternalStorageWritable()){
+                        storage = SimpleStorage.getExternalStorage();
+                    }else{
+                        storage = SimpleStorage.getInternalStorage(MainActivity.this);
                     }
+                    EasyImage.openCamera(MainActivity.this, 0);
                 }else{
                     AppPermissionHelper.requestCameraAndStoragePermission(MainActivity.this);
                 }
@@ -346,18 +325,16 @@ public class MainActivity extends AppCompatActivity
         couponMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Toast.makeText(MainActivity.this, "Coupon clicked", Toast.LENGTH_SHORT).show();
-                if(currentMenuIndex != 3){
-                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    //couponsListFragment = new CouponsListFragment();
-                    ft.replace(R.id.main_placeholder, new CouponsListFragment()).commit();
-                    /*if(currentFragment != null){
-                        ft.remove(currentFragment);
+
+                if(currentMenuIndex != 3) {
+                    if (isRunAsGuest) {
+                        Toast.makeText(MainActivity.this, "Guest runner is not entitle for coupon.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                        ft.replace(R.id.main_placeholder, new CouponsListFragment()).commit();
+                        currentMenuIndex = 3;
+                        toggleMenuState();
                     }
-                    ft.add(R.id.main_placeholder,  couponsListFragment).commit();*/
-                    //currentFragment = couponsListFragment;
-                    currentMenuIndex = 3;
-                    toggleMenuState();
                 }
 
             }
@@ -366,11 +343,9 @@ public class MainActivity extends AppCompatActivity
         sosMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //if(currentMenuIndex != 4){
                 Intent sosIntent = new Intent(v.getContext(), SOSActivity.class);
                 startActivity(sosIntent);
                 currentMenuIndex = 4;
-                //}
             }
         });
 
@@ -381,8 +356,6 @@ public class MainActivity extends AppCompatActivity
         missionMenuIcon.setImageResource(R.drawable.ic_menu_missions);
         couponMenuIcon.setImageResource(R.drawable.ic_menu_coupons);
 
-        //topMenuBar.setVisibility(View.VISIBLE);
-
         switch (currentMenuIndex){
             case 0:
                 homeMenuIcon.setImageResource(R.drawable.ic_menu_home_filled);
@@ -392,61 +365,21 @@ public class MainActivity extends AppCompatActivity
                 break;
             case 3:
                 couponMenuIcon.setImageResource(R.drawable.ic_coupons_filled);
-                //topMenuBar.setVisibility(View.GONE);
                 break;
         }
     }
 
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-
-        File storageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM), "Groomify");
-
-        if (! storageDir.exists()){
-            if (! storageDir.mkdirs()){
-                Log.i(TAG, "failed to create directory");
-                return null;
-            }
-        }
-        //File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
     private void galleryAddPic() {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        this.sendBroadcast(mediaScanIntent);
+
+        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        scanIntent.setData(Uri.fromFile(new File(directoryName)));
+        sendBroadcast(scanIntent);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.i(TAG, "onActivityResult, requestCode:"+requestCode+", resultCode: "+resultCode+", data:"+data);
-        if (requestCode == REQUEST_IMAGE_CAPTURE) {
-            Log.i(TAG, "Image captured successfully.");
-            String result;
-            if (resultCode == RESULT_OK) {
-                Log.i(TAG, "Image captured successfully. Result OK.");
-                galleryAddPic();
-                Toast.makeText(this, "Image saved to gallery.", Toast.LENGTH_SHORT).show();
-
-            } else {
-                result = "Error";
-            }
-
-        }else if(requestCode == REQUEST_PROFILE_LOGOUT){
+       if(requestCode == REQUEST_PROFILE_LOGOUT){
             if(resultCode == ProfileActivity.RESULT_REQUIRE_LOGOUT){
 
                 SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
@@ -467,17 +400,46 @@ public class MainActivity extends AppCompatActivity
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+
+        EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
+            @Override
+            public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
+                //Some error handling
+                Log.e(TAG, "onImagePickerError", e);
+                //e.printStackTrace();
+            }
+
+            @Override
+            public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
+                onPhotosReturned(imageFile);
+            }
+
+            @Override
+            public void onCanceled(EasyImage.ImageSource source, int type) {
+                //Cancel handling, you might wanna remove taken photo if it was canceled
+                if (source == EasyImage.ImageSource.CAMERA) {
+                    File photoFile = EasyImage.lastlyTakenButCanceledPhoto(MainActivity.this);
+                    if (photoFile != null) photoFile.delete();
+                }
+            }
+        });
     }
 
-  /*  private boolean isPermissionGranted() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-    }
+    private  void onPhotosReturned(File imageFile){
 
-    private void requestPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST);
-    }*/
+        if(!storage.isDirectoryExists(directoryName)){
+            storage.createDirectory(directoryName, false);
+        }
+
+        storage.copy(imageFile, directoryName, imageFile.getName());
+
+        galleryAddPic();
+        File targetFile = storage.getFile(directoryName, imageFile.getName());
+        Intent intent = new Intent(getBaseContext(), FullScreenImageActivity.class);
+        intent.putExtra("IMAGE_FILE_PATH", targetFile.getAbsolutePath());
+        startActivity(intent);
+
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -489,19 +451,10 @@ public class MainActivity extends AppCompatActivity
             Log.i(TAG, "Permission granted.");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 Log.i(TAG, "Recreating activity.");
-
-                /*new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        recreate();
-                    }
-                },2000);*/
                 if(MainFragment.googleMap != null){
                     MainFragment.googleMap.setMyLocationEnabled(true);
                     alertBanner.setVisibility(View.GONE);
                 }
-
-
             }
         }else{
             if (requestCode == AppPermissionHelper.PERMISSIONS_CAMERA_AND_STOAGE_REQUEST_CODE) {
@@ -513,14 +466,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onListFragmentInteraction(MissionContent.MissionItem item) {
-
-    }
+    public void onListFragmentInteraction(MissionContent.MissionItem item) {}
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
+    public void onFragmentInteraction(Uri uri) {}
 
     @Override
     public void onBackPressed() {
@@ -556,9 +505,8 @@ public class MainActivity extends AppCompatActivity
                 }else{
                     Log.i(TAG, "Calling race news api failed, race id: "+params[0]+", response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Unable to get race news.",e);
-                Toast.makeText(MainActivity.this, "Unable to get race detail.", Toast.LENGTH_SHORT).show();
             }
             return null;
         }
@@ -588,6 +536,8 @@ public class MainActivity extends AppCompatActivity
 
                 realm.commitTransaction();
 
+            }else{
+                Toast.makeText(MainActivity.this, "Unable to get race news at this moment.", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -608,9 +558,8 @@ public class MainActivity extends AppCompatActivity
                 }else{
                     Log.i(TAG, "Calling race news api failed, race id: "+params[0]+", response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Unable to get race news.",e);
-                Toast.makeText(MainActivity.this, "Unable to get race detail.", Toast.LENGTH_SHORT).show();
             }
             return null;
         }
@@ -660,6 +609,8 @@ public class MainActivity extends AppCompatActivity
                         Log.i(TAG, "User info from database: "+groomifyUser.toString());
                     }
                 });
+            }else{
+                Toast.makeText(MainActivity.this, "Unable to get race ranking at this moment.", Toast.LENGTH_SHORT).show();
             }
         }
     }

@@ -268,7 +268,7 @@ public class MissionDetailsFragment extends Fragment {
         Log.i(TAG, "Mission details: "+mission.toString());
 
         if(mission.getCoverPhotoBase64() != null){
-            Bitmap bitmap = BitmapUtils.cropBitmap(missionBannerImgView.getWidth(), missionBannerImgView.getHeight(), ProfileImageUtils.decodeFromBase64ToBitmap(mission.getCoverPhotoBase64()));
+            Bitmap bitmap = BitmapUtils.cropBitmap(missionBannerImgView.getWidth(), missionBannerImgView.getHeight(), BitmapUtils.decodeFromBase64ToBitmap(mission.getCoverPhotoBase64()));
             missionBannerImgView.setImageBitmap(bitmap);
             //ImageLoader.getInstance().displayImage(mission.getCoverPhotoUrl(), missionBannerImgView, ImageLoadUtils.getDisplayImageOptions());
         }else if(mission.getCoverPhotoDefaultResourceId() > 0){
