@@ -189,7 +189,7 @@ public class SplashActivity extends AppCompatActivity {
                             groomifyUser.setPhoneNo(userInfoResponse.getPhoneNo());
                             groomifyUser.setTotalRuns(userInfoResponse.getNumberOfRuns());
                             groomifyUser.setProfilePictureUrl(userInfoResponse.getProfilePicture().getUrl());
-                            if(userInfoResponse.getProfilePicture() != null && userInfoResponse.getProfilePicture().getUrl().trim().length() > 0){
+                            if(userInfoResponse.getProfilePicture() != null && userInfoResponse.getProfilePicture().getUrl() != null && userInfoResponse.getProfilePicture().getUrl().trim().length() > 0){
                                 SharedPreferencesHelper.savePreferences(SplashActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_PROFILE_PIC_UPDATED, true);
                             }
 
