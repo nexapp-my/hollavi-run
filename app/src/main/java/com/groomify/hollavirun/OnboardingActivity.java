@@ -227,7 +227,7 @@ public class OnboardingActivity extends AppCompatActivity {
                 groomifyUser.setPhoneNo(userInfoResponse.getPhoneNo());
                 groomifyUser.setTotalRuns(userInfoResponse.getNumberOfRuns());
                 groomifyUser.setProfilePictureUrl(userInfoResponse.getProfilePicture().getUrl());
-                if(userInfoResponse.getProfilePicture() != null && userInfoResponse.getProfilePicture().getUrl().trim().length() > 0){
+                if(userInfoResponse.getProfilePicture() != null && userInfoResponse.getProfilePicture().getUrl() != null  &&userInfoResponse.getProfilePicture().getUrl().trim().length() > 0){
                     SharedPreferencesHelper.savePreferences(OnboardingActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_PROFILE_PIC_UPDATED, true);
                 }
                 groomifyUser.setFacebookId(userInfoResponse.getFbId());
