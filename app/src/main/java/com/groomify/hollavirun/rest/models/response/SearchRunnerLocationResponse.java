@@ -16,37 +16,16 @@ public class SearchRunnerLocationResponse implements Serializable, Parcelable
     @SerializedName("run_bib_no")
     @Expose
     private String runBibNo;
-    @SerializedName("locations")
+    @SerializedName("location")
     @Expose
-    private List<Location> locations = null;
-    public final static Parcelable.Creator<SearchRunnerLocationResponse> CREATOR = new Creator<SearchRunnerLocationResponse>() {
+    private Location location = null;
 
-
-        @SuppressWarnings({
-                "unchecked"
-        })
-        public SearchRunnerLocationResponse createFromParcel(Parcel in) {
-            SearchRunnerLocationResponse instance = new SearchRunnerLocationResponse();
-            instance.team = ((String) in.readValue((String.class.getClassLoader())));
-            instance.runBibNo = ((String) in.readValue((String.class.getClassLoader())));
-            in.readList(instance.locations, (com.groomify.hollavirun.rest.models.response.Location.class.getClassLoader()));
-            return instance;
-        }
-
-        public SearchRunnerLocationResponse[] newArray(int size) {
-            return (new SearchRunnerLocationResponse[size]);
-        }
-
-    }
-            ;
-    private final static long serialVersionUID = -4982914067482577723L;
-
-    public String getTeam() {
-        return team;
+    public Location getLocation() {
+        return location;
     }
 
-    public void setTeam(String team) {
-        this.team = team;
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public String getRunBibNo() {
@@ -57,22 +36,45 @@ public class SearchRunnerLocationResponse implements Serializable, Parcelable
         this.runBibNo = runBibNo;
     }
 
-    public List<Location> getLocations() {
-        return locations;
+    public String getTeam() {
+        return team;
     }
 
-    public void setLocations(List<Location> locations) {
-        this.locations = locations;
+    public void setTeam(String team) {
+        this.team = team;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(team);
-        dest.writeValue(runBibNo);
-        dest.writeList(locations);
-    }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.team);
+        dest.writeString(this.runBibNo);
+        dest.writeParcelable(this.location, flags);
+    }
+
+    public SearchRunnerLocationResponse() {
+    }
+
+    protected SearchRunnerLocationResponse(Parcel in) {
+        this.team = in.readString();
+        this.runBibNo = in.readString();
+        this.location = in.readParcelable(Location.class.getClassLoader());
+    }
+
+    public static final Creator<SearchRunnerLocationResponse> CREATOR = new Creator<SearchRunnerLocationResponse>() {
+        @Override
+        public SearchRunnerLocationResponse createFromParcel(Parcel source) {
+            return new SearchRunnerLocationResponse(source);
+        }
+
+        @Override
+        public SearchRunnerLocationResponse[] newArray(int size) {
+            return new SearchRunnerLocationResponse[size];
+        }
+    };
 }

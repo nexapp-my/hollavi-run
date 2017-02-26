@@ -38,6 +38,7 @@ import com.groomify.hollavirun.rest.models.response.Info;
 import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
 import com.groomify.hollavirun.rest.models.response.RaceRankingResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
+import com.groomify.hollavirun.utils.AppUtils;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
 import com.groomify.hollavirun.utils.RealmUtils;
@@ -116,6 +117,8 @@ public class MainActivity extends AppCompatActivity
     private Date raceEndDate;
     private Long raceId;
 
+    private MainFragment mainFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if(!FacebookSdk.isInitialized()){
@@ -170,7 +173,8 @@ public class MainActivity extends AppCompatActivity
         pictureView.setVisibility(View.VISIBLE);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.main_placeholder, new MainFragment()).commit();
+        mainFragment = new MainFragment();
+        ft.replace(R.id.main_placeholder, mainFragment).commit();
 
         menuBarGreetingText.setText("Hello, " +groomifyUser.getName());
 
@@ -241,7 +245,8 @@ public class MainActivity extends AppCompatActivity
                 public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 
                     Log.i(TAG, "LoadedImage: "+loadedImage.getConfig().toString());
-                    Bitmap processedBitmap = ProfileImageUtils.processOptimizedRoundBitmap(30,30, loadedImage);
+                    int pixel = AppUtils.getPixelFromDIP(MainActivity.this, 30);
+                    Bitmap processedBitmap = ProfileImageUtils.processOptimizedRoundBitmap(pixel,pixel, loadedImage);
                     pictureView.setImageBitmap(processedBitmap);
                 }
 
@@ -283,8 +288,9 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if(currentMenuIndex != 0 ){
+                    mainFragment = new MainFragment();
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.main_placeholder, new MainFragment()).commit();
+                    ft.replace(R.id.main_placeholder, mainFragment).commit();
                     currentMenuIndex = 0;
                     toggleMenuState();
                 }
@@ -310,10 +316,13 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                 if(AppPermissionHelper.isCameraPermissionGranted(MainActivity.this) && AppPermissionHelper.isStoragePermissionGranted(MainActivity.this)){
 
-                    if(SimpleStorage.isExternalStorageWritable()){
-                        storage = SimpleStorage.getExternalStorage();
-                    }else{
-                        storage = SimpleStorage.getInternalStorage(MainActivity.this);
+                    if (storage == null){
+
+                        if(SimpleStorage.isExternalStorageWritable()){
+                            storage = SimpleStorage.getExternalStorage();
+                        }else{
+                            storage = SimpleStorage.getInternalStorage(MainActivity.this);
+                        }
                     }
                     EasyImage.openCamera(MainActivity.this, 0);
                 }else{
@@ -395,8 +404,9 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, "Logging out", Toast.LENGTH_SHORT).show();
             }else if( resultCode == ProfileActivity.RESULT_PROFILE_UPDATED){
                 groomifyUser = realm.where(GroomifyUser.class).equalTo("id", SharedPreferencesHelper.getUserId(this)).findFirst();
-                //TODO setname and the profile picture.
-                menuBarGreetingText.setText("Hello, " +groomifyUser.getName());
+
+                menuBarGreetingText.setText("Welcome, " +groomifyUser.getName());
+                loadProfilePicture();
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -451,8 +461,8 @@ public class MainActivity extends AppCompatActivity
             Log.i(TAG, "Permission granted.");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 Log.i(TAG, "Recreating activity.");
-                if(MainFragment.googleMap != null){
-                    MainFragment.googleMap.setMyLocationEnabled(true);
+                if(mainFragment != null && mainFragment.getGoogleMap() != null){
+                    mainFragment.getGoogleMap().setMyLocationEnabled(true);
                     alertBanner.setVisibility(View.GONE);
                 }
             }

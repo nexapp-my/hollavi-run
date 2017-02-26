@@ -20,7 +20,7 @@ public class ActivityUtils {
         Intent sosIntent = new Intent(parentActivity, SelectRaceActivity.class);
         parentActivity.startActivity(sosIntent);
         if(finishParent){
-            parentActivity.finish();
+            parentActivity.finishAffinity();
         }
     }
 
@@ -28,7 +28,7 @@ public class ActivityUtils {
         Intent intent = new Intent(parentActivity, TeamSelectActivity.class);
         parentActivity.startActivity(intent);
         if(finishParent){
-            parentActivity.finish();
+            parentActivity.finishAffinity();
         }
     }
 
@@ -36,7 +36,7 @@ public class ActivityUtils {
         Intent intent = new Intent(parentActivity, OnboardingActivity.class);
         parentActivity.startActivity(intent);
         if(finishParent){
-            parentActivity.finish();
+            parentActivity.finishAffinity();
         }
     }
 
@@ -44,7 +44,7 @@ public class ActivityUtils {
         Intent intent = new Intent(parentActivity, MainActivity.class);
         parentActivity.startActivity(intent);
         if(finishParent){
-            parentActivity.finish();
+            parentActivity.finishAffinity();
         }
     }
 
@@ -52,7 +52,7 @@ public class ActivityUtils {
         Intent intent = new Intent(parentActivity, WelcomeActivity.class);
         parentActivity.startActivity(intent);
         if(finishParent){
-            parentActivity.finish();
+            parentActivity.finishAffinity();
         }
     }
 }

@@ -42,10 +42,9 @@ public class ProfileActivity extends AppCompatActivity {
     private final String TAG = ProfileActivity.class.getSimpleName();
 
     View logoutTouch = null;
-
     View editProfileTouch = null;
-
     View sponsorsTouch = null;
+    View selectRaceTouch = null;
 
 
     public static final int REQUEST_CODE_EDIT_PROFILE = 100;
@@ -150,7 +149,31 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+        pictureView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchProfilePictureFullScreen();
+            }
+        });
+
+        selectRaceTouch = findViewById(R.id.select_select_a_run);
+        selectRaceTouch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getBaseContext(), SelectRaceActivity.class);
+                intent.putExtra("CALLED_FROM_SETTINGS", true);
+                startActivity(intent);
+            }
+        });
+
+
         loadProfilePicture();
+    }
+
+    private void launchProfilePictureFullScreen(){
+        Intent intent = new Intent(getBaseContext(), FullScreenImageActivity.class);
+        intent.putExtra("IMAGE_URL", groomifyUser.getProfilePictureUrl());
+        startActivity(intent);
     }
 
     private void launchEditProfileScreen(){
@@ -210,6 +233,7 @@ public class ProfileActivity extends AppCompatActivity {
                 //TODO setname and the profile picture.
                 userDisplayNameTextView.setText(groomifyUser.getName());
                 countryTextView.setText(groomifyUser.getCountry());
+                loadProfilePicture();
             }
         }
     }

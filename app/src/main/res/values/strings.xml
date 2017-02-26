@@ -55,7 +55,6 @@
 
     <integer name="viewfinder_border_width">4</integer>
     <integer name="viewfinder_border_length">60</integer>
-
     <string name="dialog_loading_text">Loading ...</string>
 
 
@@ -65,5 +64,10 @@
     <string name="mission3_validation_code">0000</string>
     <string name="mission4_validation_code">0000</string>
     <string name="mission5_validation_code">8888</string>
+
+    <integer name="ranking_refresh_interval">300000</integer> <!-- every 5 min -->
+    <integer name="location_update_interval">10000</integer> <!-- every 5 min -->
+
+    <integer name="max_bib_no">4</integer> <!-- every 5 min -->
 
 </resources>

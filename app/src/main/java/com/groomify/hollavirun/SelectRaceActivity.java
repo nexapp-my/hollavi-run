@@ -1,7 +1,6 @@
 package com.groomify.hollavirun;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -36,8 +35,6 @@ import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.groomify.hollavirun.view.ViewPagerCarouselView;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -68,10 +65,12 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
     private volatile String bibNo = AppConstant.DEFAULT_BIB_NO;
 
-    private final static int MAX_BIB_NO = 4;
+    private int maxBibNo = 4;
 
     boolean runAsGuest = false;
     //private Realm realm;
+
+    boolean isCalledFromSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +78,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_race);
 
+        maxBibNo = getResources().getInteger(R.integer.max_bib_no);
         //TODO Currently API does not return badge and minimap, waiting API to enhance.
         Bitmap miniMap = BitmapUtils.cropBitmap(183, 183, BitmapFactory.decodeResource(getResources(), R.drawable.ic_map_mini));
         Bitmap badge = BitmapUtils.cropBitmap(183, 183, BitmapFactory.decodeResource(getResources(), R.drawable.ic_finisher_badge));
@@ -114,6 +114,8 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
         new GroomifyLoadListTask().execute();
 
+        isCalledFromSettings = getIntent().getBooleanExtra("CALLED_FROM_SETTINGS", false);
+
     }
 
     private void joinRace(boolean asGuest){
@@ -137,7 +139,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         // Set up the input
         final EditText input = new EditText(this);
         InputFilter[] filterArray = new InputFilter[1];
-        filterArray[0] = new InputFilter.LengthFilter(MAX_BIB_NO);
+        filterArray[0] = new InputFilter.LengthFilter(maxBibNo);
         input.setFilters(filterArray);
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_VARIATION_NORMAL);
@@ -278,9 +280,8 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                 }else{
                     Log.i(TAG, "Calling get race response failed.");
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Unable to get race details.",e);
-                Toast.makeText(SelectRaceActivity.this, "Unable to get race detail.", Toast.LENGTH_SHORT).show();
             }
             return null;
         }
@@ -341,7 +342,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                     realm.close();
                 }
             }else{
-
+                Toast.makeText(SelectRaceActivity.this, "Unable to join race at this moment. Please try again..", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -385,7 +386,6 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Unable to call join race api.",e);
-                Toast.makeText(SelectRaceActivity.this, "Unable to join race. Please try again.", Toast.LENGTH_SHORT).show();
             }
             return null;
         }
@@ -428,6 +428,8 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                 }finally {
                     innerRealm.close();
                 }
+            }else{
+                Toast.makeText(SelectRaceActivity.this, "Unable to join race. Please try again.", Toast.LENGTH_SHORT).show();
             }
 
             }
@@ -450,6 +452,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                       realmUser.setCurrentBibNo(AppConstant.DEFAULT_BIB_NO);
                   }else{
                       SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, bibNo);
+                      SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_RUN_AS_GUEST, false);
                       realmUser.setCurrentBibNo(bibNo);
                   }
                   realm.copyToRealmOrUpdate(realmUser);
@@ -475,18 +478,21 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
     @Override
     public void onBackPressed() {
-        new AlertDialog.Builder(this)
-                .setMessage("Setting not saved, confirm to exit groomify?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
+        if(!isCalledFromSettings) {
+            new AlertDialog.Builder(this)
+                    .setMessage("Setting not saved, confirm to exit groomify?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
 
-                })
-                .setNegativeButton("No", null)
-                .show();
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        }else{
+            super.onBackPressed();
+        }
     }
 
     @Override

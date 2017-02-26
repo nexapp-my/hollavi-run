@@ -2,16 +2,20 @@ package com.groomify.hollavirun;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -23,7 +27,9 @@ import com.groomify.hollavirun.rest.models.request.FbUser;
 import com.groomify.hollavirun.rest.models.request.UpdateUserInfoRequest;
 import com.groomify.hollavirun.rest.models.response.RunnerInfoResponse;
 import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
+import com.groomify.hollavirun.utils.AppPermissionHelper;
 import com.groomify.hollavirun.utils.AppUtils;
+import com.groomify.hollavirun.utils.BitmapUtils;
 import com.groomify.hollavirun.utils.DialogUtils;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
@@ -32,6 +38,8 @@ import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.sromku.simple.storage.SimpleStorage;
+import com.sromku.simple.storage.Storage;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,6 +53,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.realm.Realm;
+import pl.aprilapps.easyphotopicker.DefaultCallback;
+import pl.aprilapps.easyphotopicker.EasyImage;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -53,6 +63,8 @@ public class EditProfileActivity extends AppCompatActivity {
     private static final String TAG = EditProfileActivity.class.getSimpleName();
     public static final int PROFILE_UPDATED = 100;
     public static final int PROFILE_NO_CHANGES = 101;
+    private static final int OPTION_CAMERA = 0;
+    private static final int OPTION_GALLERY = 1;
     ImageView pictureView = null;
     View saveButton;
     View cancelButton;
@@ -66,11 +78,17 @@ public class EditProfileActivity extends AppCompatActivity {
     private EditText fullNameEditText;
     private EditText phoneNumberEditText;
     private EditText emailEditText;
+    private ImageView editProfilePictureImageView;
     private Spinner countrySpinner;
     private Bitmap profilePictureBitmap;
     private String profilePictureBase64;
 
+    private Storage storage;
+    private String directoryName = Environment.DIRECTORY_DCIM + "/Groomify";
+    private String mCurrentPhotoPath;
+
     boolean profileUpdated = false;
+    boolean profilePictureUpdated = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +122,9 @@ public class EditProfileActivity extends AppCompatActivity {
         if(cancelButton == null)
             cancelButton = findViewById(R.id.cancel_text_view);
 
+        if(editProfilePictureImageView == null)
+            editProfilePictureImageView = (ImageView) findViewById(R.id.profile_picture_image_view);
+
         if(groomifyUser.getName() != null){
             fullNameEditText.setText(groomifyUser.getName());
         }
@@ -114,6 +135,14 @@ public class EditProfileActivity extends AppCompatActivity {
             emailEditText.setText(groomifyUser.getEmail());
         }
 
+        editProfilePictureImageView.setOnClickListener(new Button.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "Edit profile picture clicked");
+                prompPictureSelectionDialog();
+            }
+        });
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,6 +166,15 @@ public class EditProfileActivity extends AppCompatActivity {
         }
 
         loadingDialog = DialogUtils.buildLoadingDialog(this);
+
+        if (storage == null){
+            if(SimpleStorage.isExternalStorageWritable()){
+                storage = SimpleStorage.getExternalStorage();
+            }else{
+                storage = SimpleStorage.getInternalStorage(EditProfileActivity.this);
+            }
+        }
+
     }
 
     private void save(){
@@ -169,8 +207,6 @@ public class EditProfileActivity extends AppCompatActivity {
             return false;
         }
 
-
-
         return true;
 
     }
@@ -193,6 +229,27 @@ public class EditProfileActivity extends AppCompatActivity {
         countrySpinner.setAdapter(adapter);
     }
 
+    private void prompPictureSelectionDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder
+                .setItems(R.array.profile_picture_selection, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.i(TAG, "Edit profile picture, option "+which+" selected.");
+
+                        if(!AppPermissionHelper.isCameraPermissionGranted(EditProfileActivity.this) || !AppPermissionHelper.isStoragePermissionGranted(EditProfileActivity.this)){
+                            AppPermissionHelper.requestCameraAndStoragePermission(EditProfileActivity.this);
+                            return;
+                        }
+
+                        if(which == OPTION_CAMERA){
+                            EasyImage.openCamera(EditProfileActivity.this, 0);
+                        }else if(which == OPTION_GALLERY){
+                            EasyImage.openGallery(EditProfileActivity.this, 0);
+                        }
+                    }
+                });
+        builder.create().show();
+    }
 
 
     private void loadProfilePicture()
@@ -230,6 +287,54 @@ public class EditProfileActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
+            @Override
+            public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
+                //Some error handling
+                Log.e(TAG, "onImagePickerError", e);
+            }
+
+            @Override
+            public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
+                onPhotosReturned(imageFile);
+            }
+
+            @Override
+            public void onCanceled(EasyImage.ImageSource source, int type) {
+                //Cancel handling, you might wanna remove taken photo if it was canceled
+                if (source == EasyImage.ImageSource.CAMERA) {
+                    File photoFile = EasyImage.lastlyTakenButCanceledPhoto(EditProfileActivity.this);
+                    if (photoFile != null) photoFile.delete();
+                }
+            }
+        });
+
+    }
+
+    private  void onPhotosReturned(File imageFile){
+
+        mCurrentPhotoPath = imageFile.getAbsolutePath();
+
+        Bitmap temp = BitmapFactory.decodeFile(mCurrentPhotoPath);
+        int dimension = AppUtils.getPixelFromDIP(this, 300);
+        profilePictureBitmap = BitmapUtils.cropBitmap(dimension,dimension, temp);
+        profilePictureBase64 = BitmapUtils.convertToBase64(profilePictureBitmap);
+        setPictureThumnail();
+        profilePictureUpdated = true;
+    }
+
+    private void setPictureThumnail() {
+        int targetW = AppUtils.getPixelFromDIP(this, 120);
+        int targetH = AppUtils.getPixelFromDIP(this, 120);
+
+        Bitmap bitmap = ProfileImageUtils.processOptimizedRoundBitmap(targetH,targetW,mCurrentPhotoPath);
+        editProfilePictureImageView.setImageBitmap(bitmap);
+
+    }
+
     private class GroomifyUpdateRunnerInfoTask extends AsyncTask<Void, String, UserInfoResponse> {
         @Override
         protected UserInfoResponse doInBackground(Void... params) {
@@ -245,7 +350,9 @@ public class EditProfileActivity extends AppCompatActivity {
             fbUser.setPhoneNo(phoneNumberEditText.getText().toString().trim());
             fbUser.setEmail(emailEditText.getText().toString().trim());
             fbUser.setCountry(countrySpinner.getSelectedItem().toString());
-            //TODO fbUser.setProfilePicture();
+            if(profilePictureUpdated){
+                fbUser.setProfilePicture(profilePictureBase64);
+            }
             updateUserInfoRequest.setFbUser(fbUser);
 
             try {
@@ -264,7 +371,7 @@ public class EditProfileActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(UserInfoResponse userInfoResponse) {
+        protected void onPostExecute(final UserInfoResponse userInfoResponse) {
             super.onPostExecute(userInfoResponse);
 
             if(userInfoResponse == null){
@@ -282,6 +389,7 @@ public class EditProfileActivity extends AppCompatActivity {
                         realmUser.setPhoneNo(phoneNumberEditText.getText().toString().trim());
                         realmUser.setEmail(emailEditText.getText().toString().trim());
                         realmUser.setCountry(countrySpinner.getSelectedItem().toString());
+                        realmUser.setProfilePictureUrl(userInfoResponse.getProfilePicture().getUrl());
                         realm.copyToRealmOrUpdate(realmUser);
                     }
                 });

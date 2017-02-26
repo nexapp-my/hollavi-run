@@ -1,10 +1,13 @@
 package com.groomify.hollavirun.utils;
 
+import android.content.Context;
 import android.util.Log;
+import android.util.TypedValue;
 import android.widget.Spinner;
 
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.entities.Mission;
+import com.groomify.hollavirun.entities.Team;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -110,12 +113,6 @@ public class AppUtils {
     };
 
     public static Mission[] getDefaultMission(){
-        /*new Mission(1, "01", "SELFIE WITH STRANGERS", "Take 3 selfies with your fellow runners", R.drawable.mission_banner_01, true),
-                new Mission(2, "02", "POKEMON GO", "Spot the real Pikachu", R.drawable.mission_banner_02, false),
-                new Mission(3, "03", "DONT'T TEXT & DRIVE", "Prepare to be mindblown.", R.drawable.mission_banner_03, false),
-                new Mission(4, "04", "INFLATABLE CASTLE", "Meet your favourite Superheroes.", R.drawable.mission_banner_04, false),
-                new Mission(5, "05", "THE 3D JOURNEY", "Meet your favourite Superheroes.", R.drawable.mission_banner_05, false),
-                new Mission(6, "06", "UPSIDE DOWN WORLD", "Meet your favourite Superheroes.", R.drawable.mission_banner_06, false)*/
         Mission[] missions = new Mission[totalMission];
         for(int i = 0; i < totalMission; i++) {
             missions[i] = new Mission(null,
@@ -127,5 +124,17 @@ public class AppUtils {
                     i + 1, missionTitle[i], false, "0000");
         }
         return missions;
+    }
+
+    public static Team[] getDefaultTeam(){
+        Team[] teams = new Team[3];
+        teams[0] = new Team(R.drawable.team_3_ambassador, "G");
+        teams[1] = new Team(R.drawable.team_1_ambassador, "M");
+        teams[2] = new Team(R.drawable.team_2_ambassador, "F");
+        return teams;
+    }
+
+    public static int getPixelFromDIP(Context context, float targetDIP){
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, targetDIP, context.getResources().getDisplayMetrics());
     }
 }

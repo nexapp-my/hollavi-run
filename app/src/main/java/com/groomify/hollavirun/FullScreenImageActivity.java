@@ -1,5 +1,6 @@
 package com.groomify.hollavirun;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -16,11 +17,16 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareHashtag;
-import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
+import com.groomify.hollavirun.utils.AppUtils;
 import com.groomify.hollavirun.utils.BitmapUtils;
+import com.groomify.hollavirun.utils.ImageLoadUtils;
+import com.groomify.hollavirun.utils.ProfileImageUtils;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -34,14 +40,18 @@ public class FullScreenImageActivity extends AppCompatActivity {
     private View facebookShareBtn;
 
     private String imageFilePath;
+    private String imageUrl;
 
     private ShareDialog shareDialog;
     private CallbackManager callbackManager;
+
+    private Bitmap bitmapForShare;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_screen_image);
+        ImageLoadUtils.initImageLoader(this);
 
         imageView = (ImageView) findViewById(R.id.full_screen_image_view);
         progressBar = (ProgressBar) findViewById(R.id.image_loading_progress);
@@ -50,11 +60,19 @@ public class FullScreenImageActivity extends AppCompatActivity {
         imageView.setBackgroundColor(Color.parseColor("#000000"));
 
         imageFilePath = getIntent().getStringExtra("IMAGE_FILE_PATH");
+        imageUrl = getIntent().getStringExtra("IMAGE_URL");
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath, options);
-        imageView.setImageBitmap(bitmap);
+
+        if(imageFilePath != null){
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath, options);
+            imageView.setImageBitmap(bitmap);
+            Log.i(TAG, "Full screen image viewer with image file path: "+imageFilePath);
+        }else if(imageUrl != null){
+            Log.i(TAG, "Full screen image viewer with url: "+imageFilePath);
+            loadImageFromUrl();
+        }
 
         progressBar.setVisibility(View.GONE);
 
@@ -84,12 +102,17 @@ public class FullScreenImageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (ShareDialog.canShow(SharePhotoContent.class)){
-                    SharePhoto photo_0 = new SharePhoto.Builder()
-                            .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, imageFilePath))
-                            .build();
+
+                    SharePhoto.Builder photoBuilder = new SharePhoto.Builder();
+
+                    if(imageFilePath != null){
+                        photoBuilder.setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, imageFilePath));
+                    }else{
+                        photoBuilder.setBitmap(bitmapForShare);
+                    }
 
                     SharePhotoContent content = new SharePhotoContent.Builder()
-                            .addPhoto(photo_0)
+                            .addPhoto(photoBuilder.build())
                             .setShareHashtag(new ShareHashtag.Builder().setHashtag("Groomify").build())
                             .build();
 
@@ -102,6 +125,32 @@ public class FullScreenImageActivity extends AppCompatActivity {
         });
 
     }
+
+    private void loadImageFromUrl(){
+        ImageLoader.getInstance().loadImage(imageUrl,ImageLoadUtils.getDisplayImageOptions() ,new ImageLoadingListener() {
+            @Override
+            public void onLoadingStarted(String imageUri, View view) {
+
+            }
+
+            @Override
+            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+
+            }
+
+            @Override
+            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                imageView.setImageBitmap(loadedImage);
+                bitmapForShare = BitmapUtils.cropBitmap(800, 600, loadedImage);
+            }
+
+            @Override
+            public void onLoadingCancelled(String imageUri, View view) {
+
+            }
+        });
+    }
+
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -116,5 +165,12 @@ public class FullScreenImageActivity extends AppCompatActivity {
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.i(TAG, "onActivityResult, requestCode: "+requestCode+", resultCode: "+resultCode+", data:"+data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 }

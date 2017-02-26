@@ -27,8 +27,7 @@
             android:textColor="@android:color/black"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:layout_marginBottom="13dp"
-            android:layout_alignBottom="@+id/toolbar"
+            android:layout_centerVertical="true"
             android:layout_centerHorizontal="true" />
     </RelativeLayout>
 

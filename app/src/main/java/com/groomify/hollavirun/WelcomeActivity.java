@@ -46,6 +46,7 @@ import com.groomify.hollavirun.rest.models.request.FbUser;
 import com.groomify.hollavirun.rest.models.request.UpdateUserInfoRequest;
 import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
+import com.groomify.hollavirun.utils.AppUtils;
 import com.groomify.hollavirun.utils.BitmapUtils;
 import com.groomify.hollavirun.utils.DialogUtils;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
@@ -57,6 +58,8 @@ import com.groomify.hollavirun.view.ProfilePictureView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.sromku.simple.storage.SimpleStorage;
+import com.sromku.simple.storage.Storage;
 
 import org.json.JSONException;
 
@@ -73,34 +76,36 @@ import java.util.Date;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import pl.aprilapps.easyphotopicker.DefaultCallback;
+import pl.aprilapps.easyphotopicker.EasyImage;
 import retrofit2.Response;
 
 
 public class WelcomeActivity extends AppCompatActivity {
 
     private final static String TAG = "WelcomeActivity";
-    public static ProfilePictureView profilePictureView;
-    public static String facebookUserId;
 
-    ImageView addProfileImageView;
-    TextView usernameTextView;
-    TextView proceedTextView;
-    ProgressBar progressBar;
-
-    private static final int REQUEST_IMAGE_CAPTURE = 101;
-    private static final int REQUEST_PICTURE_FROM_GALLERY = 102;
-    private static final int REQUEST_PICTURE_FROM_FACEBOOK = 103;
+    private ImageView addProfileImageView;
+    private TextView usernameTextView;
+    private TextView proceedTextView;
+    private ProgressBar progressBar;
     private static final int PERMISSIONS_REQUEST = 100;
+    private static final int OPTION_CAMERA = 0;
+    private static final int OPTION_GALLERY = 1;
 
     private Bitmap profilePictureBitmap = null;
 
     private Realm realm;
 
-    RestClient client = new RestClient();
+    private RestClient client = new RestClient();
 
     private final boolean DEBUG_FACEBOOK_GRAPH_API = false;
 
     private AlertDialog loadingDialog;
+    private Storage storage;
+    private String directoryName = Environment.DIRECTORY_DCIM + "/Groomify";
+    private String mCurrentPhotoPath;
+    private String profilePictureBase64;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,12 +123,6 @@ public class WelcomeActivity extends AppCompatActivity {
         }
 
         GroomifyUser groomifyUser = realm.where(GroomifyUser.class).findFirst();
-
-        /*if(profilePictureView == null){
-            profilePictureView = (ProfilePictureView) findViewById(R.id.welcome_screen_fb_profile_picture);
-            profilePictureView.setVisibility(View.INVISIBLE);
-            profilePictureView.setPresetSize(ProfilePictureView.NORMAL);
-        }*/
 
         if(progressBar == null){
             progressBar = (ProgressBar) findViewById(R.id.profile_pic_loading_circle);
@@ -185,24 +184,38 @@ public class WelcomeActivity extends AppCompatActivity {
         });
 
         loadingDialog = DialogUtils.buildLoadingDialog(this);
-    }
 
-    private String profilePictureBase64;
+        if (storage == null){
+            if(SimpleStorage.isExternalStorageWritable()){
+                storage = SimpleStorage.getExternalStorage();
+            }else{
+                storage = SimpleStorage.getInternalStorage(WelcomeActivity.this);
+            }
+        }
+    }
 
     private void flagProfilePictureSelected(){
         if(profilePictureBitmap == null){
             Log.i(TAG, "User skip profile picture selection.");
             profilePictureBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_default_avatar);
         }
-        saveProfilePictureToDisk(profilePictureBitmap);
+        //saveProfilePictureToDisk(profilePictureBitmap);
+        if(!storage.isDirectoryExists(directoryName)){
+            storage.createDirectory(directoryName, false);
+        }
+
+        if(mCurrentPhotoPath != null) {
+            File imageFile = new File(mCurrentPhotoPath);
+            storage.copy(imageFile, directoryName, imageFile.getName());
+        }
+        //File targetFile = storage.getFile(directoryName, imageFile.getName());
 
         SharedPreferencesHelper.savePreferences(WelcomeActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_PROFILE_PIC_UPDATED, Boolean.TRUE);
         launchTeamSelectScreen();
 
     }
 
-    private static final int OPTION_CAMERA = 0;
-    private static final int OPTION_GALLERY = 1;
+
 
     private void prompPictureSelectionDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -210,58 +223,21 @@ public class WelcomeActivity extends AppCompatActivity {
                 .setItems(R.array.profile_picture_selection, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         Log.i(TAG, "Upload profile picture, option "+which+" selected.");
+                        if(!AppPermissionHelper.isCameraPermissionGranted(WelcomeActivity.this) || !AppPermissionHelper.isStoragePermissionGranted(WelcomeActivity.this)){
+                            AppPermissionHelper.requestCameraAndStoragePermission(WelcomeActivity.this);
+                            return;
+                        }
+
                         if(which == OPTION_CAMERA){
-                            if(AppPermissionHelper.isCameraPermissionGranted(WelcomeActivity.this)){
-                                dispatchTakePictureIntent();
-                            }else{
-                                AppPermissionHelper.requestCameraAndStoragePermission(WelcomeActivity.this);
-                            }
+                            EasyImage.openCamera(WelcomeActivity.this, 0);
                         }else if(which == OPTION_GALLERY){
-                            if(AppPermissionHelper.isCameraPermissionGranted(WelcomeActivity.this)){
-                                dispatchSelectPhotoIntent();
-                            }else{
-                                AppPermissionHelper.requestCameraAndStoragePermission(WelcomeActivity.this);
-                            }
+                            EasyImage.openGallery(WelcomeActivity.this, 0);
                         }
                     }
                 });
         builder.create().show();
     }
 
-
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-                Log.i(TAG, "mCurrentPhotoPath: "+mCurrentPhotoPath);
-            } catch (IOException ex) {
-               Toast.makeText(this, "Unable to save photo to your phone's storage.",Toast.LENGTH_LONG).show();
-            }
-            // Continue only if the File was successfully created
-            try {
-                if (photoFile != null) {
-                    Uri photoURI = FileProvider.getUriForFile(this, "com.groomify.hollavirun.fileprovider", photoFile);
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                }
-            }catch (Exception e){
-                Log.e(TAG, "Unable to retrieve the provided root.", e);
-            }
-        }
-    }
-
-    private void dispatchSelectPhotoIntent(){
-        Intent intent = new Intent();
-        // Show only images, no videos or anything else
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        // Always show the chooser (if there are multiple options available)
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_PICTURE_FROM_GALLERY);
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -277,90 +253,65 @@ public class WelcomeActivity extends AppCompatActivity {
         }
     }
 
-    String mCurrentPhotoPath;
 
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "GROOMIFY_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath =  image.getAbsolutePath();
-        return image;
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         Log.i(TAG, "onActivityResult, requestCode: "+requestCode+", resultCode:"+resultCode+", Data:"+data);
-        try {
 
-            if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-                Log.i(TAG, "Setup profile picture from camera success.");
-                setPic();
-                Bitmap temp = BitmapFactory.decodeFile(mCurrentPhotoPath);
-                profilePictureBitmap = BitmapUtils.cropBitmap(300,300, temp);
-                profilePictureBase64 = BitmapUtils.convertToBase64(profilePictureBitmap);
-            }else if (requestCode == REQUEST_PICTURE_FROM_GALLERY && resultCode == RESULT_OK && data != null && data.getData() != null) {
-                Log.i(TAG, "Setup profile picture from gallery success.");
-                Uri uri = data.getData();
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                setPicFromBitmap(bitmap);
-                profilePictureBitmap = BitmapUtils.cropBitmap(300,300, bitmap);
-                profilePictureBase64 = BitmapUtils.convertToBase64(profilePictureBitmap);
+        EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
+            @Override
+            public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
+                //Some error handling
+                Log.e(TAG, "onImagePickerError", e);
             }
 
-        }catch (Exception e){
-            Log.e(TAG, "Failed to capture image return from intent.", e);
-        }
+            @Override
+            public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
+                onPhotosReturned(imageFile);
+            }
+
+            @Override
+            public void onCanceled(EasyImage.ImageSource source, int type) {
+                //Cancel handling, you might wanna remove taken photo if it was canceled
+                if (source == EasyImage.ImageSource.CAMERA) {
+                    File photoFile = EasyImage.lastlyTakenButCanceledPhoto(WelcomeActivity.this);
+                    if (photoFile != null) photoFile.delete();
+                }
+            }
+        });
+    }
+
+
+    private  void onPhotosReturned(File imageFile){
+
+        mCurrentPhotoPath = imageFile.getAbsolutePath();
+
+        Bitmap temp = BitmapFactory.decodeFile(mCurrentPhotoPath);
+        int dimension = AppUtils.getPixelFromDIP(this, 300);
+        profilePictureBitmap = BitmapUtils.cropBitmap(dimension,dimension, temp);
+        profilePictureBase64 = BitmapUtils.convertToBase64(profilePictureBitmap);
+        setPictureThumnail();
     }
 
     private void setPicFromBitmap(Bitmap bitmap){
-        int targetW = addProfileImageView.getWidth();
-        int targetH = addProfileImageView.getHeight();
+        int targetW = AppUtils.getPixelFromDIP(this, 120);
+        int targetH = AppUtils.getPixelFromDIP(this, 120);
 
         Log.i(TAG, "Original bitmap dimension: "+bitmap.getWidth()+", "+bitmap.getHeight());
-        Bitmap processedBitmap = ProfileImageUtils.processOptimizedRoundBitmap(120,120,bitmap);
+        Bitmap processedBitmap = ProfileImageUtils.processOptimizedRoundBitmap(targetW,targetH,bitmap);
         addProfileImageView.setImageBitmap(processedBitmap);
         proceedTextView.setText("Next");
     }
 
-    private void setPic() {
-        int targetW = addProfileImageView.getWidth();
-        int targetH = addProfileImageView.getHeight();
+    private void setPictureThumnail() {
+        int targetW = AppUtils.getPixelFromDIP(this, 120);
+        int targetH = AppUtils.getPixelFromDIP(this, 120);
 
-        Bitmap bitmap = ProfileImageUtils.processOptimizedRoundBitmap(120,120,mCurrentPhotoPath);
+        Bitmap bitmap = ProfileImageUtils.processOptimizedRoundBitmap(targetH,targetW,mCurrentPhotoPath);
         addProfileImageView.setImageBitmap(bitmap);
         proceedTextView.setText("Next");
-    }
-
-    private void saveProfilePictureToDisk(Bitmap bitmapImage){
-        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        // path to /data/data/yourapp/app_data/imageDir
-        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        // Create imageDir
-        File mypath = new File(directory,"profile.jpg");
-
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(mypath);
-            // Use the compress method on the BitMap object to write image to the OutputStream
-            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
-        } catch (Exception e) {
-            Log.e(TAG, "Unable to save file to",e);
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private void pullFacebookProfilePicture(Long fbId){

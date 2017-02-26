@@ -459,7 +459,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
                 .setItems(R.array.profile_picture_selection, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         Log.i(TAG, "Upload profile picture, option "+which+" selected.");
-                        if(!AppPermissionHelper.isCameraPermissionGranted(MissionDetailsActivity.this)){
+                        if(!AppPermissionHelper.isCameraPermissionGranted(MissionDetailsActivity.this) || !AppPermissionHelper.isStoragePermissionGranted(MissionDetailsActivity.this)){
                             AppPermissionHelper.requestCameraAndStoragePermission(MissionDetailsActivity.this);
                             return;
                         }

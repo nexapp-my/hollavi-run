@@ -154,7 +154,6 @@ public class SplashActivity extends AppCompatActivity {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Unable to call get user api.",e);
-                Toast.makeText(SplashActivity.this, "Unable to get user detail.", Toast.LENGTH_SHORT).show();
             }
             return null;
         }
@@ -226,12 +225,13 @@ public class SplashActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(SplashActivity.this, "Initializing...", Toast.LENGTH_LONG).show();
+                Toast.makeText(SplashActivity.this, "Initializing...", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void launchNextScreen(){
+
         SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
 
         boolean profileUpdated = settings.getBoolean(AppConstant.PREFS_PROFILE_PIC_UPDATED, false);
@@ -241,6 +241,7 @@ public class SplashActivity extends AppCompatActivity {
         boolean alreadySetup = settings.getBoolean(AppConstant.PREFS_FIRST_TIME_SETUP_COMPLETE, false);
 
         Log.i(TAG,"profileUpdated: "+profileUpdated+", teamSelected: "+teamSelected+", runSelected: "+runSelected+", alreadySetup: "+alreadySetup);
+
 
         if(alreadySetup){
             launchMainScreen(SplashActivity.this, true);

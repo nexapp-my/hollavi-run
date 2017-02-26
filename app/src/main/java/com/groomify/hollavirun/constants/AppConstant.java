@@ -1,5 +1,8 @@
 package com.groomify.hollavirun.constants;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Created by Valkyrie1988 on 11/6/2016.
  */
@@ -45,5 +48,18 @@ public class AppConstant {
 
     public static final String DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
     public static final String JSON_DATE_FORMAT = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'";
+
+
+    // Number of columns of Grid View
+    public static final int NUM_OF_COLUMNS = 3;
+
+    // Gridview image padding
+    public static final int GRID_PADDING = 8; // in dp
+
+    // SD card image directory
+    public static final String PHOTO_ALBUM = "androidhive";
+
+    // supported file formats
+    public static final List<String> FILE_EXTN = Arrays.asList("jpg", "jpeg","png");
 
 }

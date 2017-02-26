@@ -3,23 +3,30 @@ package com.groomify.hollavirun.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.res.ResourcesCompat;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -29,20 +36,27 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.groomify.hollavirun.LatestUpdateActivity;
 import com.groomify.hollavirun.R;
+import com.groomify.hollavirun.RunGalleryActivity;
 import com.groomify.hollavirun.entities.NewsFeed;
+import com.groomify.hollavirun.rest.RestClient;
+import com.groomify.hollavirun.rest.models.response.SearchRunnerLocationResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
+import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.groomify.hollavirun.view.ProfilePictureView;
 import com.nostra13.universalimageloader.core.ImageLoader;
+
+import java.io.IOException;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
+import retrofit2.Response;
 
 /**
  * Created by Valkyrie1988 on 9/18/2016.
  */
-public class MainFragment extends Fragment implements OnMapReadyCallback {
+public class MainFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private final static int MAX_LATEST_NEWS_CONTENT = 50;
 
@@ -62,30 +76,31 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
     private TextView latestNewsDesc= null;
     private TextView latestNewsTimestamp = null;
     private ImageView latestNewsCover = null;
+    private ImageView runGalleryBtn = null;
 
-    public static EditText editText;
-    public static MapView mMapView;
+    public EditText editText;
+    public MapView mMapView;
 
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
 
     private Context context;
-    private FragmentActivity fragmentActivity;
 
-    //6.718263, 100.206579
-    //1.257542, 103.897877
+    private int maxBibNo = 4;
     private LatLngBounds MALAYSIA = new LatLngBounds(
             new LatLng(1.2, 100),new LatLng(7.0, 104.3));
 
 
-    public static GoogleMap googleMap = null;
+    public GoogleMap googleMap = null;
+    public Marker searchResultMarker = null;
 
     private Realm realm;
+    private RestClient client = new RestClient();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG, "On create view");
         super.onCreate(savedInstanceState);
         context = this.getContext();
-        fragmentActivity = this.getActivity();
 
         Realm.init(this.getContext());
         RealmConfiguration config = new RealmConfiguration
@@ -99,36 +114,16 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
 
         ImageLoadUtils.initImageLoader(this.getContext());
 
-       /* if(!isFirstTimeInitialized){
-            return;
-        }*/
+        maxBibNo = getResources().getInteger(R.integer.max_bib_no);
+       /*
 
 
-        //Log.i(TAG, "Inside the main fragment!!!!");
 
-        /*NewsFeed[] newsFeeds = {
-                new NewsFeed("Accident reported at section 13", "Get the latest news on the run right here.", "4 mins ago"),
-                new NewsFeed("Well done guys!", "It was a beautiful run today. Thanks for your participation and till we meet again.", "4 mins ago"),
-                new NewsFeed("King of the road!", "Congratulations. You have done this.", "1 day ago"),
-                new NewsFeed("Neque porro quisquam est qui dolorem ipsum ", "Cras fermentum dolor et nisl tincidunt, in molestie nisl pellentesque. Duis dictum laoreet elit", "1 day ago"),
-                new NewsFeed("quia dolor sit amet, consectetur", "Duis id tincidunt velit. Sed gravida diam nibh, et egestas sem porttitor et.", "1 day ago"),
-                new NewsFeed("adipisci velit...", "Donec ut sapien enim. Fusce non tristique odio.", "2 days ago"),
-                new NewsFeed("Nam eu pulvinar velit. Mauris ac nisl qua", "Morbi pellentesque nisi vel sollicitudin dapibus.", "1 day ago")
-        };
-        setListAdapter(new NewsFeedArrayAdapter(this.getContext(), newsFeeds));
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 8;
-
-        missionCards = new ArrayList<MissionCard>();
-        missionCards.add(new MissionCard("01", "SELFIE WITH STRANGERS", null));
-        missionCards.add(new MissionCard("02", "POKEMON GO", BitmapUtils.decodeSampledBitmapFromResource(getContext().getResources(), R.drawable.pikachu_resize, 128, 128)));
-        missionCards.add(new MissionCard("03", "THE 3D JOURNEY", BitmapUtils.decodeSampledBitmapFromResource(getContext().getResources(), R.drawable.crysis_cover, 128, 128)));
-        missionCards.add(new MissionCard("04", "INFLATABLE CASTLE", BitmapUtils.decodeSampledBitmapFromResource(getContext().getResources(), R.drawable.mission_sample_cod, 128, 128)));
-        missionCards.add(new MissionCard("05", "DON't TEXT & DRIVE", BitmapUtils.decodeSampledBitmapFromResource(getContext().getResources(), R.drawable.mission_sample_ffantasy, 128, 128)));
-        missionCards.add(new MissionCard("06", "UPSIDE DOWN WORLD", null));
 */
-        //isFirstTimeInitialized = false;
+
+
+
 
     }
 
@@ -138,16 +133,48 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
+        Log.i(TAG, "On create view");
         mainFragment = inflater.inflate(R.layout.fragment_main, container, false);
 
-        if (editText == null) {
-            editText = (EditText) mainFragment.findViewById(R.id.search_runner_field);
-        }
+
+        editText = (EditText) mainFragment.findViewById(R.id.search_runner_field);
+        InputFilter[] filterArray = new InputFilter[1];
+        filterArray[0] = new InputFilter.LengthFilter(maxBibNo);
+        editText.setFilters(filterArray);
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_VARIATION_NORMAL);
+
         editText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 EditText editText = (EditText) v;
+                editText.setHint("");
                 editText.setText("");
+            }
+        });
+
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    EditText editText = (EditText) v;
+                    editText.setHint("");
+                    editText.setText("");
+                }else{
+                    InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+        });
+
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    performSearch(v.getText().toString().trim());
+                    return true;
+                }
+                return false;
             }
         });
 
@@ -164,6 +191,15 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
+        runGalleryBtn = (ImageView) mainFragment.findViewById(R.id.run_gallery_btn);
+        runGalleryBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), RunGalleryActivity.class);
+                startActivity(intent);
+            }
+        });
+
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
@@ -177,6 +213,13 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
 
         return mainFragment;
 
+    }
+
+    private void performSearch(String bibNo){
+        editText.clearFocus();
+        Log.i(TAG, "Performing search for bibNo: "+bibNo);
+        Toast.makeText(getContext(), "Searching runner...", Toast.LENGTH_SHORT).show();
+        new GroomifyGetRunnerLocationTask().execute(bibNo);
     }
 
     private void launchLatestUpdateScreen(){
@@ -208,30 +251,6 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
         }else{
             latestNewsFloatPane.setVisibility(View.GONE);
         }
-
-
-       /* // ... boilerplate omitted for brevity
-        realm = Realm.getDefaultInstance();
-        // get all the customers
-        RealmResults<Customer> customers = realm.where(Customer.class).findAllAsync();
-        // ... build a list adapter and set it to the ListView/RecyclerView/etc
-
-        // set up a Realm change listener
-        changeListener = new RealmChangeListener() {
-            @Override
-            public void onChange(RealmResults<Customer> results) {
-                // This is called anytime the Realm database changes on any thread.
-                // Please note, change listeners only work on Looper threads.
-                // For non-looper threads, you manually have to use Realm.waitForChange() instead.
-                listAdapter.notifyDataSetChanged(); // Update the UI
-            }
-        };
-        // Tell Realm to notify our listener when the customers results
-        // have changed (items added, removed, updated, anything of the sort).
-        customers.addChangeListener(changeListener);*/
-
-
-
     }
 
     @Override
@@ -282,8 +301,8 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
 
             marketMission1 = map.addMarker(new MarkerOptions()
                     .position(new LatLng(3.074028, 101.606791))
-                    .title("Mission 1").flat(true).alpha(0.5f).
-                            icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
+                    .title("Mission 1").flat(true).alpha(0.5f));
+                            //icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
             marketMission1.setTag(0);
 
             marketMission2 = map.addMarker(new MarkerOptions()
@@ -348,5 +367,74 @@ public class MainFragment extends Fragment implements OnMapReadyCallback {
         mMapView.onLowMemory();
     }
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return false;
+    }
 
+
+    private class GroomifyGetRunnerLocationTask extends AsyncTask<String, Void, SearchRunnerLocationResponse> {
+
+        @Override
+        protected SearchRunnerLocationResponse doInBackground(String... params) {
+            String authToken = SharedPreferencesHelper.getAuthToken(getContext());
+            String fbId = SharedPreferencesHelper.getFbId(getContext());
+            String bibNo = params[0];
+
+            try {
+                Response<SearchRunnerLocationResponse> restResponse = client.getApiService().searchRunnerLocation(fbId, authToken, bibNo).execute();
+
+                if(restResponse.isSuccessful()){
+                    Log.i(TAG, "Calling search runner api success");
+                    return restResponse.body();
+                }else{
+                    Log.i(TAG, "Calling search runner api failed. response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to call search runner api.",e);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(SearchRunnerLocationResponse runnerInfoResponse) {
+
+            super.onPostExecute(runnerInfoResponse);
+
+            if (runnerInfoResponse != null) {
+                Log.i(TAG, "Dropping marker.");
+                if(searchResultMarker != null){
+                    searchResultMarker.remove();
+                }
+                double lat = Double.parseDouble(runnerInfoResponse.getLocation().getLat());
+                double lng = Double.parseDouble(runnerInfoResponse.getLocation().getLng());
+                searchResultMarker =  googleMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(lat,lng))
+                        .title(runnerInfoResponse.getRunBibNo()).snippet(runnerInfoResponse.getTeam()).flat(true).
+                                icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_runner_marker)));
+                //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 14));
+
+                //Fancy shit
+                // Zoom in, animating the camera.
+                googleMap.animateCamera(CameraUpdateFactory.zoomIn());
+                // Zoom out to zoom level 10, animating with a duration of 2 seconds.
+                googleMap.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
+                // Construct a CameraPosition focusing on Mountain View and animate the camera to that position.
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(new LatLng(lat, lng))      // Sets the center of the map to Mountain View
+                        .zoom(15)                   // Sets the zoom
+                        .build();                   // Creates a CameraPosition from the builder
+                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+            } else {
+                Toast.makeText(getContext(), "Runner location not found. Please try again later.", Toast.LENGTH_SHORT).show();
+            }
+
+
+        }
+    }
+
+    public GoogleMap getGoogleMap() {
+        return googleMap;
+    }
 }
