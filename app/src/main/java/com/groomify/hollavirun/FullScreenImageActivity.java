@@ -70,11 +70,11 @@ public class FullScreenImageActivity extends AppCompatActivity {
             imageView.setImageBitmap(bitmap);
             Log.i(TAG, "Full screen image viewer with image file path: "+imageFilePath);
         }else if(imageUrl != null){
-            Log.i(TAG, "Full screen image viewer with url: "+imageFilePath);
+            Log.i(TAG, "Full screen image viewer with url: "+imageUrl);
             loadImageFromUrl();
         }
 
-        progressBar.setVisibility(View.GONE);
+        progressBar.setVisibility(View.INVISIBLE);
 
         mAttacher = new PhotoViewAttacher(imageView);
 
@@ -127,26 +127,47 @@ public class FullScreenImageActivity extends AppCompatActivity {
     }
 
     private void loadImageFromUrl(){
+
         ImageLoader.getInstance().loadImage(imageUrl,ImageLoadUtils.getDisplayImageOptions() ,new ImageLoadingListener() {
             @Override
             public void onLoadingStarted(String imageUri, View view) {
-
+                Log.i(TAG,"On loading started.");
+                progressBar.setVisibility(View.VISIBLE);
+                facebookShareBtn.setEnabled(false);
             }
 
             @Override
             public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-
+                Log.i(TAG,"On loading failed.");
+                progressBar.setVisibility(View.INVISIBLE);
+                facebookShareBtn.setEnabled(true);
+                Toast.makeText(FullScreenImageActivity.this, "Unable to load image.", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                Log.i(TAG,"On loading completed.");
+                progressBar.setVisibility(View.INVISIBLE);
+                facebookShareBtn.setEnabled(true);
                 imageView.setImageBitmap(loadedImage);
-                bitmapForShare = BitmapUtils.cropBitmap(800, 600, loadedImage);
+                try {
+                    Log.i(TAG, "URL: "+imageUri+" loaded complete. Bitmap: "+loadedImage);
+                    Log.i(TAG, "URL: "+imageUri+" loaded complete. Config: "+loadedImage.getConfig().toString());
+                    bitmapForShare = BitmapUtils.cropBitmap(800, 600, loadedImage);
+                }catch (Exception e){
+                    Log.e(TAG, "Unable to crop GIF.", e);
+                    try{
+                        bitmapForShare = loadedImage.copy(Bitmap.Config.RGB_565, false);
+                    }catch (Exception ex){
+                        Log.e(TAG, "Failed to copy the GIF as well.", ex);
+                    }
+                }
             }
 
             @Override
             public void onLoadingCancelled(String imageUri, View view) {
-
+                progressBar.setVisibility(View.INVISIBLE);
+                facebookShareBtn.setEnabled(true);
             }
         });
     }

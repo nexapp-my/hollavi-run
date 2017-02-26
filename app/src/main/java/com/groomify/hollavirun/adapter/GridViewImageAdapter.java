@@ -13,6 +13,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -21,6 +22,10 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.groomify.hollavirun.FullScreenImageActivity;
+import com.groomify.hollavirun.utils.ImageLoadUtils;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.PauseOnScrollListener;
 
 public class GridViewImageAdapter extends BaseAdapter {
 
@@ -28,11 +33,24 @@ public class GridViewImageAdapter extends BaseAdapter {
     private ArrayList<String> _filePaths = new ArrayList<String>();
     private int imageWidth;
 
+    boolean pauseOnScroll = false; // or true
+    boolean pauseOnFling = true; // or false
+
+    private ImageLoader imageLoader;
+    private DisplayImageOptions displayImageOptions;
+
     public GridViewImageAdapter(Activity activity, ArrayList<String> filePaths,
                                 int imageWidth) {
         this._activity = activity;
         this._filePaths = filePaths;
         this.imageWidth = imageWidth;
+        ImageLoadUtils.initImageLoader(_activity);
+
+        imageLoader = ImageLoader.getInstance();
+        displayImageOptions = ImageLoadUtils.getDisplayImageOptions();
+
+        PauseOnScrollListener listener = new PauseOnScrollListener(imageLoader, pauseOnScroll, pauseOnFling);
+
     }
 
     @Override
@@ -60,13 +78,19 @@ public class GridViewImageAdapter extends BaseAdapter {
         }
 
         // get screen dimensions
-        Bitmap image = decodeFile(_filePaths.get(position), imageWidth,
-                imageWidth);
+        Log.i("GridViewImageAdapter", "Displaying: "+position);
 
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         imageView.setLayoutParams(new GridView.LayoutParams(imageWidth,
                 imageWidth));
-        imageView.setImageBitmap(image);
+
+        if(!isRemoteImageFile(_filePaths.get(position))){
+            Bitmap image = decodeFile(_filePaths.get(position), imageWidth,
+                    imageWidth);
+            imageView.setImageBitmap(image);
+        }else{
+            imageLoader.displayImage(_filePaths.get(position), imageView, displayImageOptions);
+        }
 
         // image view click listener
         imageView.setOnClickListener(new OnImageClickListener(position));
@@ -88,7 +112,11 @@ public class GridViewImageAdapter extends BaseAdapter {
             // on selecting grid view image
             // launch full screen activity
             Intent intent = new Intent(_activity, FullScreenImageActivity.class);
-            intent.putExtra("IMAGE_FILE_PATH", _filePaths.get(_postion));
+            if(isRemoteImageFile(_filePaths.get(_postion))){
+                intent.putExtra("IMAGE_URL", _filePaths.get(_postion));
+            }else{
+                intent.putExtra("IMAGE_FILE_PATH", _filePaths.get(_postion));
+            }
             _activity.startActivity(intent);
         }
 
@@ -120,6 +148,10 @@ public class GridViewImageAdapter extends BaseAdapter {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private boolean isRemoteImageFile(String path){
+        return path.startsWith("http:") || path.startsWith("https:");
     }
 
 }

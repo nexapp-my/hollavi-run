@@ -2,6 +2,7 @@ package com.groomify.hollavirun.rest.services;
 
 import com.groomify.hollavirun.rest.models.request.MissionTransactionRequest;
 import com.groomify.hollavirun.rest.models.request.UpdateUserInfoRequest;
+import com.groomify.hollavirun.rest.models.response.RaceGalleryResponse;
 import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
 import com.groomify.hollavirun.rest.models.response.RaceRankingResponse;
 import com.groomify.hollavirun.rest.models.response.RaceResponse;
@@ -71,6 +72,15 @@ public interface GroomifyAPIServices {
             @Header("fb_id") String facebookId,
             @Header("auth_token") String authToken,
             @Path("id") String id
+    );
+
+    @GET("races/{id}/gallery")
+    Call<RaceGalleryResponse> getRaceGallery(
+            @Header("fb_id") String facebookId,
+            @Header("auth_token") String authToken,
+            @Path("id") String id,
+            @Query("bib") String bibNo,
+            @Query("mission") Integer missionId
     );
 
     @POST("races/{id}/join")

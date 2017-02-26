@@ -15,12 +15,7 @@
         android:layout_centerHorizontal="true"
         android:id="@+id/full_screen_image_view" />
 
-    <ProgressBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/image_loading_progress" />
+
 
     <ImageView
         android:layout_width="50dp"
@@ -31,5 +26,11 @@
         android:layout_alignParentEnd="true"
         android:id="@+id/facebook_share_button"
         android:layout_margin="20dp" />
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/image_loading_progress" />
 
 </RelativeLayout>

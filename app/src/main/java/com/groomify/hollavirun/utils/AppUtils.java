@@ -107,9 +107,9 @@ public class AppUtils {
     private static int missionCoverResourceId[] = {
             R.drawable.mission_banner_01,
             R.drawable.mission_banner_02,
-            R.drawable.mission_banner_03,
             R.drawable.mission_banner_04,
-            R.drawable.mission_banner_05
+            R.drawable.mission_banner_05,
+            R.drawable.mission_banner_06
     };
 
     public static Mission[] getDefaultMission(){
@@ -128,9 +128,9 @@ public class AppUtils {
 
     public static Team[] getDefaultTeam(){
         Team[] teams = new Team[3];
-        teams[0] = new Team(R.drawable.team_3_ambassador, "G");
-        teams[1] = new Team(R.drawable.team_1_ambassador, "M");
-        teams[2] = new Team(R.drawable.team_2_ambassador, "F");
+        teams[0] = new Team(R.drawable.team_3_ambassador, "Grooton");
+        teams[1] = new Team(R.drawable.team_1_ambassador, "Miki");
+        teams[2] = new Team(R.drawable.team_2_ambassador, "Fyre");
         return teams;
     }
 

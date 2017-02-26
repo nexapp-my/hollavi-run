@@ -225,7 +225,7 @@ public class SplashActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(SplashActivity.this, "Initializing...", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(SplashActivity.this, "Initializing...", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -241,6 +241,7 @@ public class SplashActivity extends AppCompatActivity {
         boolean alreadySetup = settings.getBoolean(AppConstant.PREFS_FIRST_TIME_SETUP_COMPLETE, false);
 
         Log.i(TAG,"profileUpdated: "+profileUpdated+", teamSelected: "+teamSelected+", runSelected: "+runSelected+", alreadySetup: "+alreadySetup);
+
 
 
         if(alreadySetup){
@@ -259,48 +260,7 @@ public class SplashActivity extends AppCompatActivity {
 
         //TODO check is facebook login success and groomify failed. If failed perform groomify login here.
 
-     /*   if(profileUpdated && teamSelected && runSelected){
-            launchMainScreen(SplashActivity.this, true);
-        }else if(!runSelected ){
-            launchRaceSelectionScreen(SplashActivity.this, true);
-        }
-        else if (!teamSelected){
-            launchTeamSelectionScreen(SplashActivity.this, true);
-        }
-        else{
-            launchWelcomeScreen(SplashActivity.this, true);
-        }*/
-
     }
-
-    /*private void launchWelcomeScreen(){
-        GraphRequest request = GraphRequest.newMeRequest(
-                AccessToken.getCurrentAccessToken(),
-                new GraphRequest.GraphJSONObjectCallback() {
-                    @Override
-                    public void onCompleted(JSONObject object, GraphResponse response) {
-                        Log.v(TAG, "GraphResponse:" +response.toString());
-                        try {
-                            String email = object.getString("email");
-                            //String birthday = object.getString("birthday"); // 01/31/1980 format
-                            Bundle extras = new Bundle();
-                            extras.putString("email", email);
-                            Intent intent = new Intent(SplashActivity.this, WelcomeActivity.class);
-                            intent.putExtras(extras);
-                            startActivity(intent);
-                            finish();
-                        } catch (JSONException e) {
-                            Log.e(TAG, "Failed to convert JSON info", e);
-                        }
-                    }
-                }
-        );
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "id,name,email");
-        request.setParameters(parameters);
-        request.executeAsync();
-    }*/
-
 
     @Override
     protected void onDestroy() {

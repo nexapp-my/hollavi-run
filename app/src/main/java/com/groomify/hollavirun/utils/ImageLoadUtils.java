@@ -26,9 +26,10 @@ public class ImageLoadUtils {
         config.threadPriority(Thread.NORM_PRIORITY - 2);
         config.denyCacheImageMultipleSizesInMemory();
         config.diskCacheFileNameGenerator(new Md5FileNameGenerator());
-        config.diskCacheSize(50 * 1024 * 1024); // 50 MiB
+        config.diskCacheSize(100 * 1024 * 1024); // 50 MiB
         config.tasksProcessingOrder(QueueProcessingType.LIFO);
-        config.writeDebugLogs(); // Remove for release app
+        //config.writeDebugLogs();
+        // Remove for release app
 
         // Initialize ImageLoader with configuration.
         ImageLoader.getInstance().init(config.build());
@@ -41,6 +42,7 @@ public class ImageLoadUtils {
                     //.showImageOnLoading(R.drawable.ic_stub)
                     //.showImageForEmptyUri(R.drawable.ic_empty)
                     //.showImageOnFail(R.drawable.ic_error)
+                    .resetViewBeforeLoading(true)
                     .cacheInMemory(true)
                     .cacheOnDisk(true)
                     .considerExifParams(true)

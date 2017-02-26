@@ -136,14 +136,14 @@ public class SharedPreferencesHelper {
     public static void setCouponRedeemed(Context context, Long raceId, Integer couponId, boolean redeemed){
         SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
-        String prefKey = AppConstant.PREFS_MISSION_UNLOCK_PREFIX + "_" + raceId + "_" +couponId;
+        String prefKey = AppConstant.PREFS_COUPON_REDEEMED_PREFIX + "_" + raceId + "_" +couponId;
         editor.putBoolean(prefKey, redeemed);
         editor.commit();
     }
 
     public static boolean isCouponRedeemed(Context context, Long raceId, Integer couponId){
         SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
-        String prefKey = AppConstant.PREFS_MISSION_UNLOCK_PREFIX + "_" + raceId + "_" +couponId;
+        String prefKey = AppConstant.PREFS_COUPON_REDEEMED_PREFIX + "_" + raceId + "_" +couponId;
         return settings.getBoolean(prefKey, false);
     }
 }
