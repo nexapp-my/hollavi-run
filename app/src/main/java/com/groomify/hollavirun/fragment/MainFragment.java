@@ -36,17 +36,24 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.groomify.hollavirun.LatestUpdateActivity;
+import com.groomify.hollavirun.MissionDetailsActivity;
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.RunGalleryActivity;
+import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.entities.NewsFeed;
+import com.groomify.hollavirun.entities.Team;
 import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.request.UpdateUserLocationRequest;
 import com.groomify.hollavirun.rest.models.request.UserLocation;
 import com.groomify.hollavirun.rest.models.response.Info;
+import com.groomify.hollavirun.rest.models.response.Mission_;
+import com.groomify.hollavirun.rest.models.response.RaceDetailResponse;
 import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
+import com.groomify.hollavirun.rest.models.response.RaceTrackCoordinate;
 import com.groomify.hollavirun.rest.models.response.SearchRunnerLocationResponse;
 import com.groomify.hollavirun.rest.models.response.UpdateUserLocationResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
+import com.groomify.hollavirun.utils.AppUtils;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.groomify.hollavirun.view.ProfilePictureView;
@@ -103,6 +110,12 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
     private Realm realm;
     private RestClient client = new RestClient();
     private String runnerId;
+    private Long raceId;
+    private RaceDetailResponse raceDetailResponse;
+
+    private Mission[] missions;
+
+    int previousClickedMarker = -1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -117,23 +130,14 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
                 .build();
 
         realm = Realm.getInstance(config);
-
         // Create global configuration and initialize ImageLoader with this config
-
         ImageLoadUtils.initImageLoader(this.getContext());
-
         maxBibNo = getResources().getInteger(R.integer.max_bib_no);
-
         runnerId = SharedPreferencesHelper.getRunnerId(getContext());
-       /*
-
-
-
-
-*/
-
-
-
+        raceId = SharedPreferencesHelper.getSelectedRaceId(getContext());
+        missions = AppUtils.getDefaultMission();
+        raceDetailResponse = realm.where(RaceDetailResponse.class).equalTo("id", raceId).findFirst();
+        Log.i(TAG, "GOD BLESS ME PLEASE WORK!!!!!"+raceDetailResponse);
 
     }
 
@@ -141,11 +145,9 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
 
         Log.i(TAG, "On create view");
         View mainFragment = inflater.inflate(R.layout.fragment_main, container, false);
-
 
         editText = (EditText) mainFragment.findViewById(R.id.search_runner_field);
         InputFilter[] filterArray = new InputFilter[1];
@@ -221,7 +223,6 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
         mMapView.onCreate(mapViewBundle);
         mMapView.getMapAsync(this);
 
-
         initializeNewsView();
 
         return mainFragment;
@@ -231,8 +232,11 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
     private void performSearch(String bibNo){
         editText.clearFocus();
         Log.i(TAG, "Performing search for bibNo: "+bibNo);
-        Toast.makeText(getContext(), "Searching runner...", Toast.LENGTH_SHORT).show();
-        new GroomifyGetRunnerLocationTask().execute(bibNo);
+        if(bibNo.trim().length() > 0){
+            Toast.makeText(getContext(), "Searching runner...", Toast.LENGTH_SHORT).show();
+            new GroomifyGetRunnerLocationTask().execute(bibNo);
+        }
+
     }
 
     private void launchLatestUpdateScreen(){
@@ -242,10 +246,21 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
 
 
     private void initializeNewsView(){
-
+        Team[] teams = AppUtils.getDefaultTeam();
+        String teamName = SharedPreferencesHelper.getTeamId(getContext());
+        for(int i = 0; i < teams.length; i++){
+            if(teams[i].getTeamName().equals(teamName)){
+                latestNewsCover.setImageResource(teams[i].getResourceId());
+                break;
+            }
+        }
+        //NOTE, now will not latest news to show here anymore.
+        /*
         RealmResults<NewsFeed> newsFeedRealmResults = realm.where(NewsFeed.class).findAll();
 
         Log.i(TAG, "Total news feed from database: "+newsFeedRealmResults);
+
+
         //TODO get the first item for latest news
 
         if(newsFeedRealmResults.size() > 0){
@@ -263,7 +278,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
             ImageLoader.getInstance().displayImage(latestNews.getCoverPhotoUrl(), latestNewsCover, ImageLoadUtils.getDisplayImageOptions());
         }else{
             latestNewsFloatPane.setVisibility(View.GONE);
-        }
+        }*/
     }
 
     @Override
@@ -308,6 +323,19 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
                 map.setMyLocationEnabled(true);
             }
 
+            int i = 0;
+            for(Mission_ mission_: raceDetailResponse.getMissions()){
+                Double missionLat = Double.parseDouble(mission_.getLat());
+                Double missionLng = Double.parseDouble(mission_.getLng());
+                Marker marker = map.addMarker(new MarkerOptions()
+                        .position(new LatLng(missionLat, missionLng))
+                        .title(mission_.getTitle())
+                        .snippet(mission_.getDescription())
+                );
+                marker.setTag(i);
+                i++;
+            }
+/*
             Marker marketMission1;
             Marker marketMission2;
             Marker marketMission3;
@@ -332,27 +360,44 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
             marketMission3 = map.addMarker(new MarkerOptions()
                     .position(new LatLng(3.065279, 101.603333))
                     .title("Mission 4"));
-            marketMission3.setTag(0);
+            marketMission3.setTag(0);*/
             //3.064059, 101.579973
 
-            PolylineOptions rectOptions = new PolylineOptions()
-                    .add(new LatLng(3.073053, 101.597232))
-                    .add(new LatLng(3.073107, 101.601963))
-                    .add(new LatLng(3.074028, 101.606791))
-                    .add(new LatLng(3.074103, 101.609870))
-                    .add(new LatLng(3.073972, 101.610781))
-                    .add(new LatLng(3.065541, 101.610792))
-                    .add(new LatLng(3.065309, 101.593327))
-                    .add(new LatLng(3.072339, 101.593151))
-                    .add(new LatLng(3.072468, 101.596402))
-                    .add(new LatLng(3.073053, 101.597232))
-                    .color(ResourcesCompat.getColor(getResources(), R.color.rustyRed, null));// Closes the polyline.
+            PolylineOptions rectOptions = new PolylineOptions().color(ResourcesCompat.getColor(getResources(), R.color.rustyRed, null));
+            Double startLat = Double.parseDouble(raceDetailResponse.getStartPoint().getLat());
+            Double startLng;
+            try {
+                startLng = Double.parseDouble(raceDetailResponse.getStartPoint().getLng());
+            }catch (Exception e){
+                startLng = 101.5710442;
+            }
+            rectOptions.add(new LatLng(startLat, startLng));
+
+            for(RaceTrackCoordinate raceTrackCoordinate: raceDetailResponse.getRaceTrackCoordinates()){
+                Double lng = Double.parseDouble(raceTrackCoordinate.getLng());
+                Double lat = Double.parseDouble(raceTrackCoordinate.getLat());
+                rectOptions.add(new LatLng(lat, lng));
+            }
+
+            Double endLat =  Double.parseDouble(raceDetailResponse.getEndPoint().getLat());
+            Double endLng =  Double.parseDouble(raceDetailResponse.getEndPoint().getLng());
+            rectOptions.add(new LatLng(endLat, endLng));
+
+            Double zoomCenterLatLng = raceDetailResponse.getMapInfo().getMapCenter().getLat();
+            int zoomLevel = raceDetailResponse.getMapInfo().getZoomLevel();
+
+            Log.i(TAG, "Start point: "+startLat+", "+startLng);
+            Log.i(TAG, "End point: "+endLat+", "+endLng);
+            Log.i(TAG, "Total poly coordinate: "+raceDetailResponse.getRaceTrackCoordinates().size());
+            Log.i(TAG, "Zoom center : "+zoomCenterLatLng);
+            Log.i(TAG, "Zoom level: "+zoomLevel);
 
              // Get back the mutable Polyline
             Polyline polyline = map.addPolyline(rectOptions);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(3.068367, 101.602351), 15));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(zoomCenterLatLng, zoomCenterLatLng), zoomLevel));
 
             googleMap.setOnMyLocationChangeListener(myLocationChangeListener);
+            googleMap.setOnMarkerClickListener(this);
 
         } catch (Resources.NotFoundException e) {
             Log.e(TAG, "Can't find style. Error: ", e);
@@ -384,7 +429,24 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        return false;
+
+        int missionNo = (int) marker.getTag();
+
+        Log.i(TAG, "Marker clicked.");
+        if(previousClickedMarker == missionNo) {
+            Intent intent = new Intent(getActivity(), MissionDetailsActivity.class);
+
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("MISSION", missions[missionNo]);
+            intent.putExtra("EXTRA_MISSION", bundle);
+            getActivity().startActivity(intent);
+            previousClickedMarker = missionNo;
+            return false;
+        }else{
+            previousClickedMarker = missionNo;
+            return false;
+        }
+
     }
 
 

@@ -1,5 +1,6 @@
 package com.groomify.hollavirun;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
@@ -26,6 +28,7 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.GroomifyUser;
+import com.groomify.hollavirun.fragment.TermAndConditionDialogFragment;
 import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.response.RaceDetailResponse;
 import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
@@ -53,18 +56,15 @@ import static com.groomify.hollavirun.utils.ActivityUtils.launchWelcomeScreen;
 /**
  * Created by Valkyrie1988 on 9/17/2016.
  */
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends AppCompatActivity implements TermAndConditionDialogFragment.NoticeDialogListener {
 
     private final static String TAG = SplashActivity.class.getSimpleName();
 
     private final static long SPLASH_DISPLAY_LENGTH = 0;
-    private static final int PERMISSIONS_REQUEST = 100;
 
     boolean isDebug = false;
 
     RestClient client = new RestClient();
-    //private Realm realm;
-
     GroomifyUser groomifyUserRealmObj;
 
     int totalAttemp = 0;
@@ -113,27 +113,47 @@ public class SplashActivity extends AppCompatActivity {
         }else{
             /* New Handler to start the Menu-Activity
             * and close this Splash-Screen after some seconds.*/
-            new Handler().postDelayed(new Runnable(){
-                @Override
-                public void run() {
-
-                    SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
-                    boolean userLoggedIn = settings.getBoolean(AppConstant.PREFS_USER_LOGGGED_IN, false);
-
-                    if(!userLoggedIn){
-                        LoginManager.getInstance().logOut();
-                        AccessToken.setCurrentAccessToken(null);
-                    }
-
-                    //TODO another mechanism to determine user authenticated if user is not login with facebook.
-                    if(AccessToken.getCurrentAccessToken() != null && Profile.getCurrentProfile() != null && userLoggedIn){
-                        new GroomifyGetUserTask().execute();
-                    }else{
-                        launchOnboardingScreen(SplashActivity.this, true);
-                    }
-                }
-            }, SPLASH_DISPLAY_LENGTH);
+           if(SharedPreferencesHelper.isTermAndConditionAccepted(this)){
+               launchApp();
+           }else{
+               showTermAndConditionAgreementDialog();
+           }
         }
+    }
+
+    private void launchApp(){
+        new Handler().postDelayed(new Runnable(){
+            @Override
+            public void run() {
+
+                SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+                boolean userLoggedIn = settings.getBoolean(AppConstant.PREFS_USER_LOGGGED_IN, false);
+
+                if(!userLoggedIn){
+                    LoginManager.getInstance().logOut();
+                    AccessToken.setCurrentAccessToken(null);
+                }
+
+                //TODO another mechanism to determine user authenticated if user is not login with facebook.
+                if(AccessToken.getCurrentAccessToken() != null && Profile.getCurrentProfile() != null && userLoggedIn){
+                    new GroomifyGetUserTask().execute();
+                }else{
+                    launchOnboardingScreen(SplashActivity.this, true);
+                }
+            }
+        }, SPLASH_DISPLAY_LENGTH);
+    }
+
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        SharedPreferencesHelper.setTermAndConditionAccepted(this);
+        launchApp();
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        System.exit(0);
     }
 
     private class GroomifyGetUserTask extends AsyncTask<Void, String, UserInfoResponse> {
@@ -205,8 +225,6 @@ public class SplashActivity extends AppCompatActivity {
                             SharedPreferencesHelper.savePreferences(SplashActivity.this, SharedPreferencesHelper.PreferenceValueType.LONG, AppConstant.PREFS_USER_ID, new Long(userInfoResponse.getId()));
 
                             launchNextScreen();
-
-
                         }
                     });
                 }finally {
@@ -261,6 +279,13 @@ public class SplashActivity extends AppCompatActivity {
 
         //TODO check is facebook login success and groomify failed. If failed perform groomify login here.
 
+    }
+
+    private void showTermAndConditionAgreementDialog(){
+        Log.i(TAG, "Show term and condition dialog.");
+        DialogFragment dialog = new TermAndConditionDialogFragment();
+        dialog.setCancelable(false);
+        dialog.show(getSupportFragmentManager(), "TermAndConditionDialogFragment");
     }
 
     @Override

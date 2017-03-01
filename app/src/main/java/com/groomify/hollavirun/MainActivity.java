@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.facebook.FacebookSdk;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.GroomifyUser;
+import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.entities.NewsFeed;
 import com.groomify.hollavirun.entities.Ranking;
 import com.groomify.hollavirun.fragment.CouponsListFragment;
@@ -112,7 +113,8 @@ public class MainActivity extends AppCompatActivity
 
     private Storage storage;
 
-    private String directoryName = Environment.DIRECTORY_DCIM + "/Groomify";
+    //private String directoryName = Environment.DIRECTORY_DCIM + "/Groomify";
+    private String directoryName = AppConstant.CAMERA_IMAGE_DIRECTORY;
 
     private boolean isRunAsGuest;
 
@@ -347,11 +349,12 @@ public class MainActivity extends AppCompatActivity
 
                     if (storage == null){
 
-                        if(SimpleStorage.isExternalStorageWritable()){
+                        storage = SimpleStorage.getInternalStorage(MainActivity.this);
+                        /*if(SimpleStorage.isExternalStorageWritable()){
                             storage = SimpleStorage.getExternalStorage();
                         }else{
                             storage = SimpleStorage.getInternalStorage(MainActivity.this);
-                        }
+                        }*/
                     }
                     EasyImage.openCamera(MainActivity.this, 0);
                 }else{
@@ -417,12 +420,12 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void galleryAddPic() {
+    /*private void galleryAddPic() {
 
         Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         scanIntent.setData(Uri.fromFile(new File(directoryName)));
         sendBroadcast(scanIntent);
-    }
+    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -432,10 +435,28 @@ public class MainActivity extends AppCompatActivity
 
                 SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
+
+                //FIXME trick to recover mission from lost.
+                boolean missionSubmitted[] = new boolean[AppUtils.getDefaultMission().length];
+                boolean missionUnlocked[] = new boolean[AppUtils.getDefaultMission().length];
+                String missionUnlockedTime[] = new String[AppUtils.getDefaultMission().length];
+                Mission[] missions = AppUtils.getDefaultMission();
+                for(int i = 0; i < missions.length; i++){
+                    missionUnlockedTime[i] = SharedPreferencesHelper.getMissionUnlockTime(this, raceId, missions[i].getId());
+                    missionSubmitted[i] = SharedPreferencesHelper.isMissionSubmitted(this, raceId, missions[i].getId());
+                    missionUnlocked[i] = SharedPreferencesHelper.isMissionUnlocked(this, raceId, missions[i].getId());
+                }
                 editor.clear();
                 // Commit the edits!
                 editor.commit();
 
+                for(int i = 0; i < missions.length; i++){
+                    SharedPreferencesHelper.setMissionUnlocked(this, raceId, missions[i].getId(), missionUnlocked[i]);
+                    SharedPreferencesHelper.setMissionSubmitted(this, raceId, missions[i].getId(), missionSubmitted[i]);
+                    SharedPreferencesHelper.setMissionUnlockedTime(this, raceId, missions[i].getId(), missionUnlockedTime[i]);
+                }
+                SharedPreferencesHelper.setTermAndConditionAccepted(this);
+                editor.commit();
                 Intent intent = new Intent(MainActivity.this, OnboardingActivity.class);
                 startActivity(intent);
                 finish();
@@ -482,10 +503,11 @@ public class MainActivity extends AppCompatActivity
 
         storage.copy(imageFile, directoryName, imageFile.getName());
 
-        galleryAddPic();
+        /*galleryAddPic();*/
         File targetFile = storage.getFile(directoryName, imageFile.getName());
         Intent intent = new Intent(getBaseContext(), FullScreenImageActivity.class);
-        intent.putExtra("IMAGE_FILE_PATH", targetFile.getAbsolutePath());
+        intent.putExtra("IMAGE_FILE_PATH", imageFile.getAbsolutePath());
+        intent.putExtra("HD_MODE", true);
         startActivity(intent);
 
     }
@@ -554,8 +576,6 @@ public class MainActivity extends AppCompatActivity
                     .setNegativeButton("No", null)
                     .show();
         }
-
-
     }
 
 

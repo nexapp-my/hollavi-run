@@ -68,15 +68,15 @@ public class CouponsListFragment extends ListFragment {
             Log.e(TAG, "Unable to parse race expiration date.");
         }
 
-        int oriDimension = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 106, getResources().getDisplayMetrics());
+        /*int oriDimension = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 106, getResources().getDisplayMetrics());
         int dimension = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 72, getResources().getDisplayMetrics());
 
         Bitmap tshirt = BitmapUtils.cropBitmap(dimension, dimension, BitmapFactory.decodeResource(getResources(), R.drawable.t_shirt));
         Bitmap goodieBag = BitmapUtils.cropBitmap(dimension, dimension, BitmapFactory.decodeResource(getResources(), R.drawable.goodie_bag));
         Bitmap firstAidKit = BitmapUtils.cropBitmap(dimension, dimension, BitmapFactory.decodeResource(getResources(), R.drawable.first_aid_kit));
-        Bitmap milo = BitmapUtils.cropBitmap(dimension, dimension, BitmapFactory.decodeResource(getResources(), R.drawable.milo));
+        Bitmap milo = BitmapUtils.cropBitmap(dimension, dimension, BitmapFactory.decodeResource(getResources(), R.drawable.milo));*/
 
-        ByteArrayOutputStream tshirtByteArr = new ByteArrayOutputStream();
+        /*ByteArrayOutputStream tshirtByteArr = new ByteArrayOutputStream();
         ByteArrayOutputStream goodieBagByteArr = new ByteArrayOutputStream();
         ByteArrayOutputStream firstAidKitByteArr = new ByteArrayOutputStream();
         ByteArrayOutputStream miloByteArr = new ByteArrayOutputStream();
@@ -89,18 +89,20 @@ public class CouponsListFragment extends ListFragment {
         tshirt.compress(Bitmap.CompressFormat.PNG, 50, tshirtByteArr);
         goodieBag.compress(Bitmap.CompressFormat.PNG, 50, goodieBagByteArr);
         firstAidKit.compress(Bitmap.CompressFormat.PNG, 50, firstAidKitByteArr);
-        milo.compress(Bitmap.CompressFormat.PNG, 50, miloByteArr);
+        milo.compress(Bitmap.CompressFormat.PNG, 50, miloByteArr);*/
 
-        BitmapUtils.cropBitmap(oriDimension, oriDimension, BitmapFactory.decodeResource(getResources(), R.drawable.t_shirt)).compress(Bitmap.CompressFormat.PNG, 50, oriTshirtByteArr);
+        /*BitmapUtils.cropBitmap(oriDimension, oriDimension, BitmapFactory.decodeResource(getResources(), R.drawable.t_shirt)).compress(Bitmap.CompressFormat.PNG, 50, oriTshirtByteArr);
         BitmapUtils.cropBitmap(oriDimension, oriDimension, BitmapFactory.decodeResource(getResources(), R.drawable.goodie_bag)).compress(Bitmap.CompressFormat.PNG, 50, oriGoodieBagByteArr);
         BitmapUtils.cropBitmap(oriDimension, oriDimension, BitmapFactory.decodeResource(getResources(), R.drawable.first_aid_kit)).compress(Bitmap.CompressFormat.PNG, 50, oriFirstAidKitByteArr);
-        BitmapUtils.cropBitmap(oriDimension, oriDimension, BitmapFactory.decodeResource(getResources(), R.drawable.milo)).compress(Bitmap.CompressFormat.PNG, 50, oriMiloByteArr);
+        BitmapUtils.cropBitmap(oriDimension, oriDimension, BitmapFactory.decodeResource(getResources(), R.drawable.milo)).compress(Bitmap.CompressFormat.PNG, 50, oriMiloByteArr);*/
+
+        //public Coupon(String description, Date expirationTime, int id, String name, boolean redeemed, int resourceId) {
 
         coupons = new Coupon[]{
-                new Coupon(1, "Free Milo Drink", "Energise yourself", raceFinishDate, miloByteArr.toByteArray(), oriMiloByteArr.toByteArray()),
-                new Coupon(2, "Goodie Bag", "Everything is inside", raceFinishDate, goodieBagByteArr.toByteArray(), oriGoodieBagByteArr.toByteArray()),
-                new Coupon(3, "First Aid Kit", "Help yourself", raceFinishDate, firstAidKitByteArr.toByteArray(), oriFirstAidKitByteArr.toByteArray()),
-                new Coupon(4, "Groomify T-Shirt", "Signature T-Shirt", raceFinishDate, tshirtByteArr.toByteArray(), oriTshirtByteArr.toByteArray())
+                new Coupon(1, "Free Milo Drink", "Energise yourself", raceFinishDate, false,  R.drawable.milo),
+                new Coupon(2, "Goodie Bag", "Everything is inside", raceFinishDate, false, R.drawable.goodie_bag),
+                new Coupon(3, "First Aid Kit", "Help yourself", raceFinishDate, false, R.drawable.first_aid_kit),
+                new Coupon(4, "Groomify T-Shirt", "Signature T-Shirt", raceFinishDate, false, R.drawable.t_shirt)
         };
 
         super.onCreate(savedInstanceState);

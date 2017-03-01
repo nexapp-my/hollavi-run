@@ -40,8 +40,9 @@
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:textColor="@color/black"
-        android:textSize="17sp"
-        android:textStyle="normal|bold" />
+        android:textSize="18sp"
+        android:textStyle="normal|bold"
+        android:visibility="invisible" />
 
     <ImageView
         android:layout_width="43dp"

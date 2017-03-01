@@ -58,11 +58,12 @@ public class CouponArrayAdapter extends ArrayAdapter<Coupon> {
                 couponExpirationTextView.setText("Expired");
             }
 
-            if(coupon.getImageByteArr() != null){
+            couponImageImageView.setImageResource(coupon.getResourceId());
+            /*if(coupon.getImageByteArr() != null){
                 //couponImageImageView = new ImageView(this.getContext());
                 Bitmap miniMapBitmap = BitmapFactory.decodeByteArray(coupon.getImageByteArr(), 0, coupon.getImageByteArr().length);
                 couponImageImageView.setImageBitmap(miniMapBitmap);
-            }
+            }*/
         }
 
 

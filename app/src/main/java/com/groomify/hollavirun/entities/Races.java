@@ -25,8 +25,9 @@ public class Races extends RealmObject implements Parcelable{
     public String endTime;
     public String firstAid;
     public String groomifySupport;
-
     public RealmList<Mission> missions;
+
+
 
     @Ignore
     public byte[] miniMapByteArr;

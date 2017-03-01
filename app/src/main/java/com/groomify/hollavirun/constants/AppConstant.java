@@ -1,5 +1,7 @@
 package com.groomify.hollavirun.constants;
 
+import android.os.Environment;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,6 +47,8 @@ public class AppConstant {
 
     public static final String PREFS_COUPON_REDEEMED_PREFIX = "coupon_redeemed_prefix_";
 
+    public static final String PREFS_TERM_AND_CONDITION_ACCEPTED = "term_and_condition_accepted";
+
 
     public static final String DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
     public static final String JSON_DATE_FORMAT = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'";
@@ -56,10 +60,9 @@ public class AppConstant {
     // Gridview image padding
     public static final int GRID_PADDING = 8; // in dp
 
-    // SD card image directory
-    public static final String PHOTO_ALBUM = "androidhive";
-
     // supported file formats
     public static final List<String> FILE_EXTN = Arrays.asList("jpg", "jpeg","png");
+
+    public static final String CAMERA_IMAGE_DIRECTORY = "CAMERA";
 
 }

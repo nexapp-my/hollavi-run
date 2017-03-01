@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Vibrator;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -119,6 +120,8 @@ public class MissionDetailsActivity extends AppCompatActivity {
     private String runnerId;
     private Long userId;
 
+    private String[] submittedPhotoLocation = new String[3];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Bundle extras = getIntent().getExtras().getBundle("EXTRA_MISSION");
@@ -162,9 +165,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
         shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
             @Override
             public void onSuccess(Sharer.Result result) {
-                //onBackPressed();
-                //TODO save those photo to storage so it is retrivable.
-                new GroomifySubmitMissionTask().execute();
+                Toast.makeText(MissionDetailsActivity.this, "Your photo has been shared to facebook.", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -176,7 +177,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
             public void onError(FacebookException error) {
                 Log.e(TAG, "Failed to share content to facebook.Errors: "+error.getMessage(),error.getCause() );
 
-                Toast.makeText(MissionDetailsActivity.this, "Failed to share facebook post. Please try again.", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MissionDetailsActivity.this, "Failed to share facebook post. Please try again.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -194,31 +195,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
                 if(unlocked){
                     if(checkIsMissionReadyToSubmit()){
                         Log.i(TAG, "Preparing to submit the mission.");
-                        if (ShareDialog.canShow(SharePhotoContent.class)){
-                           SharePhoto photo_0 = new SharePhoto.Builder()
-                                    .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[0]))
-                                   .build();
-                            SharePhoto photo_1 = new SharePhoto.Builder()
-                                    .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[1]))
-                                    .build();
-                            SharePhoto photo_2 = new SharePhoto.Builder()
-                                    .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[2]))
-                                    .build();
-
-                            String hashtag =  MissionDetailsActivity.this.getResources().getString(R.string.facebook_hashtag);
-                            SharePhotoContent content = new SharePhotoContent.Builder()
-                                    .addPhoto(photo_0)
-                                    .addPhoto(photo_1)
-                                    .addPhoto(photo_2)
-                                    .setShareHashtag(new ShareHashtag.Builder().setHashtag(hashtag).build())
-                                    .build();
-
-
-                            shareDialog.show(content);
-
-                        }else{
-                            Toast.makeText(MissionDetailsActivity.this, "Your device does not support facebook share.", Toast.LENGTH_SHORT).show();
-                        }
+                        new GroomifySubmitMissionTask().execute();
                     }
                 }else{
                     Toast.makeText(MissionDetailsActivity.this, "Scan QR to unlock mission.", Toast.LENGTH_SHORT).show();
@@ -239,6 +216,8 @@ public class MissionDetailsActivity extends AppCompatActivity {
                     Toast.makeText(v.getContext(), "Select first picture.", Toast.LENGTH_SHORT).show();
                     currentSelectedImage = 1;
                     prompPictureSelectionDialog();
+                }else{
+                    viewFullScreenPhoto(1);
                 }
             }
         });
@@ -250,6 +229,8 @@ public class MissionDetailsActivity extends AppCompatActivity {
                     Toast.makeText(v.getContext(), "Select second picture.", Toast.LENGTH_SHORT).show();
                     currentSelectedImage = 2;
                     prompPictureSelectionDialog();
+                }else{
+                    viewFullScreenPhoto(2);
                 }
             }
         });
@@ -261,6 +242,8 @@ public class MissionDetailsActivity extends AppCompatActivity {
                     Toast.makeText(v.getContext(), "Select third picture.", Toast.LENGTH_SHORT).show();
                     currentSelectedImage = 3;
                     prompPictureSelectionDialog();
+                }else{
+                    viewFullScreenPhoto(3);
                 }
             }
         });
@@ -320,6 +303,10 @@ public class MissionDetailsActivity extends AppCompatActivity {
             renderThumnailFromBitmap(missionImageOne.getAbsolutePath(), 1);
             renderThumnailFromBitmap(missionImageTwo.getAbsolutePath(), 2);
             renderThumnailFromBitmap(missionImageThree.getAbsolutePath(), 3);
+            submittedPhotoLocation[0] = missionImageOne.getAbsolutePath();
+            submittedPhotoLocation[1] = missionImageTwo.getAbsolutePath();
+            submittedPhotoLocation[2] = missionImageThree.getAbsolutePath();
+
 
 
         }else{
@@ -361,6 +348,9 @@ public class MissionDetailsActivity extends AppCompatActivity {
                     SharedPreferencesHelper.setMissionUnlockedTime(MissionDetailsActivity.this, raceId, mission.getId(), sdf.format(new Date()));
                     message = "Valid verification code. Mission unlocked";
                     toggleMissionPanel();
+                    Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+                    // Vibrate for 500 milliseconds
+                    v.vibrate(500);
                 }else{
                     Log.i(TAG, "Mission verification code not match.");
                     message = "Invalid verification code. Please try again.";
@@ -509,6 +499,18 @@ public class MissionDetailsActivity extends AppCompatActivity {
         missionSubmissionImageView.setImageBitmap(processedBitmap);
     }
 
+    private void viewFullScreenPhoto(int photoNum){
+        Intent intent = new Intent(this, FullScreenImageActivity.class);
+
+        if(photoNum == 1){
+            intent.putExtra("IMAGE_FILE_PATH", submittedPhotoLocation[photoNum -1]);
+        }else if(photoNum == 2){
+            intent.putExtra("IMAGE_FILE_PATH", submittedPhotoLocation[photoNum -1]);
+        }else{
+            intent.putExtra("IMAGE_FILE_PATH", submittedPhotoLocation[photoNum -1]);
+        }
+        startActivity(intent);
+    }
 
     private class GroomifySubmitMissionTask extends AsyncTask<Void, String, MissionSubmissionResponse> {
 
@@ -578,6 +580,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
                 SharedPreferencesHelper.setMissionSubmitted(MissionDetailsActivity.this, raceId, mission.getId(), true);
                 submitted = true;
                 toggleMissionPanel();
+                promptShareToFaceBook();
             }
         }
     }
@@ -596,5 +599,46 @@ public class MissionDetailsActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void promptShareToFaceBook(){
+
+        new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setMessage("Share this photo to Facebook?")
+                .setPositiveButton("Share Now", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (ShareDialog.canShow(SharePhotoContent.class)){
+                            SharePhoto photo_0 = new SharePhoto.Builder()
+                                    .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[0]))
+                                    .build();
+                            SharePhoto photo_1 = new SharePhoto.Builder()
+                                    .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[1]))
+                                    .build();
+                            SharePhoto photo_2 = new SharePhoto.Builder()
+                                    .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[2]))
+                                    .build();
+
+                            String hashtag =  MissionDetailsActivity.this.getResources().getString(R.string.facebook_hashtag);
+                            SharePhotoContent content = new SharePhotoContent.Builder()
+                                    .addPhoto(photo_0)
+                                    .addPhoto(photo_1)
+                                    .addPhoto(photo_2)
+                                    .setShareHashtag(new ShareHashtag.Builder().setHashtag(hashtag).build())
+                                    .build();
+
+
+                            shareDialog.show(content);
+
+                        }else{
+                            Toast.makeText(MissionDetailsActivity.this, "Your device does not support facebook share.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                })
+                .setNegativeButton("Maybe Later", null)
+                .show();
     }
 }

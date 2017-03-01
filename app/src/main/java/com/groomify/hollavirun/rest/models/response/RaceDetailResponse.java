@@ -1,17 +1,16 @@
 
 package com.groomify.hollavirun.rest.models.response;
 
-import java.io.Serializable;
-import java.util.List;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class RaceDetailResponse implements Serializable, Parcelable
-{
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
+public class RaceDetailResponse extends RealmObject {
+
+    @PrimaryKey
     @SerializedName("id")
     @Expose
     private Long id;
@@ -39,41 +38,30 @@ public class RaceDetailResponse implements Serializable, Parcelable
     @SerializedName("gr_support")
     @Expose
     private String grSupport;
+    @SerializedName("map")
+    @Expose
+    private Map map;
+    @SerializedName("badge")
+    @Expose
+    private Badge badge;
+    @SerializedName("start_point")
+    @Expose
+    private StartPoint startPoint;
+    @SerializedName("end_point")
+    @Expose
+    private EndPoint endPoint;
+    @SerializedName("mapInfo")
+    @Expose
+    private MapInfo mapInfo;
+    @SerializedName("race_track_coordinates")
+    @Expose
+    private RealmList<RaceTrackCoordinate> raceTrackCoordinates = null;
     @SerializedName("missions")
     @Expose
-    private List<Mission> missions = null;
+    private RealmList<Mission_> missions = null;
     @SerializedName("url")
     @Expose
     private String url;
-    public final static Parcelable.Creator<RaceDetailResponse> CREATOR = new Creator<RaceDetailResponse>() {
-
-
-        @SuppressWarnings({
-                "unchecked"
-        })
-        public RaceDetailResponse createFromParcel(Parcel in) {
-            RaceDetailResponse instance = new RaceDetailResponse();
-            instance.id = ((Long) in.readValue((Long.class.getClassLoader())));
-            instance.name = ((String) in.readValue((String.class.getClassLoader())));
-            instance.location = ((String) in.readValue((String.class.getClassLoader())));
-            instance.distance = ((Long) in.readValue((Long.class.getClassLoader())));
-            instance.missionNo = ((Long) in.readValue((Long.class.getClassLoader())));
-            instance.status = ((Boolean) in.readValue((Boolean.class.getClassLoader())));
-            instance.endTime = ((String) in.readValue((String.class.getClassLoader())));
-            instance.firstAid = ((String) in.readValue((String.class.getClassLoader())));
-            instance.grSupport = ((String) in.readValue((String.class.getClassLoader())));
-            in.readList(instance.missions, (com.groomify.hollavirun.rest.models.response.Mission.class.getClassLoader()));
-            instance.url = ((String) in.readValue((String.class.getClassLoader())));
-            return instance;
-        }
-
-        public RaceDetailResponse[] newArray(int size) {
-            return (new RaceDetailResponse[size]);
-        }
-
-    }
-            ;
-    private final static long serialVersionUID = -4477338688856641397L;
 
     public Long getId() {
         return id;
@@ -147,11 +135,59 @@ public class RaceDetailResponse implements Serializable, Parcelable
         this.grSupport = grSupport;
     }
 
-    public List<Mission> getMissions() {
+    public Map getMap() {
+        return map;
+    }
+
+    public void setMap(Map map) {
+        this.map = map;
+    }
+
+    public Badge getBadge() {
+        return badge;
+    }
+
+    public void setBadge(Badge badge) {
+        this.badge = badge;
+    }
+
+    public StartPoint getStartPoint() {
+        return startPoint;
+    }
+
+    public void setStartPoint(StartPoint startPoint) {
+        this.startPoint = startPoint;
+    }
+
+    public EndPoint getEndPoint() {
+        return endPoint;
+    }
+
+    public void setEndPoint(EndPoint endPoint) {
+        this.endPoint = endPoint;
+    }
+
+    public MapInfo getMapInfo() {
+        return mapInfo;
+    }
+
+    public void setMapInfo(MapInfo mapInfo) {
+        this.mapInfo = mapInfo;
+    }
+
+    public RealmList<RaceTrackCoordinate> getRaceTrackCoordinates() {
+        return raceTrackCoordinates;
+    }
+
+    public void setRaceTrackCoordinates(RealmList<RaceTrackCoordinate> raceTrackCoordinates) {
+        this.raceTrackCoordinates = raceTrackCoordinates;
+    }
+
+    public RealmList<Mission_> getMissions() {
         return missions;
     }
 
-    public void setMissions(List<Mission> missions) {
+    public void setMissions(RealmList<Mission_> missions) {
         this.missions = missions;
     }
 
@@ -163,38 +199,4 @@ public class RaceDetailResponse implements Serializable, Parcelable
         this.url = url;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(id);
-        dest.writeValue(name);
-        dest.writeValue(location);
-        dest.writeValue(distance);
-        dest.writeValue(missionNo);
-        dest.writeValue(status);
-        dest.writeValue(endTime);
-        dest.writeValue(firstAid);
-        dest.writeValue(grSupport);
-        dest.writeList(missions);
-        dest.writeValue(url);
-    }
-
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public String toString() {
-        return "RaceDetailResponse{" +
-                "distance=" + distance +
-                ", id=" + id +
-                ", name='" + name + '\'' +
-                ", location='" + location + '\'' +
-                ", missionNo=" + missionNo +
-                ", status=" + status +
-                ", endTime='" + endTime + '\'' +
-                ", firstAid='" + firstAid + '\'' +
-                ", grSupport='" + grSupport + '\'' +
-                ", missions=" + missions +
-                ", url='" + url + '\'' +
-                '}';
-    }
 }

@@ -17,6 +17,8 @@ import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.GroomifyUser;
+import com.groomify.hollavirun.entities.Mission;
+import com.groomify.hollavirun.utils.AppUtils;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.ProfileImageUtils;
 import com.groomify.hollavirun.utils.RealmUtils;
@@ -38,6 +40,7 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView countryTextView;
     private TextView numberOfRunsTextView;
     private TextView userBibNoTextView;
+    private TextView totalMissionTextView;
 
     private final String TAG = ProfileActivity.class.getSimpleName();
 
@@ -45,6 +48,8 @@ public class ProfileActivity extends AppCompatActivity {
     View editProfileTouch = null;
     View sponsorsTouch = null;
     View selectRaceTouch = null;
+    View privacyPolicyTouch = null;
+    View termOfUserTouch = null;
 
 
     public static final int REQUEST_CODE_EDIT_PROFILE = 100;
@@ -55,6 +60,8 @@ public class ProfileActivity extends AppCompatActivity {
     private GroomifyUser groomifyUser;
 
     private boolean profileUpdated = false;
+    private int totalMissionCompleted = 0;
+    private Long raceId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +71,7 @@ public class ProfileActivity extends AppCompatActivity {
         Realm.init(this);
         realm = Realm.getInstance(RealmUtils.getRealmConfiguration());
         groomifyUser = realm.where(GroomifyUser.class).equalTo("id", SharedPreferencesHelper.getUserId(this)).findFirst();
-
+        raceId = SharedPreferencesHelper.getSelectedRaceId(this);
         ImageLoadUtils.initImageLoader(this);
 
         if(userDisplayNameTextView == null){
@@ -88,6 +95,45 @@ public class ProfileActivity extends AppCompatActivity {
         if(userBibNoTextView == null){
             userBibNoTextView = (TextView) findViewById(R.id.user_bib_no_text_view);
         }
+
+        if(totalMissionTextView == null){
+            totalMissionTextView = (TextView) findViewById(R.id.total_mission_text_view);
+        }
+
+        Mission[] missions = AppUtils.getDefaultMission();
+        for(int i = 0; i < missions.length; i++){
+            if(SharedPreferencesHelper.isMissionSubmitted(this, raceId, missions[i].getId())){
+                totalMissionCompleted++;
+            }
+        }
+
+        totalMissionTextView.setText(""+totalMissionCompleted);
+
+        if(privacyPolicyTouch == null){
+            privacyPolicyTouch = findViewById(R.id.select_privacy_policy);
+        }
+
+        privacyPolicyTouch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, TermsAndConditionActivity.class);
+                intent.putExtra("TYPE", 2);
+                startActivity(intent);
+            }
+        });
+
+        if(termOfUserTouch == null){
+            termOfUserTouch = findViewById(R.id.select_terms_of_use);
+        }
+
+        termOfUserTouch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, TermsAndConditionActivity.class);
+                intent.putExtra("TYPE", 1);
+                startActivity(intent);
+            }
+        });
 
         userDisplayNameTextView.setText(groomifyUser.getName());
         userBibNoTextView.setText("BIB No: "+SharedPreferencesHelper.getBibNo(this));

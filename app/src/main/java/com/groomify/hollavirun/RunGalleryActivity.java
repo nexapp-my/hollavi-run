@@ -44,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import retrofit2.Response;
@@ -141,8 +142,16 @@ public class RunGalleryActivity extends AppCompatActivity {
                 localImagePaths.add(file.getAbsolutePath());
                 imagePaths.add(file.getAbsolutePath());
             }
-
         }
+
+        List<File> cameraFiles = storage.getFiles(AppConstant.CAMERA_IMAGE_DIRECTORY, OrderType.DATE);
+
+        for(File file: cameraFiles){
+            localImagePaths.add(file.getAbsolutePath());
+            imagePaths.add(file.getAbsolutePath());
+        }
+
+
 
         // Initilizing Grid View
         initilizeGridLayout();
@@ -177,6 +186,7 @@ public class RunGalleryActivity extends AppCompatActivity {
 
     private void performSearch(String bibNo){
         editText.clearFocus();
+        changeViewState(true);
         new GroomifyGetRunnerGalleryTask().execute(bibNo);
     }
 
@@ -196,7 +206,7 @@ public class RunGalleryActivity extends AppCompatActivity {
 
         @Override
         protected RaceGalleryResponse doInBackground(String... params) {
-            changeViewState(true);
+
             String authToken = SharedPreferencesHelper.getAuthToken(RunGalleryActivity.this);
             String fbId = SharedPreferencesHelper.getFbId(RunGalleryActivity.this);
             Long raceId = SharedPreferencesHelper.getSelectedRaceId(RunGalleryActivity.this);
@@ -230,6 +240,8 @@ public class RunGalleryActivity extends AppCompatActivity {
                     if(gallery.getPhoto().getContent().getUrl() != null )
                     remoteImagePaths.add(gallery.getPhoto().getContent().getUrl());
                 }
+                Collections.sort(remoteImagePaths, Collections.reverseOrder());
+
                 imagePaths.clear();
                 imagePaths.addAll(remoteImagePaths);
                 imagePaths.addAll(localImagePaths);

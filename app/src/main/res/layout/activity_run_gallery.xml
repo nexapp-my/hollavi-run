@@ -52,13 +52,16 @@
         android:ems="10"
         android:id="@+id/search_runner_field"
         android:hint="Search Runner ID"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="14sp"
+        android:textColor="@color/primaryTextColour"
+        android:textSize="16sp"
         android:padding="5dp"
         android:gravity="center"
         android:layout_below="@+id/toolbar_layout"
         android:layout_centerHorizontal="true"
-        android:layout_margin="5dp"
-        android:layout_width="200dp" />
+        android:layout_width="match_parent"
+        android:background="@drawable/drawable_search_gallery_bg"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="10dp" />
 
 </RelativeLayout>

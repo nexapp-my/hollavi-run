@@ -13,6 +13,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -78,16 +79,20 @@ public class GridViewImageAdapter extends BaseAdapter {
         }
 
         // get screen dimensions
-        Log.i("GridViewImageAdapter", "Displaying: "+position);
+        Log.v("GridViewImageAdapter", "Displaying: "+position);
 
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         imageView.setLayoutParams(new GridView.LayoutParams(imageWidth,
                 imageWidth));
 
         if(!isRemoteImageFile(_filePaths.get(position))){
-            Bitmap image = decodeFile(_filePaths.get(position), imageWidth,
+            final String uri = Uri.fromFile(new File(_filePaths.get(position))).toString();
+            final String decoded = Uri.decode(uri);
+
+            imageLoader.displayImage(decoded, imageView, displayImageOptions);
+            /*Bitmap image = decodeFile(_filePaths.get(position), imageWidth,
                     imageWidth);
-            imageView.setImageBitmap(image);
+            imageView.setImageBitmap(image);*/
         }else{
             imageLoader.displayImage(_filePaths.get(position), imageView, displayImageOptions);
         }

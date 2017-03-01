@@ -20,33 +20,9 @@ public class Coupon implements Parcelable{
 
     private byte[] imageByteArr;
     private byte[] originalImageByteArr;
+    private int resourceId;
 
     private boolean redeemed;
-
-    public Coupon(int id, String name, String description, Date expirationTime, byte[] imageByteArr, byte[] originalImageByteArr) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.expirationTime = expirationTime;
-        this.imageByteArr = imageByteArr;
-        this.originalImageByteArr = originalImageByteArr;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getDescription() {
         return description;
@@ -64,12 +40,36 @@ public class Coupon implements Parcelable{
         this.expirationTime = expirationTime;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public byte[] getImageByteArr() {
         return imageByteArr;
     }
 
     public void setImageByteArr(byte[] imageByteArr) {
         this.imageByteArr = imageByteArr;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public byte[] getOriginalImageByteArr() {
+        return originalImageByteArr;
+    }
+
+    public void setOriginalImageByteArr(byte[] originalImageByteArr) {
+        this.originalImageByteArr = originalImageByteArr;
     }
 
     public boolean isRedeemed() {
@@ -80,12 +80,12 @@ public class Coupon implements Parcelable{
         this.redeemed = redeemed;
     }
 
-    public byte[] getOriginalImageByteArr() {
-        return originalImageByteArr;
+    public int getResourceId() {
+        return resourceId;
     }
 
-    public void setOriginalImageByteArr(byte[] originalImageByteArr) {
-        this.originalImageByteArr = originalImageByteArr;
+    public void setResourceId(int resourceId) {
+        this.resourceId = resourceId;
     }
 
 
@@ -102,7 +102,20 @@ public class Coupon implements Parcelable{
         dest.writeLong(this.expirationTime != null ? this.expirationTime.getTime() : -1);
         dest.writeByteArray(this.imageByteArr);
         dest.writeByteArray(this.originalImageByteArr);
+        dest.writeInt(this.resourceId);
         dest.writeByte(this.redeemed ? (byte) 1 : (byte) 0);
+    }
+
+    public Coupon(int id, String name, String description, Date expirationTime,  boolean redeemed, int resourceId) {
+        this.description = description;
+        this.expirationTime = expirationTime;
+        this.id = id;
+        this.name = name;
+        this.redeemed = redeemed;
+        this.resourceId = resourceId;
+    }
+
+    public Coupon() {
     }
 
     protected Coupon(Parcel in) {
@@ -113,6 +126,7 @@ public class Coupon implements Parcelable{
         this.expirationTime = tmpExpirationTime == -1 ? null : new Date(tmpExpirationTime);
         this.imageByteArr = in.createByteArray();
         this.originalImageByteArr = in.createByteArray();
+        this.resourceId = in.readInt();
         this.redeemed = in.readByte() != 0;
     }
 

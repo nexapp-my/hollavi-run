@@ -2,6 +2,7 @@ package com.groomify.hollavirun.utils;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 
 import com.groomify.hollavirun.R;

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,6 +29,8 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
+import java.io.File;
+
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class FullScreenImageActivity extends AppCompatActivity {
@@ -46,12 +49,14 @@ public class FullScreenImageActivity extends AppCompatActivity {
     private CallbackManager callbackManager;
 
     private Bitmap bitmapForShare;
+    ImageLoader imageLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_screen_image);
         ImageLoadUtils.initImageLoader(this);
+        imageLoader = ImageLoader.getInstance();
 
         imageView = (ImageView) findViewById(R.id.full_screen_image_view);
         progressBar = (ProgressBar) findViewById(R.id.image_loading_progress);
@@ -61,13 +66,24 @@ public class FullScreenImageActivity extends AppCompatActivity {
 
         imageFilePath = getIntent().getStringExtra("IMAGE_FILE_PATH");
         imageUrl = getIntent().getStringExtra("IMAGE_URL");
+        boolean hdMode = getIntent().getBooleanExtra("HD_MODE", false);
 
 
         if(imageFilePath != null){
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath, options);
-            imageView.setImageBitmap(bitmap);
+            if(hdMode){
+                Log.i(TAG, "Display in HD mode.");
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath, options);
+                imageView.setImageBitmap(bitmap);
+            }else{
+                Log.i(TAG, "Display in normal mode.");
+                final String uri = Uri.fromFile(new File(imageFilePath)).toString();
+                final String decoded = Uri.decode(uri);
+
+                imageLoader.displayImage(decoded, imageView, ImageLoadUtils.getDisplayImageOptions());
+            }
+
             Log.i(TAG, "Full screen image viewer with image file path: "+imageFilePath);
         }else if(imageUrl != null){
             Log.i(TAG, "Full screen image viewer with url: "+imageUrl);
@@ -129,7 +145,7 @@ public class FullScreenImageActivity extends AppCompatActivity {
 
     private void loadImageFromUrl(){
 
-        ImageLoader.getInstance().loadImage(imageUrl,ImageLoadUtils.getDisplayImageOptions() ,new ImageLoadingListener() {
+        imageLoader.getInstance().loadImage(imageUrl,ImageLoadUtils.getDisplayImageOptions() ,new ImageLoadingListener() {
             @Override
             public void onLoadingStarted(String imageUri, View view) {
                 Log.i(TAG,"On loading started.");

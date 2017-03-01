@@ -87,20 +87,20 @@ public class TeamSelectActivity extends AppCompatActivity implements TeamViewPag
         shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
             @Override
             public void onSuccess(Sharer.Result result) {
-                Toast.makeText(TeamSelectActivity.this, "Your photo has been shared to facebook.", Toast.LENGTH_SHORT);
-                new GroomifyUpdateRunnerInfoTask().execute();
+                Toast.makeText(TeamSelectActivity.this, "Your photo has been shared to facebook.", Toast.LENGTH_SHORT).show();
+                launchMainActivity();
             }
 
             @Override
             public void onCancel() {
-                letsGoTextView.setEnabled(true);
+                launchMainActivity();
             }
 
             @Override
             public void onError(FacebookException error) {
                 Log.e(TAG, "Failed to share content to facebook. Errors: "+error.getMessage(),error.getCause() );
                 Toast.makeText(TeamSelectActivity.this, "Failed to share facebook post. Please try again.", Toast.LENGTH_SHORT).show();
-                letsGoTextView.setEnabled(true);
+                launchMainActivity();
             }
         });
 
@@ -110,27 +110,8 @@ public class TeamSelectActivity extends AppCompatActivity implements TeamViewPag
 
     private void selectTeam(){
         Log.i(TAG, "Team selected: "+selectedTeam);
-
-        selectedTeam = team[currentPosition].getTeamName();
-        int resourceId = team[currentPosition].getResourceId();
-
-        if (ShareDialog.canShow(SharePhotoContent.class)){
-
-            letsGoTextView.setEnabled(false);
-            SharePhoto.Builder photoBuilder = new SharePhoto.Builder();
-            photoBuilder.setBitmap(BitmapUtils.decodeSampledBitmapFromResource(getResources(), resourceId, 800, 600));
-            String hashtag =  TeamSelectActivity.this.getResources().getString(R.string.facebook_hashtag);
-
-            SharePhotoContent content = new SharePhotoContent.Builder()
-                    .addPhoto(photoBuilder.build())
-                    .setShareHashtag(new ShareHashtag.Builder().setHashtag(hashtag).build())
-                    .build();
-
-            shareDialog.show(content);
-
-        }else{
-            Toast.makeText(TeamSelectActivity.this, "Your device does not support facebook share.", Toast.LENGTH_SHORT).show();
-        }
+        changeViewState(true);
+        new GroomifyUpdateRunnerInfoTask().execute();
 
     }
 
@@ -170,6 +151,7 @@ public class TeamSelectActivity extends AppCompatActivity implements TeamViewPag
         }
     }
 
+    boolean bibAlreadyTaken = false;
 
     private class GroomifyUpdateRunnerInfoTask extends AsyncTask<Void, String, RunnerInfoResponse> {
 
@@ -183,7 +165,7 @@ public class TeamSelectActivity extends AppCompatActivity implements TeamViewPag
 
             changeViewState(true);
             try {
-
+                bibAlreadyTaken = false;
                 Log.d(TAG, "User information: "+realmUser);
                 UpdateRunnerInfoRequest updateRunnerInfoRequest = new UpdateRunnerInfoRequest();
                 Runner runner = new Runner();
@@ -196,6 +178,10 @@ public class TeamSelectActivity extends AppCompatActivity implements TeamViewPag
                     Log.i(TAG, "Calling update runner api success");
                     return restResponse.body();
                 }else{
+                    if(restResponse.code() == 422){
+                        Log.i(TAG, "API return 422, bib already taken.");
+                        bibAlreadyTaken = true;
+                    }
                     Log.i(TAG, "Calling update runner api failed. response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
                 }
             } catch (IOException e) {
@@ -222,15 +208,59 @@ public class TeamSelectActivity extends AppCompatActivity implements TeamViewPag
                 SharedPreferencesHelper.savePreferences(TeamSelectActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_TEAM_SELECTED, true);
                 SharedPreferencesHelper.savePreferences(TeamSelectActivity.this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_TEAM_SELECTED_ID, selectedTeam);
                 SharedPreferencesHelper.savePreferences(TeamSelectActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_FIRST_TIME_SETUP_COMPLETE, true);
-                letsGoTextView.setEnabled(false);
-                launchMainActivity();
+
+                promptShareToFaceBook();
             } else {
-                Toast.makeText(TeamSelectActivity.this, "Unable to make team selection at this moment. Please try again later.", Toast.LENGTH_SHORT).show();
-                letsGoTextView.setEnabled(true);
+                if(bibAlreadyTaken){
+                    Toast.makeText(TeamSelectActivity.this, "Entered bib no. already taken.", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(TeamSelectActivity.this, "Unable to make team selection at this moment. Please try again later.", Toast.LENGTH_SHORT).show();
+                }
+
             }
-
-
         }
+    }
+
+    private void promptShareToFaceBook(){
+
+        new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setMessage("Share this photo to Facebook?")
+                .setPositiveButton("Share Now", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        selectedTeam = team[currentPosition].getTeamName();
+                        int resourceId = team[currentPosition].getResourceId();
+
+                        if (ShareDialog.canShow(SharePhotoContent.class)){
+
+                            letsGoTextView.setEnabled(false);
+                            SharePhoto.Builder photoBuilder = new SharePhoto.Builder();
+                            photoBuilder.setBitmap(BitmapUtils.decodeSampledBitmapFromResource(getResources(), resourceId, 800, 600));
+                            String hashtag =  TeamSelectActivity.this.getResources().getString(R.string.facebook_hashtag);
+
+                            SharePhotoContent content = new SharePhotoContent.Builder()
+                                    .addPhoto(photoBuilder.build())
+                                    .setShareHashtag(new ShareHashtag.Builder().setHashtag(hashtag).build())
+                                    .build();
+
+                            shareDialog.show(content);
+
+                        }else{
+                            Toast.makeText(TeamSelectActivity.this, "Your device does not support facebook share.", Toast.LENGTH_SHORT).show();
+                            launchMainActivity();
+                        }
+                    }
+
+                })
+                .setNegativeButton("Maybe Later", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        launchMainActivity();
+                    }
+                })
+                .show();
     }
 
     private void changeViewState(final boolean loading){

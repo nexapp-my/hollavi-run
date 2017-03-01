@@ -34,7 +34,7 @@
             <ImageView
                 android:layout_width="72dp"
                 android:layout_height="72dp"
-                app:srcCompat="@drawable/pikachu_resize"
+                app:srcCompat="@android:color/white"
                 android:id="@+id/latest_news_image_view"
                 android:layout_margin="10dp" />
 
@@ -76,7 +76,18 @@
                 tools:text="2 hours ago"
                 android:layout_alignBottom="@+id/latest_news_image_view"
                 android:layout_alignLeft="@+id/latest_news_desc_text_view"
-                android:layout_alignStart="@+id/latest_news_desc_text_view" />
+                android:layout_alignStart="@+id/latest_news_desc_text_view"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                app:srcCompat="@drawable/ic_groomify_logo_large"
+                android:id="@+id/imageView"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="10dp" />
 
         </RelativeLayout>
 

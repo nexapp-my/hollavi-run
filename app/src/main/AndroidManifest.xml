@@ -18,6 +18,9 @@
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
+
 
     <meta-data
         android:name="com.google.android.gms.vision.DEPENDENCIES"
@@ -25,7 +28,7 @@
 
     <uses-feature android:name="android.hardware.screen.portrait" />
 
-    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
 
     <application
         android:allowBackup="true"
@@ -71,14 +74,11 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".OnboardingActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/GroomifyAppActionBarTheme.Dialog">
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
@@ -121,7 +121,8 @@
             android:screenOrientation="portrait" />
         <activity android:name=".SponsorsActivity" />
         <activity android:name=".FullScreenImageActivity" />
-        <activity android:name=".RunGalleryActivity"></activity>
+        <activity android:name=".RunGalleryActivity" />
+        <activity android:name=".TermsAndConditionActivity"></activity>
     </application>
 
 </manifest>

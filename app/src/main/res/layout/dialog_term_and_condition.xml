@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="@android:color/white">
+
+    <TextView
+        android:text="Accept Terms"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/tnc_dialog_header_text"
+        android:textStyle="normal|bold"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tnc_dialog_header_text"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/tnc_dialog_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/tnc_dialog_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:textColor="@color/primaryTextColour" />
+
+    <TextView
+        android:text="Term of Use"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tnc_dialog_content"
+        android:layout_alignLeft="@id/tnc_dialog_content"
+        android:layout_alignStart="@id/tnc_dialog_content"
+        android:id="@+id/term_link_text"
+        android:textColor="@android:color/holo_blue_light"
+        android:layout_marginBottom="20dp" />
+
+    <TextView
+        android:text=" and "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/term_link_text"
+        android:layout_toRightOf="@id/term_link_text"
+        android:layout_toEndOf="@id/term_link_text"
+        android:id="@+id/tnc_and"
+        android:textColor="@color/primaryTextColour" />
+
+    <TextView
+        android:text="Privacy Policy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/privacy_link_text"
+        android:layout_below="@id/tnc_dialog_content"
+        android:layout_toRightOf="@id/tnc_and"
+        android:layout_toEndOf="@id/tnc_and"
+        android:textColor="@android:color/holo_blue_light" />
+</RelativeLayout>

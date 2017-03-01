@@ -25,11 +25,13 @@ import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.entities.Races;
 import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.response.JoinRaceResponse;
+import com.groomify.hollavirun.rest.models.response.Mission_;
 import com.groomify.hollavirun.rest.models.response.RaceDetailResponse;
 import com.groomify.hollavirun.rest.models.response.RaceResponse;
 import com.groomify.hollavirun.rest.models.response.RunnerInfoResponse;
 import com.groomify.hollavirun.utils.ActivityUtils;
 import com.groomify.hollavirun.utils.BitmapUtils;
+import com.groomify.hollavirun.utils.DialogUtils;
 import com.groomify.hollavirun.utils.RealmUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.groomify.hollavirun.view.ViewPagerCarouselView;
@@ -63,7 +65,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
     long carouselSlideInterval = 999999; // 3 SECONDS
     private static final String TAG = SelectRaceActivity.class.getSimpleName();
 
-    private volatile String bibNo = AppConstant.DEFAULT_BIB_NO;
+    private String bibNo = AppConstant.DEFAULT_BIB_NO;
 
     private int maxBibNo = 4;
 
@@ -71,6 +73,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
     //private Realm realm;
 
     boolean isCalledFromSettings;
+    private AlertDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +118,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         new GroomifyLoadListTask().execute();
 
         isCalledFromSettings = getIntent().getBooleanExtra("CALLED_FROM_SETTINGS", false);
+        loadingDialog = DialogUtils.buildLoadingDialog(this);
 
     }
 
@@ -128,11 +132,12 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
             runAsGuest = false;
             //SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, bibNo);
         }
-
+        changeViewState(true);
         new GroomifyJoinRaceTask().execute(""+race.getId());
     }
 
     private void promptBibNoInputDialog(){
+
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Please enter your bib number");
@@ -319,13 +324,13 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                             realm.delete(Mission.class);
 
                             for (int i = 0; i < raceDetail.getMissions().size(); i++) {
-                                com.groomify.hollavirun.rest.models.response.Mission missionResponse = raceDetail.getMissions().get(i);
+                                Mission_ missionResponse = raceDetail.getMissions().get(i);
                                 Mission mission = new Mission(missionResponse.getCoverPhoto(),
                                         0,
                                         missionResponse.getDescription(),
                                         i + 1,
-                                        missionResponse.getLatitude(),
-                                        missionResponse.getLongitude(),
+                                        missionResponse.getLat(),
+                                        missionResponse.getLng(),
                                         i + 1, missionResponse.getTitle(), false , "0000");
                                 //public Mission(String coverPhotoBase64, String description, int id, String latitude, String longitude, int sequenceNumber, String title, boolean unlocked, String validationCode) {
                                 Log.i(TAG, "Adding mission into database. " + mission.toString());
@@ -337,12 +342,22 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                             //joinRace(false);
                         }
                     });
+
+                    realm.executeTransaction(new Realm.Transaction() {
+
+                        @Override
+                        public void execute(Realm realm) {
+                            realm.copyToRealmOrUpdate(raceDetail);
+                        }
+                    });
+
                     launchNextScreen();
                 }finally {
                     realm.close();
                 }
             }else{
                 Toast.makeText(SelectRaceActivity.this, "Unable to join race at this moment. Please try again..", Toast.LENGTH_SHORT).show();
+                changeViewState(false);
             }
         }
     }
@@ -419,6 +434,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                             if(SharedPreferencesHelper.getBibNo(SelectRaceActivity.this) != null || runAsGuest){
                                 populateRaceDetails();
                             }else{
+                                changeViewState(false);
                                 promptBibNoInputDialog();
                             }
 
@@ -430,6 +446,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                 }
             }else{
                 Toast.makeText(SelectRaceActivity.this, "Unable to join race. Please try again.", Toast.LENGTH_SHORT).show();
+                changeViewState(false);
             }
 
             }
@@ -456,6 +473,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                       realmUser.setCurrentBibNo(bibNo);
                   }
                   realm.copyToRealmOrUpdate(realmUser);
+                  changeViewState(false);
 
                   if(!SharedPreferencesHelper.isProfilePictureUpdated(SelectRaceActivity.this)){
                       ActivityUtils.launchWelcomeScreen(SelectRaceActivity.this, true);
@@ -468,7 +486,22 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         });
 
     }
-
+    private void changeViewState(final boolean loading){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(loading){
+                    //progressBar.setVisibility(View.VISIBLE);
+                    //proceedTextView.setVisibility(View.GONE);
+                    loadingDialog.show();
+                }else{
+                    //progressBar.setVisibility(View.GONE);
+                    //proceedTextView.setVisibility(View.VISIBLE);
+                    loadingDialog.hide();
+                }
+            }
+        });
+    }
 
     @Override
     protected void onDestroy() {
