@@ -3,6 +3,7 @@ package com.groomify.hollavirun.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -39,7 +40,12 @@ import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.RunGalleryActivity;
 import com.groomify.hollavirun.entities.NewsFeed;
 import com.groomify.hollavirun.rest.RestClient;
+import com.groomify.hollavirun.rest.models.request.UpdateUserLocationRequest;
+import com.groomify.hollavirun.rest.models.request.UserLocation;
+import com.groomify.hollavirun.rest.models.response.Info;
+import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
 import com.groomify.hollavirun.rest.models.response.SearchRunnerLocationResponse;
+import com.groomify.hollavirun.rest.models.response.UpdateUserLocationResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
@@ -47,6 +53,7 @@ import com.groomify.hollavirun.view.ProfilePictureView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.IOException;
+import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -95,6 +102,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
 
     private Realm realm;
     private RestClient client = new RestClient();
+    private String runnerId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -115,6 +123,8 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
         ImageLoadUtils.initImageLoader(this.getContext());
 
         maxBibNo = getResources().getInteger(R.integer.max_bib_no);
+
+        runnerId = SharedPreferencesHelper.getRunnerId(getContext());
        /*
 
 
@@ -339,6 +349,8 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
             Polyline polyline = map.addPolyline(rectOptions);
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(3.068367, 101.602351), 15));
 
+            googleMap.setOnMyLocationChangeListener(myLocationChangeListener);
+
         } catch (Resources.NotFoundException e) {
             Log.e(TAG, "Can't find style. Error: ", e);
         } catch ( java.lang.SecurityException e){
@@ -437,4 +449,48 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
     public GoogleMap getGoogleMap() {
         return googleMap;
     }
+
+    private GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
+        @Override
+        public void onMyLocationChange(Location location) {
+            Log.i(TAG, "Detected user location changed. Fire update event.");
+            new GroomifyUpdateLocationTask().execute(location);
+
+        }
+    };
+
+
+    //TODO might need a thread periodicaly pull the news.
+    private class GroomifyUpdateLocationTask extends AsyncTask<Location, Void, UpdateUserLocationResponse> {
+
+        @Override
+        protected UpdateUserLocationResponse doInBackground(Location... params) {
+            String authToken = SharedPreferencesHelper.getAuthToken(getContext());
+            String fbId = SharedPreferencesHelper.getFbId(getContext());
+            try {
+
+                Location location = params[0];
+                UpdateUserLocationRequest updateUserLocationRequest = new UpdateUserLocationRequest();
+                UserLocation userLocation = new UserLocation();
+                userLocation.setLat(location.getLatitude());
+                userLocation.setLng(location.getLongitude());
+                userLocation.setRunnerId(Integer.parseInt(runnerId));
+                updateUserLocationRequest.setUserLocation(userLocation);
+
+                Response<UpdateUserLocationResponse> restResponse = client.getApiService().updateUserLocation(fbId, authToken, updateUserLocationRequest).execute();
+
+                if(restResponse.isSuccessful()){
+                    Log.i(TAG, "Calling update location api success");
+                    return restResponse.body();
+                }else{
+                    Log.i(TAG, "Calling update location api failed, , response code: "+restResponse.code());
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to update location.",e);
+            }
+            return null;
+        }
+    }
+
+
 }

@@ -197,7 +197,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
                         if (ShareDialog.canShow(SharePhotoContent.class)){
                            SharePhoto photo_0 = new SharePhoto.Builder()
                                     .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[0]))
-                                    .build();
+                                   .build();
                             SharePhoto photo_1 = new SharePhoto.Builder()
                                     .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[1]))
                                     .build();
@@ -205,12 +205,14 @@ public class MissionDetailsActivity extends AppCompatActivity {
                                     .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[2]))
                                     .build();
 
+                            String hashtag =  MissionDetailsActivity.this.getResources().getString(R.string.facebook_hashtag);
                             SharePhotoContent content = new SharePhotoContent.Builder()
                                     .addPhoto(photo_0)
                                     .addPhoto(photo_1)
                                     .addPhoto(photo_2)
-                                    .setShareHashtag(new ShareHashtag.Builder().setHashtag("Groomify").build())
+                                    .setShareHashtag(new ShareHashtag.Builder().setHashtag(hashtag).build())
                                     .build();
+
 
                             shareDialog.show(content);
 

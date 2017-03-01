@@ -22,7 +22,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
         <TextView
-            android:text="TOP 5 OVERALL RANKINGS"
+            android:text="OVERALL RANKINGS"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/top_5_header_tv"

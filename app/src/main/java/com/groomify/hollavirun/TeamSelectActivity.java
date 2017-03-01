@@ -119,10 +119,11 @@ public class TeamSelectActivity extends AppCompatActivity implements TeamViewPag
             letsGoTextView.setEnabled(false);
             SharePhoto.Builder photoBuilder = new SharePhoto.Builder();
             photoBuilder.setBitmap(BitmapUtils.decodeSampledBitmapFromResource(getResources(), resourceId, 800, 600));
+            String hashtag =  TeamSelectActivity.this.getResources().getString(R.string.facebook_hashtag);
 
             SharePhotoContent content = new SharePhotoContent.Builder()
                     .addPhoto(photoBuilder.build())
-                    .setShareHashtag(new ShareHashtag.Builder().setHashtag("Groomify").build())
+                    .setShareHashtag(new ShareHashtag.Builder().setHashtag(hashtag).build())
                     .build();
 
             shareDialog.show(content);

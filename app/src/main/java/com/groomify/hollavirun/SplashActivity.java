@@ -72,6 +72,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        DebugUtils.printKeyHash(this);
 
         Realm.init(this);
         RealmConfiguration config = new RealmConfiguration

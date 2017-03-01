@@ -111,9 +111,10 @@ public class FullScreenImageActivity extends AppCompatActivity {
                         photoBuilder.setBitmap(bitmapForShare);
                     }
 
+                    String hashtag =  FullScreenImageActivity.this.getResources().getString(R.string.facebook_hashtag);
                     SharePhotoContent content = new SharePhotoContent.Builder()
                             .addPhoto(photoBuilder.build())
-                            .setShareHashtag(new ShareHashtag.Builder().setHashtag("Groomify").build())
+                            .setShareHashtag(new ShareHashtag.Builder().setHashtag(hashtag).build())
                             .build();
 
                     shareDialog.show(content);
