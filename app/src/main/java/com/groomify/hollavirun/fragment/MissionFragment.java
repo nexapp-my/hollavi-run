@@ -30,9 +30,6 @@ public class MissionFragment  extends Fragment {
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
-    public static View missionFragment;
-
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -41,7 +38,7 @@ public class MissionFragment  extends Fragment {
             return missionFragment;
         }*/
 
-        missionFragment = inflater.inflate(R.layout.fragment_mission, container, false);
+        View missionFragment = inflater.inflate(R.layout.fragment_mission, container, false);
 
         viewPager = (ViewPager) missionFragment.findViewById(R.id.viewpager);
 

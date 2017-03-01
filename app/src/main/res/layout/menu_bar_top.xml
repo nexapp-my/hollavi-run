@@ -4,15 +4,6 @@
     android:layout_height="wrap_content"
     android:id="@+id/menu_bar_top">
 
-    <ImageView
-        android:layout_width="43dp"
-        android:layout_height="24dp"
-        android:id="@+id/menu_bar_gromify_logo"
-        android:layout_alignParentTop="true"
-        android:src="@drawable/ic_groomify_logo_tab"
-        android:layout_marginBottom="14dp"
-        android:layout_centerInParent="true" />
-
 
     <ImageView
         android:id="@+id/menu_bar_profile_picture"
@@ -39,6 +30,26 @@
         android:visibility="invisible"
         android:layout_marginTop="15dp"
         android:layout_marginBottom="15dp" />
+
+    <TextView
+        android:text="Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/menu_bar_title"
+        android:layout_centerInParent="false"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/black"
+        android:textSize="17sp"
+        android:textStyle="normal|bold" />
+
+    <ImageView
+        android:layout_width="43dp"
+        android:layout_height="24dp"
+        android:id="@+id/menu_bar_gromify_logo"
+        android:src="@drawable/ic_groomify_logo_tab"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
     <!--<ProgressBar
         android:id="@+id/pbHeaderProgress"

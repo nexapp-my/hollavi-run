@@ -57,6 +57,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Stack;
 
 import io.realm.Realm;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
@@ -81,8 +82,9 @@ public class MainActivity extends AppCompatActivity
     private View topMenuBar;
     private ImageView menuBarLogo;
     private TextView menuBarGreetingText;
+    private TextView menuBarTitleText;
     private ImageView pictureView;
-    public Fragment currentFragment;
+
     public int currentMenuIndex = 0;
 
     private View homeMenu;
@@ -118,6 +120,10 @@ public class MainActivity extends AppCompatActivity
     private Long raceId;
 
     private MainFragment mainFragment;
+    private MissionFragment missionFragment;
+    private CouponsListFragment couponsListFragment;
+
+    private Stack<Integer> stateStack = new Stack<Integer> ();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,6 +157,9 @@ public class MainActivity extends AppCompatActivity
         if(menuBarGreetingText == null)
             menuBarGreetingText = (TextView) findViewById(R.id.menu_bar_greeting_text);
 
+        if(menuBarTitleText == null)
+            menuBarTitleText = (TextView) findViewById(R.id.menu_bar_title);
+
         if(pictureView == null)
             pictureView = (ImageView) findViewById(R.id.menu_bar_profile_picture);
 
@@ -170,13 +179,19 @@ public class MainActivity extends AppCompatActivity
 
         menuBarLogo.setVisibility(ImageView.INVISIBLE);
         menuBarGreetingText.setVisibility(TextView.VISIBLE);
+        menuBarTitleText.setVisibility(View.GONE);
         pictureView.setVisibility(View.VISIBLE);
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         mainFragment = new MainFragment();
-        ft.replace(R.id.main_placeholder, mainFragment).commit();
+        missionFragment = new MissionFragment();
+        couponsListFragment = new CouponsListFragment();
 
-        menuBarGreetingText.setText("Hello, " +groomifyUser.getName());
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.main_placeholder, mainFragment).commit();
+        stateStack.push(0);
+
+        menuBarGreetingText.setText("Welcome, " +groomifyUser.getName());
 
         pictureView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -271,6 +286,8 @@ public class MainActivity extends AppCompatActivity
             R.id.menu_sos
     };
 
+    boolean isBackPressedBeforeThis = false;
+
     private void initializeMenuBarListener(){
 
         homeMenuIcon = (ImageView) findViewById(R.id.menu_home_image_view);
@@ -290,8 +307,14 @@ public class MainActivity extends AppCompatActivity
                 if(currentMenuIndex != 0 ){
                     mainFragment = new MainFragment();
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.main_placeholder, mainFragment).commit();
+                    //ft.replace(R.id.main_placeholder, mainFragment).commit();
+                    ft.replace(R.id.main_placeholder, mainFragment);
+                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                    ft.addToBackStack(null);
+                    ft.commit();
                     currentMenuIndex = 0;
+                    stateStack.push(currentMenuIndex);
+                    isBackPressedBeforeThis = false;
                     toggleMenuState();
                 }
             }
@@ -303,8 +326,14 @@ public class MainActivity extends AppCompatActivity
                 if(currentMenuIndex != 1){
 
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.main_placeholder, new MissionFragment()).commit();
+                    ft.replace(R.id.main_placeholder, missionFragment);
+                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                    ft.addToBackStack(null);
+                    ft.commit();
+                    //ft.replace(R.id.main_placeholder, missionFragment).commit();
                     currentMenuIndex = 1;
+                    stateStack.push(currentMenuIndex);
+                    isBackPressedBeforeThis = false;
                     toggleMenuState();
 
                 }
@@ -340,8 +369,14 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this, "Guest runner is not entitle for coupon.", Toast.LENGTH_SHORT).show();
                     } else {
                         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                        ft.replace(R.id.main_placeholder, new CouponsListFragment()).commit();
+                        //ft.replace(R.id.main_placeholder, couponsListFragment).commit();
+                        ft.replace(R.id.main_placeholder, couponsListFragment);
+                        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                        ft.addToBackStack(null);
+                        ft.commit();
                         currentMenuIndex = 3;
+                        stateStack.push(currentMenuIndex);
+                        isBackPressedBeforeThis = false;
                         toggleMenuState();
                     }
                 }
@@ -364,7 +399,8 @@ public class MainActivity extends AppCompatActivity
         homeMenuIcon.setImageResource(R.drawable.ic_menu_home);
         missionMenuIcon.setImageResource(R.drawable.ic_menu_missions);
         couponMenuIcon.setImageResource(R.drawable.ic_menu_coupons);
-
+        menuBarTitleText.setVisibility(View.GONE);
+        menuBarGreetingText.setVisibility(View.VISIBLE);
         switch (currentMenuIndex){
             case 0:
                 homeMenuIcon.setImageResource(R.drawable.ic_menu_home_filled);
@@ -374,6 +410,9 @@ public class MainActivity extends AppCompatActivity
                 break;
             case 3:
                 couponMenuIcon.setImageResource(R.drawable.ic_coupons_filled);
+                menuBarTitleText.setText("Coupon");
+                menuBarTitleText.setVisibility(View.VISIBLE);
+                menuBarGreetingText.setVisibility(View.INVISIBLE);
                 break;
         }
     }
@@ -483,19 +522,40 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        new AlertDialog.Builder(this)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setMessage("Are you sure you want to exit Groomify?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
 
-                })
-                .setNegativeButton("No", null)
-                .show();
+        if(getSupportFragmentManager().getBackStackEntryCount() > 0){
+            if(!isBackPressedBeforeThis){
+                currentMenuIndex = stateStack.pop();
+            }
+            isBackPressedBeforeThis = true;
+
+            if(!stateStack.empty()){
+                currentMenuIndex = stateStack.pop();
+                if(stateStack.size() == 0){
+                    //Need to put at least one stack inside
+                    stateStack.push(currentMenuIndex);
+                }
+
+            }
+            toggleMenuState();
+            getSupportFragmentManager().popBackStack();
+        }else{
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setMessage("Are you sure you want to exit Groomify?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        }
+
+
     }
 
 

@@ -36,9 +36,6 @@ public class CouponsListFragment extends ListFragment {
 
     //private OnListFragmentInteractionListener mListener;
 
-    public static View viewInstance;
-
-
     Coupon[] coupons = null;
 
     public static SimpleDateFormat sdf = new SimpleDateFormat(AppConstant.DATE_FORMAT);

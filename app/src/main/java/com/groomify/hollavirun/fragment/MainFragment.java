@@ -54,6 +54,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Stack;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -75,7 +76,6 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
     private ArrayList<MissionCard> missionCards;
     private HorizontalAdapter horizontalAdapter;*/
 
-    public static View mainFragment;
     //public boolean isFirstTimeInitialized = true;
 
     private View latestNewsFloatPane = null;
@@ -144,7 +144,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
         // Inflate the layout for this fragment
 
         Log.i(TAG, "On create view");
-        mainFragment = inflater.inflate(R.layout.fragment_main, container, false);
+        View mainFragment = inflater.inflate(R.layout.fragment_main, container, false);
 
 
         editText = (EditText) mainFragment.findViewById(R.id.search_runner_field);
@@ -214,10 +214,13 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
         }
+
+
         Log.i(TAG, "Creating map view.");
         mMapView = (MapView) mainFragment.findViewById(R.id.map);
         mMapView.onCreate(mapViewBundle);
         mMapView.getMapAsync(this);
+
 
         initializeNewsView();
 
@@ -292,7 +295,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
 
             boolean success = map.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
-                            mainFragment.getContext(), R.raw.style_json));
+                            getContext(), R.raw.style_json));
 
             if (!success) {
                 Log.e(TAG, "Style parsing failed.");
