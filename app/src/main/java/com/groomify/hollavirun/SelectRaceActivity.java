@@ -24,6 +24,8 @@ import com.groomify.hollavirun.entities.GroomifyUser;
 import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.entities.Races;
 import com.groomify.hollavirun.rest.RestClient;
+import com.groomify.hollavirun.rest.models.request.Runner;
+import com.groomify.hollavirun.rest.models.request.UpdateRunnerInfoRequest;
 import com.groomify.hollavirun.rest.models.response.JoinRaceResponse;
 import com.groomify.hollavirun.rest.models.response.Mission_;
 import com.groomify.hollavirun.rest.models.response.RaceDetailResponse;
@@ -37,6 +39,7 @@ import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.groomify.hollavirun.view.ViewPagerCarouselView;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -74,6 +77,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
     boolean isCalledFromSettings;
     private AlertDialog loadingDialog;
+    boolean bibAlreadyTaken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +107,6 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         joinRaceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //promptBibNoInputDialog();
                 joinRace(false);
             }
         });
@@ -157,7 +160,8 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                                 if (input.getText().length() > 0 && input.getText().toString().trim().length() > 0) {
                                     bibNo = input.getText().toString();
                                     //joinRace();
-                                    populateRaceDetails();
+                                    new GroomifyVerifyBibNoTask().execute();
+
                                 }
                             }
                         })
@@ -269,7 +273,6 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
             progressBar.setVisibility(View.GONE);
         }
     }
-
 
     private class GroomifyLoadRaceDetailTask extends AsyncTask<String, String, RaceDetailResponse> {
         @Override
@@ -450,6 +453,60 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
             }
 
             }
+    }
+
+    private class GroomifyVerifyBibNoTask extends AsyncTask<Void, String, RunnerInfoResponse> {
+
+        @Override
+        protected RunnerInfoResponse doInBackground(Void... params) {
+            String authToken = SharedPreferencesHelper.getAuthToken(SelectRaceActivity.this);
+            String fbId = SharedPreferencesHelper.getFbId(SelectRaceActivity.this);
+            Long userId = SharedPreferencesHelper.getUserId(SelectRaceActivity.this);
+            Realm innerRealm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+            GroomifyUser realmUser = innerRealm.where(GroomifyUser.class).equalTo("id", userId).findFirst();
+
+            changeViewState(true);
+            try {
+                bibAlreadyTaken = false;
+                Log.d(TAG, "User information: "+realmUser);
+                UpdateRunnerInfoRequest updateRunnerInfoRequest = new UpdateRunnerInfoRequest();
+                Runner runner = new Runner();
+                runner.setRunBibNo(bibNo);
+                updateRunnerInfoRequest.setRunner(runner);
+                Response<RunnerInfoResponse> restResponse = client.getApiService().updateRunnerInfo(fbId, authToken, realmUser.getCurrentRunnerId(), updateRunnerInfoRequest).execute();
+
+                if(restResponse.isSuccessful()){
+                    Log.i(TAG, "Calling update runner api success");
+                    return restResponse.body();
+                }else{
+                    if(restResponse.code() == 422){
+                        Log.i(TAG, "API return 422, bib already taken.");
+                        bibAlreadyTaken = true;
+                    }
+                    Log.i(TAG, "Calling update runner api failed. response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to call update runner api.",e);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(RunnerInfoResponse runnerInfoResponse) {
+
+            super.onPostExecute(runnerInfoResponse);
+            changeViewState(false);
+            if (runnerInfoResponse != null) {
+                Log.i(TAG, "Update user info success, returning:" + runnerInfoResponse.toString());
+                populateRaceDetails();
+            } else {
+                if(bibAlreadyTaken){
+                    Toast.makeText(SelectRaceActivity.this, "Entered bib no. already taken.", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(SelectRaceActivity.this, "Unable to verify bib no at this moment. Please try again later.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 
     private void launchNextScreen(){

@@ -122,7 +122,7 @@
         <activity android:name=".SponsorsActivity" />
         <activity android:name=".FullScreenImageActivity" />
         <activity android:name=".RunGalleryActivity" />
-        <activity android:name=".TermsAndConditionActivity"></activity>
+        <activity android:name=".TermsAndConditionActivity" android:theme="@style/ActionBarWhiteOptionMenu"/>
     </application>
 
 </manifest>

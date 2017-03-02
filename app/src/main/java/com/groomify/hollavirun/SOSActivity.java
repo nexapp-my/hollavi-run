@@ -137,8 +137,9 @@ public class SOSActivity extends AppCompatActivity {
         emergencyContactPanel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String dialogContent = dialogContentEmergencyContact.replaceAll("EC_NAME", emergencyContactName).replaceAll("EC_NO", emergencyContactNumber);
+
                 if(SOSActivity.emergencyContactSelected){
+                    String dialogContent = dialogContentEmergencyContact.replaceAll("EC_NAME", emergencyContactName).replaceAll("EC_NO", emergencyContactNumber);
                     prompCallConfirmationDialog(emergencyContactNumber, dialogContent);
                 }else{
                     Log.i(TAG, "Emergency contact is not set, prompt user to setup now.");

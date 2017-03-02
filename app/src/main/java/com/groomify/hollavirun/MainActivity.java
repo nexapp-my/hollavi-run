@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 
-                    Log.i(TAG, "LoadedImage: "+loadedImage.getConfig().toString());
+                    //Log.i(TAG, "LoadedImage: "+loadedImage.getConfig().toString());
                     int pixel = AppUtils.getPixelFromDIP(MainActivity.this, 30);
                     Bitmap processedBitmap = ProfileImageUtils.processOptimizedRoundBitmap(pixel,pixel, loadedImage);
                     pictureView.setImageBitmap(processedBitmap);

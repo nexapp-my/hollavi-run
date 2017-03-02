@@ -8,6 +8,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -23,6 +26,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.groomify.hollavirun.FullScreenImageActivity;
+import com.groomify.hollavirun.RunGalleryActivity;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -31,7 +35,8 @@ import com.nostra13.universalimageloader.core.listener.PauseOnScrollListener;
 public class GridViewImageAdapter extends BaseAdapter {
 
     private Activity _activity;
-    private ArrayList<String> _filePaths = new ArrayList<String>();
+    private List<String> _filePaths = new ArrayList<String>();
+    private Map<String, String> localImagePath = new HashMap<>();
     private int imageWidth;
 
     boolean pauseOnScroll = false; // or true
@@ -40,11 +45,12 @@ public class GridViewImageAdapter extends BaseAdapter {
     private ImageLoader imageLoader;
     private DisplayImageOptions displayImageOptions;
 
-    public GridViewImageAdapter(Activity activity, ArrayList<String> filePaths,
-                                int imageWidth) {
+    public GridViewImageAdapter(Activity activity, List<String> filePaths,
+                                int imageWidth, Map<String, String> localImagePath) {
         this._activity = activity;
         this._filePaths = filePaths;
         this.imageWidth = imageWidth;
+        this.localImagePath = localImagePath;
         ImageLoadUtils.initImageLoader(_activity);
 
         imageLoader = ImageLoader.getInstance();
@@ -121,8 +127,11 @@ public class GridViewImageAdapter extends BaseAdapter {
                 intent.putExtra("IMAGE_URL", _filePaths.get(_postion));
             }else{
                 intent.putExtra("IMAGE_FILE_PATH", _filePaths.get(_postion));
+                if(localImagePath.containsKey(_filePaths.get(_postion))){
+                    intent.putExtra("REMOVABLE_CAMERA_FILE", true);
+                }
             }
-            _activity.startActivity(intent);
+            _activity.startActivityForResult(intent, RunGalleryActivity.REMOVE_FILE_REQUEST_CODE);
         }
 
     }

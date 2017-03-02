@@ -331,7 +331,12 @@ public class WelcomeActivity extends AppCompatActivity {
             @Override
             public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
                 Log.d(TAG, "Render url into bitmap.");
-                profilePictureBitmap = loadedImage.copy(loadedImage.getConfig(), true);
+                Bitmap.Config bitmapConfig = loadedImage.getConfig();
+                if(bitmapConfig == null){
+                    bitmapConfig = Bitmap.Config.ARGB_8888;
+                }
+
+                profilePictureBitmap = loadedImage.copy(bitmapConfig, true);
                 profilePictureBase64 = BitmapUtils.convertToBase64(profilePictureBitmap);
                 setPicFromBitmap(profilePictureBitmap);
             }

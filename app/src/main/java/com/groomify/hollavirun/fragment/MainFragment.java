@@ -60,6 +60,7 @@ import com.groomify.hollavirun.view.ProfilePictureView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Stack;
 
@@ -76,7 +77,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
     private final static int MAX_LATEST_NEWS_CONTENT = 50;
 
     private final static String TAG = MainFragment.class.getSimpleName();
-
+    private static DecimalFormat decimalFormat = new DecimalFormat("00");
     public static ProfilePictureView profilePictureView;
 
     /*private RecyclerView horizonRecyclerView;
@@ -329,7 +330,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
                 Double missionLng = Double.parseDouble(mission_.getLng());
                 Marker marker = map.addMarker(new MarkerOptions()
                         .position(new LatLng(missionLat, missionLng))
-                        .title(mission_.getTitle())
+                        .title("Mission "+decimalFormat.format((i + 1))+": "+mission_.getTitle())
                         .snippet(mission_.getDescription())
                 );
                 marker.setTag(i);
@@ -433,8 +434,8 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
 
         Integer missionNo = (Integer) marker.getTag();
 
-        Log.i(TAG, "Marker clicked.");
-        if(missionNo > 0 && previousClickedMarker == missionNo) {
+        Log.i(TAG, "Marker clicked: TAG:"+missionNo);
+        if(missionNo >= 0 && previousClickedMarker == missionNo) {
             Intent intent = new Intent(getActivity(), MissionDetailsActivity.class);
 
             Bundle bundle = new Bundle();

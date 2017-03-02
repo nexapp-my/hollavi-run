@@ -128,4 +128,24 @@
     <style name="Widget.Toolbar" parent="@style/Widget.AppCompat.Toolbar">
         <item name="contentInsetStart">0dp</item>
     </style>
+
+
+    <style name="FullScreenImageViewTheme">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:actionBarStyle">@style/FullScreenImageViewTheme.ThemeActionBar</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <!-- Support library compatibility -->
+        <item name="actionBarStyle">@style/FullScreenImageViewTheme.ThemeActionBar</item>
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+    <style name="FullScreenImageViewTheme.ThemeActionBar"
+        parent="Widget.AppCompat.Light.ActionBar.Solid">
+        <item name="android:background">@null</item>
+        <!-- Support library compatibility -->
+        <item name="background">@null</item>
+    </style>
+
+    <style name="ActionBarWhiteOptionMenu" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:textColorSecondary">@android:color/white</item>
+    </style>
 </resources>

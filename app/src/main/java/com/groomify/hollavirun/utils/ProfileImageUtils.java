@@ -65,7 +65,7 @@ public class ProfileImageUtils {
         int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
 
         // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = true;
+        bmOptions.inJustDecodeBounds = false;
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 

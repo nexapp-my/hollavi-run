@@ -1,6 +1,8 @@
 package com.groomify.hollavirun;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
@@ -45,16 +47,23 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Response;
 
 public class RunGalleryActivity extends AppCompatActivity {
 
     private static final String TAG = RunGalleryActivity.class.getSimpleName();
-    private ArrayList<String> imagePaths = new ArrayList<String>();
-    private ArrayList<String> localImagePaths = new ArrayList<String>();
-    private ArrayList<String> remoteImagePaths = new ArrayList<String>();
+    public static final int REMOVE_FILE_REQUEST_CODE = 100;
+    public static final  String REQUIRE_RELOAD_LOCAL_FILE = "REQUIRE_RELOAD_LOCAL_FILE";
+    public static final String DELETED_FILE = "DELETED_FILE";
+    private List<String> imagePaths = new ArrayList<String>();
+    private List<String> localImagePaths = new ArrayList<String>();
+    private List<String> missionImagePaths = new ArrayList<String>();
+    private List<String> remoteImagePaths = new ArrayList<String>();
+    private Map<String, String> localFilePathMap = new HashMap<>();
 
     private GridViewImageAdapter adapter;
     private GridView gridView;
@@ -139,19 +148,13 @@ public class RunGalleryActivity extends AppCompatActivity {
 
             for(File file: files){
                 Log.i(TAG, "File found, pushing to list:"+file.getAbsolutePath());
-                localImagePaths.add(file.getAbsolutePath());
-                imagePaths.add(file.getAbsolutePath());
+                missionImagePaths.add(file.getAbsolutePath());
             }
         }
 
-        List<File> cameraFiles = storage.getFiles(AppConstant.CAMERA_IMAGE_DIRECTORY, OrderType.DATE);
+        loadInAppCapturedFile();
 
-        for(File file: cameraFiles){
-            localImagePaths.add(file.getAbsolutePath());
-            imagePaths.add(file.getAbsolutePath());
-        }
-
-
+        combineAllPath();
 
         // Initilizing Grid View
         initilizeGridLayout();
@@ -160,11 +163,30 @@ public class RunGalleryActivity extends AppCompatActivity {
         //imagePaths = utils.getFilePaths();
 
         // Gridview adapter
-        adapter = new GridViewImageAdapter(RunGalleryActivity.this, imagePaths,columnWidth);
+        adapter = new GridViewImageAdapter(RunGalleryActivity.this, imagePaths,columnWidth, localFilePathMap);
 
         // setting grid view adapter
         gridView.setAdapter(adapter);
         loadingDialog = DialogUtils.buildLoadingDialog(this);
+
+    }
+
+    private void loadInAppCapturedFile(){
+        List<File> cameraFiles = storage.getFiles(AppConstant.CAMERA_IMAGE_DIRECTORY, OrderType.DATE);
+        localFilePathMap.clear();
+        localImagePaths.clear();
+        for(File file: cameraFiles){
+            localFilePathMap.put(file.getAbsolutePath(), file.getAbsolutePath());
+            localImagePaths.add(file.getAbsolutePath());
+        }
+    }
+
+    private void combineAllPath(){
+        imagePaths.clear();
+
+        imagePaths.addAll(remoteImagePaths);
+        imagePaths.addAll(localImagePaths);
+        imagePaths.addAll(missionImagePaths);
 
     }
 
@@ -194,7 +216,7 @@ public class RunGalleryActivity extends AppCompatActivity {
         for(String imagePath: imagePaths){
             Log.i(TAG, "Image path: "+imagePath);
         }
-        adapter = new GridViewImageAdapter(RunGalleryActivity.this, imagePaths,columnWidth);
+        adapter = new GridViewImageAdapter(RunGalleryActivity.this, imagePaths,columnWidth, localFilePathMap);
         adapter.notifyDataSetChanged();
         // setting grid view adapter
         gridView.setAdapter(adapter);
@@ -273,5 +295,18 @@ public class RunGalleryActivity extends AppCompatActivity {
         });
     }
 
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == REMOVE_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK){
+            if(data != null){
+                boolean requireReload  = data.getBooleanExtra(REQUIRE_RELOAD_LOCAL_FILE, false);
+                if(requireReload){
+                    loadInAppCapturedFile();
+                    combineAllPath();
+                    notifyDataChanged();
+                }
+            }
+        }
+    }
 }

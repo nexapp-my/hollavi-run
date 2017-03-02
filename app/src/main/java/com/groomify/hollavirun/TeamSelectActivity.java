@@ -204,6 +204,7 @@ public class TeamSelectActivity extends AppCompatActivity implements TeamViewPag
                     public void execute(Realm realm) {
                         GroomifyUser realmUser = realm.where(GroomifyUser.class).findFirst();
                         realmUser.setCurrentTeam(selectedTeam);
+                        realm.copyToRealmOrUpdate(realmUser);
                     }
                 });
                 SharedPreferencesHelper.savePreferences(TeamSelectActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_TEAM_SELECTED, true);

@@ -68,6 +68,7 @@ public class SplashActivity extends AppCompatActivity implements TermAndConditio
     GroomifyUser groomifyUserRealmObj;
 
     int totalAttemp = 0;
+    boolean requireRelog = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,6 +172,10 @@ public class SplashActivity extends AppCompatActivity implements TermAndConditio
                     Log.i(TAG, "Calling get user api success");
                     return restResponse.body();
                 }else{
+                    if(restResponse.code() == 401){
+                        Log.i(TAG, "Calling API returned with error 401. Possible user auth token expired. Request for new login.");
+                        requireRelog = true;
+                    }
                     Log.i(TAG, "Calling get user api failed, response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
                 }
             } catch (Exception e) {
@@ -232,9 +237,13 @@ public class SplashActivity extends AppCompatActivity implements TermAndConditio
                 }
 
             }else{
-                totalAttemp++;
-                if(totalAttemp <= 3){
-                    new GroomifyGetUserTask().execute();
+                if(requireRelog){
+                    launchNextScreen();
+                }else{
+                    totalAttemp++;
+                    if(totalAttemp <= 3){
+                        new GroomifyGetUserTask().execute();
+                    }
                 }
             }
         }
@@ -250,6 +259,10 @@ public class SplashActivity extends AppCompatActivity implements TermAndConditio
     }
 
     private void launchNextScreen(){
+        if(requireRelog){
+            launchOnboardingScreen(SplashActivity.this, true);
+            return;
+        }
 
         SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
 

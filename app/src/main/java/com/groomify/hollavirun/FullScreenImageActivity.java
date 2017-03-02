@@ -1,13 +1,21 @@
 package com.groomify.hollavirun;
 
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -21,6 +29,7 @@ import com.facebook.share.model.ShareHashtag;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
+import com.groomify.hollavirun.rest.models.response.RaceGalleryResponse;
 import com.groomify.hollavirun.utils.AppUtils;
 import com.groomify.hollavirun.utils.BitmapUtils;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
@@ -28,6 +37,8 @@ import com.groomify.hollavirun.utils.ProfileImageUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.sromku.simple.storage.SimpleStorage;
+import com.sromku.simple.storage.Storage;
 
 import java.io.File;
 
@@ -51,10 +62,20 @@ public class FullScreenImageActivity extends AppCompatActivity {
     private Bitmap bitmapForShare;
     ImageLoader imageLoader;
 
+    private boolean removeable;
+    private Bitmap decodedBitmap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_screen_image);
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        myToolbar.setBackgroundColor(Color.TRANSPARENT);
+        myToolbar.setTitle("");
+        setSupportActionBar(myToolbar);
+
+
         ImageLoadUtils.initImageLoader(this);
         imageLoader = ImageLoader.getInstance();
 
@@ -66,33 +87,44 @@ public class FullScreenImageActivity extends AppCompatActivity {
 
         imageFilePath = getIntent().getStringExtra("IMAGE_FILE_PATH");
         imageUrl = getIntent().getStringExtra("IMAGE_URL");
-        boolean hdMode = getIntent().getBooleanExtra("HD_MODE", false);
-
+        //boolean hdMode = getIntent().getBooleanExtra("HD_MODE", false);
+        /*boolean hdMode = false;
 
         if(imageFilePath != null){
             if(hdMode){
-                Log.i(TAG, "Display in HD mode.");
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath, options);
-                imageView.setImageBitmap(bitmap);
+                progressBar.setVisibility(View.VISIBLE);
+                new GroomifyGetRunnerGalleryTask().execute();
             }else{
                 Log.i(TAG, "Display in normal mode.");
                 final String uri = Uri.fromFile(new File(imageFilePath)).toString();
                 final String decoded = Uri.decode(uri);
 
-                imageLoader.displayImage(decoded, imageView, ImageLoadUtils.getDisplayImageOptions());
+                imageLoader.displayImage(decoded, imageView, ImageLoadUtils.getDisplayImageOptions(), );
+                mAttacher = new PhotoViewAttacher(imageView);
             }
 
             Log.i(TAG, "Full screen image viewer with image file path: "+imageFilePath);
         }else if(imageUrl != null){
             Log.i(TAG, "Full screen image viewer with url: "+imageUrl);
             loadImageFromUrl();
+        }*/
+
+        if(imageFilePath!= null){
+            final String uri = Uri.fromFile(new File(imageFilePath)).toString();
+            final String decoded = Uri.decode(uri);
+            imageUrl = decoded;
+            loadImageFromUrl();
         }
 
+        removeable = getIntent().getBooleanExtra("REMOVABLE_CAMERA_FILE", false);
+
+        if(!removeable){
+            getSupportActionBar().hide();
+        }
         progressBar.setVisibility(View.INVISIBLE);
 
-        mAttacher = new PhotoViewAttacher(imageView);
+
+
 
         callbackManager = CallbackManager.Factory.create();
         shareDialog = new ShareDialog(this);
@@ -179,6 +211,7 @@ public class FullScreenImageActivity extends AppCompatActivity {
                         Log.e(TAG, "Failed to copy the GIF as well.", ex);
                     }
                 }
+                mAttacher = new PhotoViewAttacher(imageView);
             }
 
             @Override
@@ -211,5 +244,78 @@ public class FullScreenImageActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         Log.i(TAG, "onActivityResult, requestCode: "+requestCode+", resultCode: "+resultCode+", data:"+data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void removeFile(){
+        Log.i(TAG, "Deleting file: "+imageFilePath);
+        if(imageFilePath != null){
+            File imageFile = new File(imageFilePath);
+            if(imageFile.exists()){
+                boolean deleted = imageFile.delete();
+                Log.i(TAG, "File deleted? "+deleted);
+                if(deleted){
+                    Intent intent = new Intent();
+                    intent.putExtra(RunGalleryActivity.REQUIRE_RELOAD_LOCAL_FILE, true);
+                    intent.putExtra(RunGalleryActivity.DELETED_FILE, imageFile);
+                    setResult(Activity.RESULT_OK, intent);
+                    super.onBackPressed();
+                }
+            }
+        }
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.full_screen_image_view_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // action with ID action_refresh was selected
+            case R.id.action_delete:
+                promptConfirmation();
+                break;
+        }
+
+        return true;
+    }
+
+    private void promptConfirmation(){
+        new AlertDialog.Builder(this)
+                .setMessage("Delete this photo?")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        removeFile();
+                    }
+
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private class GroomifyGetRunnerGalleryTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.i(TAG, "Display in HD mode.");
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            decodedBitmap = BitmapFactory.decodeFile(imageFilePath, options);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            progressBar.setVisibility(View.INVISIBLE);
+            imageView.setImageBitmap(decodedBitmap);
+            mAttacher = new PhotoViewAttacher(imageView);
+        }
     }
 }
