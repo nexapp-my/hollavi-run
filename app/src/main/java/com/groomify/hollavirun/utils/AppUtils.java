@@ -128,9 +128,9 @@ public class AppUtils {
 
     public static Team[] getDefaultTeam(){
         Team[] teams = new Team[3];
-        teams[0] = new Team(R.drawable.team_3_ambassador, "Grooton");
-        teams[1] = new Team(R.drawable.team_1_ambassador, "Miki");
-        teams[2] = new Team(R.drawable.team_2_ambassador, "Fyre");
+        teams[0] = new Team(R.drawable.team_3_ambassador, R.drawable.team_grooton_for_fb, "Grooton");
+        teams[1] = new Team(R.drawable.team_1_ambassador, R.drawable.team_miki_for_fb,"Miki");
+        teams[2] = new Team(R.drawable.team_2_ambassador, R.drawable.team_fyre_for_fb, "Fyre");
         return teams;
     }
 

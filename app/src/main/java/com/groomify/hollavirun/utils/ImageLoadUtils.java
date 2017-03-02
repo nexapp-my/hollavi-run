@@ -8,6 +8,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 
 /**
  * Created by Valkyrie1988 on 2/17/2017.
@@ -50,7 +51,24 @@ public class ImageLoadUtils {
                     //.displayer(new RoundedBitmapDisplayer(20))
                     .build();
         }
+        return displayImageOptions;
+    }
 
+    public static DisplayImageOptions getDisplayRoundedImageOptions(){
+        if(displayImageOptions == null) {
+
+            displayImageOptions = new DisplayImageOptions.Builder()
+                    //.showImageOnLoading(R.drawable.ic_stub)
+                    //.showImageForEmptyUri(R.drawable.ic_empty)
+                    //.showImageOnFail(R.drawable.ic_error)
+                    .resetViewBeforeLoading(true)
+                    .cacheInMemory(true)
+                    .cacheOnDisk(true)
+                    .considerExifParams(true)
+                    .bitmapConfig(Bitmap.Config.RGB_565)
+                    .displayer(new RoundedBitmapDisplayer(20))
+                    .build();
+        }
         return displayImageOptions;
     }
 

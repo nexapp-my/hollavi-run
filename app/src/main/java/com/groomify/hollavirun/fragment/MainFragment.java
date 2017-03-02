@@ -383,18 +383,19 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
             Double endLng =  Double.parseDouble(raceDetailResponse.getEndPoint().getLng());
             rectOptions.add(new LatLng(endLat, endLng));
 
-            Double zoomCenterLatLng = raceDetailResponse.getMapInfo().getMapCenter().getLat();
+            Double zoomCenterLat = raceDetailResponse.getMapInfo().getMapCenter().getLat();
+            Double zoomCenterLng = raceDetailResponse.getMapInfo().getMapCenter().getLng();
             int zoomLevel = raceDetailResponse.getMapInfo().getZoomLevel();
 
             Log.i(TAG, "Start point: "+startLat+", "+startLng);
             Log.i(TAG, "End point: "+endLat+", "+endLng);
             Log.i(TAG, "Total poly coordinate: "+raceDetailResponse.getRaceTrackCoordinates().size());
-            Log.i(TAG, "Zoom center : "+zoomCenterLatLng);
+            Log.i(TAG, "Zoom center : "+zoomCenterLat+","+zoomCenterLng);
             Log.i(TAG, "Zoom level: "+zoomLevel);
 
              // Get back the mutable Polyline
             Polyline polyline = map.addPolyline(rectOptions);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(zoomCenterLatLng, zoomCenterLatLng), zoomLevel));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(zoomCenterLat, zoomCenterLng), zoomLevel));
 
             googleMap.setOnMyLocationChangeListener(myLocationChangeListener);
             googleMap.setOnMarkerClickListener(this);
@@ -430,10 +431,10 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public boolean onMarkerClick(Marker marker) {
 
-        int missionNo = (int) marker.getTag();
+        Integer missionNo = (Integer) marker.getTag();
 
         Log.i(TAG, "Marker clicked.");
-        if(previousClickedMarker == missionNo) {
+        if(missionNo > 0 && previousClickedMarker == missionNo) {
             Intent intent = new Intent(getActivity(), MissionDetailsActivity.class);
 
             Bundle bundle = new Bundle();
@@ -489,6 +490,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
                         .position(new LatLng(lat,lng))
                         .title(runnerInfoResponse.getRunBibNo()).snippet(runnerInfoResponse.getTeam()).flat(true).
                                 icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_runner_marker)));
+                searchResultMarker.setTag(-1);
                 //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 14));
 
                 //Fancy shit

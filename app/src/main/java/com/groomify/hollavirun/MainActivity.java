@@ -520,7 +520,8 @@ public class MainActivity extends AppCompatActivity
 
         if(successGranted){
             Log.i(TAG, "Permission granted.");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && requestCode == AppPermissionHelper.PERMISSIONS_LOCATION_REQUEST_CODE) {
                 Log.i(TAG, "Recreating activity.");
                 if(mainFragment != null && mainFragment.getGoogleMap() != null){
                     mainFragment.getGoogleMap().setMyLocationEnabled(true);

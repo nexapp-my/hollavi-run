@@ -11,11 +11,7 @@ public class Team implements Parcelable {
 
     private String teamName;
     private int resourceId;
-
-    public Team(int resourceId, String teamName) {
-        this.resourceId = resourceId;
-        this.teamName = teamName;
-    }
+    private int resrouceIdForFB;
 
     public int getResourceId() {
         return resourceId;
@@ -25,11 +21,25 @@ public class Team implements Parcelable {
         this.resourceId = resourceId;
     }
 
+    public int getResrouceIdForFB() {
+        return resrouceIdForFB;
+    }
+
+    public void setResrouceIdForFB(int resrouceIdForFB) {
+        this.resrouceIdForFB = resrouceIdForFB;
+    }
+
     public String getTeamName() {
         return teamName;
     }
 
     public void setTeamName(String teamName) {
+        this.teamName = teamName;
+    }
+
+    public Team(int resourceId, int resrouceIdForFB, String teamName) {
+        this.resourceId = resourceId;
+        this.resrouceIdForFB = resrouceIdForFB;
         this.teamName = teamName;
     }
 
@@ -43,17 +53,16 @@ public class Team implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.teamName);
         dest.writeInt(this.resourceId);
-    }
-
-    public Team() {
+        dest.writeInt(this.resrouceIdForFB);
     }
 
     protected Team(Parcel in) {
         this.teamName = in.readString();
         this.resourceId = in.readInt();
+        this.resrouceIdForFB = in.readInt();
     }
 
-    public static final Parcelable.Creator<Team> CREATOR = new Parcelable.Creator<Team>() {
+    public static final Creator<Team> CREATOR = new Creator<Team>() {
         @Override
         public Team createFromParcel(Parcel source) {
             return new Team(source);

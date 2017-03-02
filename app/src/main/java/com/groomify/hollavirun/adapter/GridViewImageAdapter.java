@@ -48,7 +48,7 @@ public class GridViewImageAdapter extends BaseAdapter {
         ImageLoadUtils.initImageLoader(_activity);
 
         imageLoader = ImageLoader.getInstance();
-        displayImageOptions = ImageLoadUtils.getDisplayImageOptions();
+        displayImageOptions = ImageLoadUtils.getDisplayRoundedImageOptions();
 
         PauseOnScrollListener listener = new PauseOnScrollListener(imageLoader, pauseOnScroll, pauseOnFling);
 

@@ -110,6 +110,7 @@ public class TeamSelectActivity extends AppCompatActivity implements TeamViewPag
 
     private void selectTeam(){
         Log.i(TAG, "Team selected: "+selectedTeam);
+        selectedTeam = team[currentPosition].getTeamName();
         changeViewState(true);
         new GroomifyUpdateRunnerInfoTask().execute();
 
@@ -231,7 +232,7 @@ public class TeamSelectActivity extends AppCompatActivity implements TeamViewPag
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         selectedTeam = team[currentPosition].getTeamName();
-                        int resourceId = team[currentPosition].getResourceId();
+                        int resourceId = team[currentPosition].getResrouceIdForFB();
 
                         if (ShareDialog.canShow(SharePhotoContent.class)){
 

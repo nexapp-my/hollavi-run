@@ -48,6 +48,7 @@ public class RankingListFragment extends ListFragment {
     TextView myRankingNameTextView = null;
     TextView myRankingUserIdTextView = null;
     TextView myRankingTimeTextView = null;
+    View myRankingPanel = null;
 
     private OnFragmentInteractionListener mListener;
 
@@ -143,7 +144,7 @@ public class RankingListFragment extends ListFragment {
         myRankingNameTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_name);
         myRankingUserIdTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_user_id);
         myRankingTimeTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_time);
-
+        myRankingPanel = parentView;
         initializeMyRanking(parentView);
         return view;
     }
@@ -154,10 +155,15 @@ public class RankingListFragment extends ListFragment {
 
         Ranking ranking = groomifyUser.getMyRanking() ;
 
-        myRankingNoTextView.setText("#"+ranking.getRankNumber()+".");
-        myRankingNameTextView.setText(ranking.getName());
-        myRankingTimeTextView.setText(ranking.getCompletionTime() == null ? "" : AppUtils.getFormattedTimeFromSeconds(ranking.getCompletionTime()));
-        myRankingUserIdTextView.setText("(ID:"+ranking.getId()+")");
+        if(ranking != null){
+            myRankingNoTextView.setText("#"+ranking.getRankNumber()+".");
+            myRankingNameTextView.setText(ranking.getName());
+            myRankingTimeTextView.setText(ranking.getCompletionTime() == null ? "" : AppUtils.getFormattedTimeFromSeconds(ranking.getCompletionTime()));
+            myRankingUserIdTextView.setText("(ID:"+ranking.getId()+")");
+            myRankingPanel.setVisibility(View.VISIBLE);
+        }else{
+            myRankingPanel.setVisibility(View.GONE);
+        }
 
     }
 
