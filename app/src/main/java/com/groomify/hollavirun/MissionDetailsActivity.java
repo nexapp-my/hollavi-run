@@ -325,10 +325,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
 
     public void requestQRCodeScan(View v) {
         Intent qrScanIntent = new Intent(this, QRActivity.class);
-        //qrScanIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        //qrScanIntent.setClassName("com.groomify.hollavirun", "com.groomify.hollavirun.QRActivity");
-        //startActivityForResult(myIntent, 600);
+        qrScanIntent.setClassName("com.groomify.hollavirun", "com.groomify.hollavirun.QRActivity");
         startActivityForResult(qrScanIntent, QR_REQUEST);
     }
 

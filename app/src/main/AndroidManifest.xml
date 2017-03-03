@@ -96,7 +96,7 @@
         <activity
             android:name=".QRActivity"
             android:label=""
-            android:launchMode="singleTask"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <activity
             android:name=".SOSActivity"
@@ -119,10 +119,10 @@
         <activity
             android:name=".LatestUpdateDetailsActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".SponsorsActivity" />
-        <activity android:name=".FullScreenImageActivity" />
-        <activity android:name=".RunGalleryActivity" />
-        <activity android:name=".TermsAndConditionActivity" android:theme="@style/ActionBarWhiteOptionMenu"/>
+        <activity android:name=".SponsorsActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".FullScreenImageActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".RunGalleryActivity" android:screenOrientation="portrait" />
+        <activity android:name=".TermsAndConditionActivity" android:screenOrientation="portrait" />
     </application>
 
 </manifest>
