@@ -33,6 +33,7 @@ import com.groomify.hollavirun.fragment.MainFragment;
 import com.groomify.hollavirun.fragment.MissionFragment;
 import com.groomify.hollavirun.fragment.MissionListFragment;
 import com.groomify.hollavirun.fragment.RankingListFragment;
+import com.groomify.hollavirun.fragment.SOSFragment;
 import com.groomify.hollavirun.fragment.dummy.MissionContent;
 import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.response.Info;
@@ -97,6 +98,7 @@ public class MainActivity extends AppCompatActivity
     private ImageView homeMenuIcon;
     private ImageView missionMenuIcon;
     private ImageView couponMenuIcon;
+    private ImageView sosMenuIcon;
 
     private TextView alertText;
     private View alertBanner;
@@ -124,8 +126,7 @@ public class MainActivity extends AppCompatActivity
     private MainFragment mainFragment;
     private MissionFragment missionFragment;
     private CouponsListFragment couponsListFragment;
-
-    private Stack<Integer> stateStack = new Stack<Integer> ();
+    private SOSFragment sosFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -187,11 +188,11 @@ public class MainActivity extends AppCompatActivity
         mainFragment = new MainFragment();
         missionFragment = new MissionFragment();
         couponsListFragment = new CouponsListFragment();
+        sosFragment = new SOSFragment();
 
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.main_placeholder, mainFragment).commit();
-        stateStack.push(0);
+        ft.replace(R.id.main_placeholder, mainFragment, MainFragment.class.getSimpleName()).commit();
 
         menuBarGreetingText.setText("Welcome, " +groomifyUser.getName());
 
@@ -288,13 +289,12 @@ public class MainActivity extends AppCompatActivity
             R.id.menu_sos
     };
 
-    boolean isBackPressedBeforeThis = false;
-
     private void initializeMenuBarListener(){
 
         homeMenuIcon = (ImageView) findViewById(R.id.menu_home_image_view);
         missionMenuIcon = (ImageView) findViewById(R.id.menu_mission_image_view);
         couponMenuIcon = (ImageView) findViewById(R.id.menu_coupon_image_view);
+        sosMenuIcon = (ImageView) findViewById(R.id.menu_sos_image_view);
 
 
         homeMenu = findViewById(menusId[0]);
@@ -310,13 +310,11 @@ public class MainActivity extends AppCompatActivity
                     mainFragment = new MainFragment();
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                     //ft.replace(R.id.main_placeholder, mainFragment).commit();
-                    ft.replace(R.id.main_placeholder, mainFragment);
+                    ft.replace(R.id.main_placeholder, mainFragment, MainFragment.class.getSimpleName());
                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                     ft.addToBackStack(null);
                     ft.commit();
                     currentMenuIndex = 0;
-                    stateStack.push(currentMenuIndex);
-                    isBackPressedBeforeThis = false;
                     toggleMenuState();
                 }
             }
@@ -328,14 +326,11 @@ public class MainActivity extends AppCompatActivity
                 if(currentMenuIndex != 1){
 
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.main_placeholder, missionFragment);
+                    ft.replace(R.id.main_placeholder, missionFragment, MissionFragment.class.getSimpleName());
                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                     ft.addToBackStack(null);
                     ft.commit();
-                    //ft.replace(R.id.main_placeholder, missionFragment).commit();
                     currentMenuIndex = 1;
-                    stateStack.push(currentMenuIndex);
-                    isBackPressedBeforeThis = false;
                     toggleMenuState();
 
                 }
@@ -373,13 +368,11 @@ public class MainActivity extends AppCompatActivity
                     } else {
                         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                         //ft.replace(R.id.main_placeholder, couponsListFragment).commit();
-                        ft.replace(R.id.main_placeholder, couponsListFragment);
+                        ft.replace(R.id.main_placeholder, couponsListFragment, CouponsListFragment.class.getSimpleName());
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         ft.addToBackStack(null);
                         ft.commit();
                         currentMenuIndex = 3;
-                        stateStack.push(currentMenuIndex);
-                        isBackPressedBeforeThis = false;
                         toggleMenuState();
                     }
                 }
@@ -390,9 +383,22 @@ public class MainActivity extends AppCompatActivity
         sosMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent sosIntent = new Intent(v.getContext(), SOSActivity.class);
+
+                if(currentMenuIndex != 4){
+
+                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                    ft.replace(R.id.main_placeholder, sosFragment, SOSFragment.class.getSimpleName());
+                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                    ft.addToBackStack(null);
+                    ft.commit();
+                    currentMenuIndex = 4;
+                    toggleMenuState();
+
+                }
+
+                /*Intent sosIntent = new Intent(v.getContext(), SOSActivity.class);
                 startActivity(sosIntent);
-                currentMenuIndex = 4;
+                currentMenuIndex = 4;*/
             }
         });
 
@@ -402,6 +408,7 @@ public class MainActivity extends AppCompatActivity
         homeMenuIcon.setImageResource(R.drawable.ic_menu_home);
         missionMenuIcon.setImageResource(R.drawable.ic_menu_missions);
         couponMenuIcon.setImageResource(R.drawable.ic_menu_coupons);
+        sosMenuIcon.setImageResource(R.drawable.ic_menu_sos);
         menuBarTitleText.setVisibility(View.GONE);
         menuBarGreetingText.setVisibility(View.VISIBLE);
         switch (currentMenuIndex){
@@ -417,6 +424,11 @@ public class MainActivity extends AppCompatActivity
                 menuBarTitleText.setVisibility(View.VISIBLE);
                 menuBarGreetingText.setVisibility(View.INVISIBLE);
                 break;
+            case 4:
+                sosMenuIcon.setImageResource(R.drawable.ic_menu_sos_filled);
+                menuBarTitleText.setText("SOS");
+                menuBarTitleText.setVisibility(View.VISIBLE);
+                menuBarGreetingText.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -547,21 +559,18 @@ public class MainActivity extends AppCompatActivity
     public void onBackPressed() {
 
         if(getSupportFragmentManager().getBackStackEntryCount() > 0){
-            if(!isBackPressedBeforeThis){
-                currentMenuIndex = stateStack.pop();
+            getSupportFragmentManager().popBackStackImmediate();
+            if(getSupportFragmentManager().findFragmentByTag(MainFragment.class.getSimpleName()) != null && getSupportFragmentManager().findFragmentByTag(MainFragment.class.getSimpleName()).isVisible()){
+                currentMenuIndex = 0;
+            }else if(getSupportFragmentManager().findFragmentByTag(MissionFragment.class.getSimpleName()) != null && getSupportFragmentManager().findFragmentByTag(MissionFragment.class.getSimpleName()).isVisible()){
+                currentMenuIndex = 1;
+            }else if(getSupportFragmentManager().findFragmentByTag(CouponsListFragment.class.getSimpleName()) != null && getSupportFragmentManager().findFragmentByTag(CouponsListFragment.class.getSimpleName()).isVisible()){
+                currentMenuIndex = 3;
+            }else  if(getSupportFragmentManager().findFragmentByTag(SOSFragment.class.getSimpleName()) != null && getSupportFragmentManager().findFragmentByTag(SOSFragment.class.getSimpleName()).isVisible()){
+                currentMenuIndex = 4;
             }
-            isBackPressedBeforeThis = true;
 
-            if(!stateStack.empty()){
-                currentMenuIndex = stateStack.pop();
-                if(stateStack.size() == 0){
-                    //Need to put at least one stack inside
-                    stateStack.push(currentMenuIndex);
-                }
-
-            }
             toggleMenuState();
-            getSupportFragmentManager().popBackStack();
         }else{
             new AlertDialog.Builder(this)
                     .setIcon(android.R.drawable.ic_dialog_alert)

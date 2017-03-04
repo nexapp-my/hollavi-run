@@ -15,48 +15,50 @@
         android:layout_marginRight="16dp" />
 
     <TextView
+        android:id="@+id/coupon_title_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@id/coupon_image_view"
+        android:layout_toRightOf="@id/coupon_image_view"
+        android:text="Item Name"
+        android:textColor="@android:color/black"
+        android:textSize="12sp" />
+
+    <TextView
         android:text="Item Description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/coupon_title_text_view"
-        android:layout_toRightOf="@+id/coupon_image_view"
-        android:layout_toEndOf="@+id/coupon_image_view"
+        android:layout_below="@id/coupon_title_text_view"
+        android:layout_toRightOf="@id/coupon_image_view"
+        android:layout_toEndOf="@id/coupon_image_view"
         android:id="@+id/coupon_desc_text_view"
         android:layout_marginBottom="11dp"
         android:textSize="12sp"
         android:textColor="@color/primaryTextColour" />
 
     <TextView
-        android:text="Expires in 3 hours"
+        android:id="@+id/coupon_expiration_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/coupon_desc_text_view"
-        android:layout_toRightOf="@+id/coupon_image_view"
-        android:layout_toEndOf="@+id/coupon_image_view"
-        android:id="@+id/coupon_expiration_text_view"
+        android:layout_below="@id/coupon_desc_text_view"
+        android:layout_marginBottom="10dp"
+        android:layout_toEndOf="@id/coupon_image_view"
+        android:layout_toRightOf="@id/coupon_image_view"
+        android:text="Expires in 3 hours"
         android:textColor="@color/primaryTextColour"
         android:textSize="10sp" />
-
-    <TextView
-        android:text="Item Name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/coupon_title_text_view"
-        android:textColor="@android:color/black"
-        android:textSize="12sp"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/coupon_image_view"
-        android:layout_toEndOf="@+id/coupon_image_view"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="10dp" />
 
 
     <View
         android:layout_width="fill_parent"
         android:layout_height="0.5dp"
-        android:background="@color/primaryTextColour"
-        android:layout_weight="0"
         android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/coupon_image_view"
-        android:layout_toEndOf="@+id/coupon_image_view" />
+        android:layout_marginTop="5dp"
+        android:layout_toEndOf="@id/coupon_image_view"
+        android:layout_toRightOf="@id/coupon_image_view"
+        android:layout_weight="0"
+        android:background="@color/primaryTextColour" />
 </RelativeLayout>
