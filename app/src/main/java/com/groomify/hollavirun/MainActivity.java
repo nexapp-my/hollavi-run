@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
@@ -307,13 +308,12 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if(currentMenuIndex != 0 ){
-                    mainFragment = new MainFragment();
-                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    //ft.replace(R.id.main_placeholder, mainFragment).commit();
+                    /*FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                     ft.replace(R.id.main_placeholder, mainFragment, MainFragment.class.getSimpleName());
                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                     ft.addToBackStack(null);
-                    ft.commit();
+                    ft.commit();*/
+                    getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                     currentMenuIndex = 0;
                     toggleMenuState();
                 }
@@ -367,7 +367,6 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this, "Guest runner is not entitle for coupon.", Toast.LENGTH_SHORT).show();
                     } else {
                         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                        //ft.replace(R.id.main_placeholder, couponsListFragment).commit();
                         ft.replace(R.id.main_placeholder, couponsListFragment, CouponsListFragment.class.getSimpleName());
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         ft.addToBackStack(null);
@@ -559,8 +558,9 @@ public class MainActivity extends AppCompatActivity
     public void onBackPressed() {
 
         if(getSupportFragmentManager().getBackStackEntryCount() > 0){
-            getSupportFragmentManager().popBackStackImmediate();
-            if(getSupportFragmentManager().findFragmentByTag(MainFragment.class.getSimpleName()) != null && getSupportFragmentManager().findFragmentByTag(MainFragment.class.getSimpleName()).isVisible()){
+            getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            currentMenuIndex = 0;
+            /*if(getSupportFragmentManager().findFragmentByTag(MainFragment.class.getSimpleName()) != null && getSupportFragmentManager().findFragmentByTag(MainFragment.class.getSimpleName()).isVisible()){
                 currentMenuIndex = 0;
             }else if(getSupportFragmentManager().findFragmentByTag(MissionFragment.class.getSimpleName()) != null && getSupportFragmentManager().findFragmentByTag(MissionFragment.class.getSimpleName()).isVisible()){
                 currentMenuIndex = 1;
@@ -568,7 +568,7 @@ public class MainActivity extends AppCompatActivity
                 currentMenuIndex = 3;
             }else  if(getSupportFragmentManager().findFragmentByTag(SOSFragment.class.getSimpleName()) != null && getSupportFragmentManager().findFragmentByTag(SOSFragment.class.getSimpleName()).isVisible()){
                 currentMenuIndex = 4;
-            }
+            }*/
 
             toggleMenuState();
         }else{

@@ -94,7 +94,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
     private ImageView runGalleryBtn = null;
 
     public EditText editText;
-    public MapView mMapView;
+    private MapView mMapView;
 
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
 
@@ -122,6 +122,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "On create view");
         super.onCreate(savedInstanceState);
+
         context = this.getContext();
 
         Realm.init(this.getContext());
@@ -138,7 +139,6 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
         raceId = SharedPreferencesHelper.getSelectedRaceId(getContext());
         missions = AppUtils.getDefaultMission();
         raceDetailResponse = realm.where(RaceDetailResponse.class).equalTo("id", raceId).findFirst();
-        Log.i(TAG, "GOD BLESS ME PLEASE WORK!!!!!"+raceDetailResponse);
 
     }
 
@@ -211,15 +211,14 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
             }
         });
 
+        Log.i(TAG, "Creating map view.");
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
         }
-
-
-        Log.i(TAG, "Creating map view.");
         mMapView = (MapView) mainFragment.findViewById(R.id.map);
         mMapView.onCreate(mapViewBundle);
+
         mMapView.getMapAsync(this);
 
         initializeNewsView();
@@ -334,33 +333,6 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
                 marker.setTag(i);
                 i++;
             }
-/*
-            Marker marketMission1;
-            Marker marketMission2;
-            Marker marketMission3;
-
-            marketMission1 = map.addMarker(new MarkerOptions()
-                    .position(new LatLng(3.074028, 101.606791))
-                    .title("Mission 1").flat(true).alpha(0.5f));
-                            //icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
-            marketMission1.setTag(0);
-
-            marketMission2 = map.addMarker(new MarkerOptions()
-                    .position(new LatLng(3.069393, 101.610725))
-                    .title("Mission 2"));
-            marketMission2.setTag(0);
-
-            marketMission3 = map.addMarker(new MarkerOptions()
-                    .position(new LatLng(3.065279, 101.603333))
-                    .title("Mission 3"));
-            marketMission3.setTag(0);
-
-
-            marketMission3 = map.addMarker(new MarkerOptions()
-                    .position(new LatLng(3.065279, 101.603333))
-                    .title("Mission 4"));
-            marketMission3.setTag(0);*/
-            //3.064059, 101.579973
 
             PolylineOptions rectOptions = new PolylineOptions().color(ResourcesCompat.getColor(getResources(), R.color.rustyRed, null));
             Double startLat = Double.parseDouble(raceDetailResponse.getStartPoint().getLat());
@@ -417,6 +389,10 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public void onDestroy() {
         Log.i(TAG, "onDestroy, map destroyed.");
+        if(googleMap != null){
+            googleMap.setMyLocationEnabled(false);
+            //googleMap.clear();
+        }
         mMapView.onDestroy();
         super.onDestroy();
     }
@@ -425,6 +401,19 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
     public void onLowMemory() {
         super.onLowMemory();
         mMapView.onLowMemory();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Bundle mapViewBundle = outState.getBundle(MAPVIEW_BUNDLE_KEY);
+        if (mapViewBundle == null) {
+            mapViewBundle = new Bundle();
+            outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle);
+        }
+
+        mMapView.onSaveInstanceState(mapViewBundle);
     }
 
     @Override
@@ -483,6 +472,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
                 if(searchResultMarker != null){
                     searchResultMarker.remove();
                 }
+
                 double lat = Double.parseDouble(runnerInfoResponse.getLocation().getLat());
                 double lng = Double.parseDouble(runnerInfoResponse.getLocation().getLng());
                 searchResultMarker =  googleMap.addMarker(new MarkerOptions()
