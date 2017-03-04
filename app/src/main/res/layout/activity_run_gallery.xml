@@ -47,7 +47,7 @@
     <EditText
         android:imeOptions="actionSearch"
         android:layout_height="36dp"
-        android:inputType="textPersonName"
+        android:inputType="number"
         android:ems="10"
         android:id="@+id/search_runner_field"
         android:hint="Search Runner Bib No"

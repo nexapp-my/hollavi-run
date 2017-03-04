@@ -155,13 +155,12 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
         filterArray[0] = new InputFilter.LengthFilter(maxBibNo);
         editText.setFilters(filterArray);
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-        editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_VARIATION_NORMAL);
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL);
 
         editText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 EditText editText = (EditText) v;
-                editText.setHint("");
                 editText.setText("");
             }
         });
@@ -171,7 +170,6 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
             public void onFocusChange(View v, boolean hasFocus) {
                 if(hasFocus){
                     EditText editText = (EditText) v;
-                    editText.setHint("");
                     editText.setText("");
                 }else{
                     InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);

@@ -203,7 +203,7 @@ public class EditProfileActivity extends AppCompatActivity {
         }
 
         if(!AppUtils.isValidEmail(emailEditText.getText().toString().trim())){
-            emailEditText.setError("Invalid email.");
+            emailEditText.setError("Invalid email address.");
             return false;
         }
 

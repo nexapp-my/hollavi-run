@@ -109,13 +109,13 @@ public class FullScreenImageActivity extends AppCompatActivity {
             loadImageFromUrl();
         }*/
 
-        if(imageFilePath!= null){
+        if(imageFilePath!= null) {
             final String uri = Uri.fromFile(new File(imageFilePath)).toString();
             final String decoded = Uri.decode(uri);
             imageUrl = decoded;
-            loadImageFromUrl();
         }
 
+        loadImageFromUrl();
         removeable = getIntent().getBooleanExtra("REMOVABLE_CAMERA_FILE", false);
 
         if(!removeable){

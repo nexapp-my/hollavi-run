@@ -16,8 +16,6 @@
     </string>
 
     <string name="title_activity_login">Login</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
 
     <string name="facebook_app_id">1066614556786691</string>
     <string name="facebook_authority_id">com.facebook.app.FacebookContentProvider1066614556786691</string>
@@ -36,22 +34,20 @@
     <string name="welcome_description">Before we begin, why not upload a display picture so that we can get to know you better?</string>
 
     <string name="team_select_header">PICK A TEAM</string>
-    <string name="team_select_description">Enter your email to receive instructions on how to reset your password.</string>
-    <string name="team_select_one">A</string>
-    <string name="team_select_two">B</string>
-    <string name="team_select_three">C</string>
 
     <string name="sos_call_dialog_first_aid">Call for first aid?</string>
     <string name="sos_call_dialog_support">Call for Groomify support?</string>
     <string name="sos_call_dialog_emergency_contact">Call for emergency contact: EC_NAME(EC_NO)?</string>
 
+    <string name="main_search_runner_hint">Search Runner Bib no.</string>
+
     <string name="mission_detail_scan_qr_btn">SCAN QR TO ACTIVATE</string>
     <string name="coupon_detail_scan_qr_btn">SCAN QR TO REDEEM</string>
     <string name="qr_help_text">QR Code only available on Run-site</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="sponsors_partners"><![CDATA[Sponsors & Partners]]></string>
+
+    <string name="edit_profile_hint_phone">Phone number. Eg: 0107654321</string>
 
     <integer name="viewfinder_border_width">4</integer>
     <integer name="viewfinder_border_length">60</integer>

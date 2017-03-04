@@ -105,7 +105,7 @@ public class RunGalleryActivity extends AppCompatActivity {
         filterArray[0] = new InputFilter.LengthFilter(maxBibNo);
         editText.setFilters(filterArray);
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-        editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_VARIATION_NORMAL);
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL);
 
         editText.setOnClickListener(new View.OnClickListener() {
             @Override
