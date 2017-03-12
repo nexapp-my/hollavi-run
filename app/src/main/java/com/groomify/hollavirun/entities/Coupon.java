@@ -6,23 +6,41 @@ import android.os.Parcelable;
 import java.util.Arrays;
 import java.util.Date;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by Valkyrie1988 on 11/29/2016.
  */
 
-public class Coupon implements Parcelable{
+public class Coupon extends RealmObject implements Parcelable{
 
 
+    @PrimaryKey
     private int id;
     private String name;
     private String description;
     private Date expirationTime;
-
-    private byte[] imageByteArr;
-    private byte[] originalImageByteArr;
+    private String coverPhotoUrl;
     private int resourceId;
 
     private boolean redeemed;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getDescription() {
         return description;
@@ -40,44 +58,12 @@ public class Coupon implements Parcelable{
         this.expirationTime = expirationTime;
     }
 
-    public int getId() {
-        return id;
+    public String getCoverPhotoUrl() {
+        return coverPhotoUrl;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public byte[] getImageByteArr() {
-        return imageByteArr;
-    }
-
-    public void setImageByteArr(byte[] imageByteArr) {
-        this.imageByteArr = imageByteArr;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public byte[] getOriginalImageByteArr() {
-        return originalImageByteArr;
-    }
-
-    public void setOriginalImageByteArr(byte[] originalImageByteArr) {
-        this.originalImageByteArr = originalImageByteArr;
-    }
-
-    public boolean isRedeemed() {
-        return redeemed;
-    }
-
-    public void setRedeemed(boolean redeemed) {
-        this.redeemed = redeemed;
+    public void setCoverPhotoUrl(String coverPhotoUrl) {
+        this.coverPhotoUrl = coverPhotoUrl;
     }
 
     public int getResourceId() {
@@ -86,6 +72,14 @@ public class Coupon implements Parcelable{
 
     public void setResourceId(int resourceId) {
         this.resourceId = resourceId;
+    }
+
+    public boolean isRedeemed() {
+        return redeemed;
+    }
+
+    public void setRedeemed(boolean redeemed) {
+        this.redeemed = redeemed;
     }
 
 
@@ -100,19 +94,9 @@ public class Coupon implements Parcelable{
         dest.writeString(this.name);
         dest.writeString(this.description);
         dest.writeLong(this.expirationTime != null ? this.expirationTime.getTime() : -1);
-        dest.writeByteArray(this.imageByteArr);
-        dest.writeByteArray(this.originalImageByteArr);
+        dest.writeString(this.coverPhotoUrl);
         dest.writeInt(this.resourceId);
         dest.writeByte(this.redeemed ? (byte) 1 : (byte) 0);
-    }
-
-    public Coupon(int id, String name, String description, Date expirationTime,  boolean redeemed, int resourceId) {
-        this.description = description;
-        this.expirationTime = expirationTime;
-        this.id = id;
-        this.name = name;
-        this.redeemed = redeemed;
-        this.resourceId = resourceId;
     }
 
     public Coupon() {
@@ -124,8 +108,7 @@ public class Coupon implements Parcelable{
         this.description = in.readString();
         long tmpExpirationTime = in.readLong();
         this.expirationTime = tmpExpirationTime == -1 ? null : new Date(tmpExpirationTime);
-        this.imageByteArr = in.createByteArray();
-        this.originalImageByteArr = in.createByteArray();
+        this.coverPhotoUrl = in.readString();
         this.resourceId = in.readInt();
         this.redeemed = in.readByte() != 0;
     }
@@ -141,4 +124,6 @@ public class Coupon implements Parcelable{
             return new Coupon[size];
         }
     };
+
+
 }

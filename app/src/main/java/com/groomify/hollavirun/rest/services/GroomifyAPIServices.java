@@ -4,6 +4,7 @@ import com.groomify.hollavirun.rest.models.request.FirstAidRequest;
 import com.groomify.hollavirun.rest.models.request.MissionTransactionRequest;
 import com.groomify.hollavirun.rest.models.request.UpdateUserInfoRequest;
 import com.groomify.hollavirun.rest.models.response.CheckAppVersionResponse;
+import com.groomify.hollavirun.rest.models.response.CouponsResponse;
 import com.groomify.hollavirun.rest.models.response.RaceGalleryResponse;
 import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
 import com.groomify.hollavirun.rest.models.response.RaceRankingResponse;
@@ -100,6 +101,11 @@ public interface GroomifyAPIServices {
             @Header("auth_token") String authToken,
             @Body  FirstAidRequest firstAidRequest);
 
+    @GET("races/{id}/coupons")
+    Call<CouponsResponse> getCoupons(
+            @Header("fb_id") String facebookId,
+            @Header("auth_token") String authToken,
+            @Path("id") String id);
 
     @POST("fb_transactions")
     Call<PostFacebookTransactionResponse> postFacebookTransaction(

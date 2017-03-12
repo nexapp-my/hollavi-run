@@ -14,12 +14,12 @@
         android:layout_height="56dp" />
 
     <ImageView
+        android:id="@+id/coupon_header_image_view"
         android:layout_width="wrap_content"
         android:layout_height="106dp"
-        app:srcCompat="@drawable/milo"
-        android:id="@+id/coupon_header_image_view"
         android:layout_below="@id/toolbar"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:minWidth="106dp" />
 
     <TextView
         android:text="FREE MILO DRINK FOR GROOMIFY RUNNERS"

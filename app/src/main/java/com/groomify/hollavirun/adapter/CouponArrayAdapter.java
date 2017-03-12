@@ -13,8 +13,11 @@ import android.widget.TextView;
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.entities.Coupon;
 import com.groomify.hollavirun.entities.Mission;
+import com.groomify.hollavirun.utils.ImageLoadUtils;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,9 +26,9 @@ import java.util.concurrent.TimeUnit;
 
 public class CouponArrayAdapter extends ArrayAdapter<Coupon> {
     private final Context context;
-    private final Coupon[] values;
+    private final List<Coupon> values;
 
-    public CouponArrayAdapter(Context context, Coupon[] values) {
+    public CouponArrayAdapter(Context context, List<Coupon> values) {
         super(context, R.layout.item_coupon, values);
         this.context = context;
         this.values = values;
@@ -44,8 +47,8 @@ public class CouponArrayAdapter extends ArrayAdapter<Coupon> {
         TextView couponExpirationTextView = (TextView) rowView.findViewById(R.id.coupon_expiration_text_view);
         ImageView couponImageImageView = (ImageView) rowView.findViewById(R.id.coupon_image_view);
 
-        if(values != null && values[position] != null){
-            Coupon coupon = values[position];
+        if(values != null && values.get(position) != null){
+            Coupon coupon = values.get(position);
             couponDescTextView.setText(coupon.getDescription());
             couponTitleTextView.setText(coupon.getName());
 
@@ -58,7 +61,11 @@ public class CouponArrayAdapter extends ArrayAdapter<Coupon> {
                 couponExpirationTextView.setText("Expired");
             }
 
-            couponImageImageView.setImageResource(coupon.getResourceId());
+            if(coupon.getResourceId() > -1){
+                couponImageImageView.setImageResource(coupon.getResourceId());
+            }else{
+                ImageLoader.getInstance().displayImage(coupon.getCoverPhotoUrl(), couponImageImageView, ImageLoadUtils.getDisplayImageOptions());
+            }
             /*if(coupon.getImageByteArr() != null){
                 //couponImageImageView = new ImageView(this.getContext());
                 Bitmap miniMapBitmap = BitmapFactory.decodeByteArray(coupon.getImageByteArr(), 0, coupon.getImageByteArr().length);

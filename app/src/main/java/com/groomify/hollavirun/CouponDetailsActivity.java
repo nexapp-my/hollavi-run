@@ -18,7 +18,9 @@ import android.widget.Toast;
 
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.Coupon;
+import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
@@ -71,10 +73,7 @@ public class CouponDetailsActivity extends AppCompatActivity {
         couponName = (TextView) findViewById(R.id.coupon_detail_title_text_view);
         expirationTime = (TextView) findViewById(R.id.coupon_details_expiration_text_view);
 
-        if(coupon.getImageByteArr() != null){
-            Bitmap miniMapBitmap = BitmapFactory.decodeByteArray(coupon.getOriginalImageByteArr(), 0, coupon.getOriginalImageByteArr().length);
-            couponImageHeader.setImageBitmap(miniMapBitmap);
-        }
+        ImageLoader.getInstance().displayImage(coupon.getCoverPhotoUrl(), couponImageHeader, ImageLoadUtils.getDisplayImageOptions());
 
         couponName.setText(coupon.getName());
 
