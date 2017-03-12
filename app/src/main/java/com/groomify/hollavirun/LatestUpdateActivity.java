@@ -3,12 +3,10 @@ package com.groomify.hollavirun;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -20,8 +18,6 @@ import com.groomify.hollavirun.rest.models.response.Info;
 import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import io.realm.Realm;
@@ -32,14 +28,15 @@ import retrofit2.Response;
 public class LatestUpdateActivity extends ListActivity {
 
     private static final String TAG = LatestUpdateActivity.class.getSimpleName();
-
+    private NewsFeedArrayAdapter adapter;
     private RestClient client = new RestClient();
     private Realm realm;
 
-    private NewsFeed[] newsFeeds;
+    private NewsFeed[] newsFeeds = {};
 
     Toolbar toolbar;
     ProgressBar progressBar;
+    private Long raceId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +44,7 @@ public class LatestUpdateActivity extends ListActivity {
         setContentView(R.layout.activity_latest_update);
 
         progressBar = (ProgressBar) findViewById(R.id.latest_update_loading_circle);
-        progressBar.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -65,15 +62,20 @@ public class LatestUpdateActivity extends ListActivity {
 
         realm = Realm.getInstance(config);
 
-        RealmResults<NewsFeed> newsFeedRealmResults = realm.where(NewsFeed.class).findAll();
-
-        newsFeeds = newsFeedRealmResults.toArray(new NewsFeed[newsFeedRealmResults.size()]);
-
-        NewsFeedArrayAdapter adapter = new NewsFeedArrayAdapter(this, newsFeeds);
-
-        setListAdapter(adapter);
-
+        raceId = SharedPreferencesHelper.getSelectedRaceId(this);
+        progressBar.setVisibility(View.VISIBLE);
+        new GroomifyRaceInfoTask().execute(""+raceId);
     }
+
+    private void loadNewsFeedList(){
+        progressBar.setVisibility(View.GONE);
+        RealmResults<NewsFeed> newsFeedRealmResults = realm.where(NewsFeed.class).findAll();
+        newsFeeds = newsFeedRealmResults.toArray(new NewsFeed[newsFeedRealmResults.size()]);
+        adapter = new NewsFeedArrayAdapter(this, newsFeeds);
+        setListAdapter(adapter);
+        //adapter.notifyDataSetChanged();
+    }
+
 
     protected void onListItemClick(ListView l, View v, int position, long id) {
 
@@ -107,7 +109,6 @@ public class LatestUpdateActivity extends ListActivity {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Unable to get race news.",e);
-                Toast.makeText(LatestUpdateActivity.this, "Unable to get race detail.", Toast.LENGTH_SHORT).show();
             }
             return null;
         }
@@ -129,15 +130,15 @@ public class LatestUpdateActivity extends ListActivity {
                     NewsFeed newsFeed = realm.createObject(NewsFeed.class, i + 1);
                     newsFeed.setContent(infos.get(i).getContent());
                     newsFeed.setHeader(infos.get(i).getTitle());
-                    newsFeed.setTimeStamp("1 min ago");//TODO missing timestamp
+                    newsFeed.setTimeStamp(infos.get(i).getPostedDate());
                     newsFeed.setCoverPhotoUrl(infos.get(i).getCover().getUrl());
-
+                    newsFeed.setDescription(infos.get(i).getDescription());
                     realm.copyToRealmOrUpdate(newsFeed);
                 }
 
                 realm.commitTransaction();
-
             }
+            loadNewsFeedList();
         }
     }
 }

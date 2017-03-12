@@ -1,46 +1,38 @@
 package com.groomify.hollavirun.fragment;
 
 import android.content.Context;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.groomify.hollavirun.R;
-import com.groomify.hollavirun.adapter.MissionArrayAdapter;
 import com.groomify.hollavirun.adapter.RankingArrayAdapter;
 import com.groomify.hollavirun.entities.GroomifyUser;
-import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.entities.Ranking;
+import com.groomify.hollavirun.rest.RestClient;
+import com.groomify.hollavirun.rest.models.response.RaceRankingResponse;
 import com.groomify.hollavirun.utils.AppUtils;
+import com.groomify.hollavirun.utils.RealmUtils;
+import com.groomify.hollavirun.utils.SharedPreferencesHelper;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
-import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
+import retrofit2.Response;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link RankingListFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link RankingListFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class RankingListFragment extends ListFragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private final static String TAG = RankingListFragment.class.getSimpleName();
 
@@ -49,8 +41,7 @@ public class RankingListFragment extends ListFragment {
     TextView myRankingUserIdTextView = null;
     TextView myRankingTimeTextView = null;
     View myRankingPanel = null;
-
-    private OnFragmentInteractionListener mListener;
+    ProgressBar loadingProgress;
 
     private Realm realm;
 
@@ -58,63 +49,33 @@ public class RankingListFragment extends ListFragment {
 
     private RankingArrayAdapter rankingArrayAdapter;
 
+    private RestClient client = new RestClient();
 
-    Ranking[] rankings = {
-           /* new Ranking(1, "Ceric", "10001", "1 m 0 s"),
-            new Ranking(2, "Calvin Koh", "10001", "1 m 0 s"),
-            new Ranking(3, "CMonz", "10001", "1 m 0 s"),
-            new Ranking(4, "Jeffrey", "10001", "1 m 0 s"),
-            new Ranking(5, "Ken", "10001", "1 m 0 s")*/
 
-    };
+    List<Ranking> rankings = new ArrayList<>();
 
     public RankingListFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment RankingListFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static RankingListFragment newInstance(String param1, String param2) {
-        RankingListFragment fragment = new RankingListFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        Log.i(TAG, "on create ranking list fragment.");
 
         Realm.init(this.getContext());
-        RealmConfiguration config = new RealmConfiguration
-                .Builder()
-                .deleteRealmIfMigrationNeeded()
-                .build();
+        realm = Realm.getInstance(RealmUtils.getRealmConfiguration());
 
-        realm = Realm.getInstance(config);
-
-        // ... boilerplate omitted for brevity
-        // get all the customers
-        RealmResults<Ranking> rankingRealmResults = realm.where(Ranking.class).findAll();
+        /*RealmResults<Ranking> rankingRealmResults = realm.where(Ranking.class).findAll();
 
         Log.i(TAG, "All ranking. "+rankingRealmResults.size());
-        // ... build a list adapter and set it to the ListView/RecyclerView/etc
+        rankings = rankingRealmResults.toArray(new Ranking[0]);*/
+        rankingArrayAdapter = new RankingArrayAdapter(this.getContext(), rankings);
+        setListAdapter(rankingArrayAdapter);
 
-        rankings = rankingRealmResults.toArray(new Ranking[0]);
-
+        Long raceId = SharedPreferencesHelper.getSelectedRaceId(getContext());
+        new GroomifyMissionRankingTask().execute(""+raceId);
+/*
         // set up a Realm change listener
         realmChangeListener = new RealmChangeListener<RealmResults<Ranking>>() {
             @Override
@@ -122,15 +83,15 @@ public class RankingListFragment extends ListFragment {
                 // This is called anytime the Realm database changes on any thread.
                 // Please note, change listeners only work on Looper threads.
                 // For non-looper threads, you manually have to use Realm.waitForChange() instead.
+                Log.i(TAG, "Realm changed detected, notify dataset changed.");
                 rankingArrayAdapter.notifyDataSetChanged(); // Update the UI
             }
         };
-        // Tell Realm to notify our listener when the customers results
-        // have changed (items added, removed, updated, anything of the sort).
-        rankingRealmResults.addChangeListener(realmChangeListener);
 
-        rankingArrayAdapter = new RankingArrayAdapter(this.getContext(), rankings);
-        setListAdapter(rankingArrayAdapter);
+        rankingRealmResults.addChangeListener(realmChangeListener);
+*/
+
+
     }
 
 
@@ -139,17 +100,19 @@ public class RankingListFragment extends ListFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_ranking_list, container, false);
+        loadingProgress = (ProgressBar) view.findViewById(R.id.ranking_loading_progress);
+
         View parentView = view.findViewById(R.id.my_profile_ranking);
         myRankingNoTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_no);
         myRankingNameTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_name);
         myRankingUserIdTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_user_id);
         myRankingTimeTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_time);
         myRankingPanel = parentView;
-        initializeMyRanking(parentView);
+        initializeMyRanking();
         return view;
     }
 
-    private void initializeMyRanking(View parentView)
+    private void initializeMyRanking()
     {
         GroomifyUser groomifyUser = realm.where(GroomifyUser.class).findFirst();
 
@@ -167,42 +130,98 @@ public class RankingListFragment extends ListFragment {
 
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-/*            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");*/
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    //TODO might need a thread periodicaly pull the ranking.
+    private class GroomifyMissionRankingTask extends AsyncTask<String, String, RaceRankingResponse> {
+
+        @Override
+        protected RaceRankingResponse doInBackground(String... params) {
+            String authToken = SharedPreferencesHelper.getAuthToken(getContext());
+            String fbId = SharedPreferencesHelper.getFbId(getContext());
+            try {
+                Response<RaceRankingResponse> restResponse = client.getApiService().raceRanking(fbId, authToken, params[0]).execute();
+
+                if(restResponse.isSuccessful()){
+                    Log.i(TAG, "Calling race ranking api success");
+                    return restResponse.body();
+                }else{
+                    Log.i(TAG, "Calling race ranking api failed, race id: "+params[0]+", response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to get race ranking.",e);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(RaceRankingResponse raceRankingResponse) {
+            super.onPostExecute(raceRankingResponse);
+
+            if(raceRankingResponse != null){
+
+                realm.beginTransaction();
+                realm.delete(com.groomify.hollavirun.entities.Ranking.class);//truncate the tables.
+
+                Log.i(TAG, "Total ranking size: "+raceRankingResponse.getRankings().size());
+
+                for(int i =0; i < raceRankingResponse.getRankings().size(); i++){
+                    com.groomify.hollavirun.entities.Ranking ranking = realm.createObject(com.groomify.hollavirun.entities.Ranking.class, i + 1);
+                    ranking.setName(raceRankingResponse.getRankings().get(i).getRunnerName());
+
+                    ranking.setCompletionTime(raceRankingResponse.getRankings().get(i).getTotalMissionTime());
+                    ranking.setId(raceRankingResponse.getRankings().get(i).getRunnerBib());
+                    ranking.setTeamName(raceRankingResponse.getRankings().get(i).getTeam());
+
+                    Log.i(TAG, "Saving ranking into database: "+ranking.toString());
+                    realm.copyToRealmOrUpdate(ranking);
+                }
+
+                Log.i(TAG, "Ranking list saved into database. Saving user own ranking into database.");
+                final com.groomify.hollavirun.entities.Ranking myRanking = new Ranking();
+                myRanking.setRankNumber(raceRankingResponse.getMyRanking().getRanking());
+                myRanking.setName(raceRankingResponse.getMyRanking().getRunnerName());
+                myRanking.setCompletionTime(raceRankingResponse.getMyRanking().getTotalMissionTime());
+                myRanking.setId(raceRankingResponse.getMyRanking().getRunnerBib());
+                myRanking.setTeamName(raceRankingResponse.getMyRanking().getTeam());
+
+                final Ranking realmRanking = realm.copyToRealmOrUpdate(myRanking);
+                Log.i(TAG, "Saving user ranking into database: "+myRanking.toString());
+                realm.commitTransaction();
+
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        GroomifyUser groomifyUser = realm.where(GroomifyUser.class).equalTo("id", SharedPreferencesHelper.getUserId(getContext())).findFirst();
+                        groomifyUser.setMyRanking(realmRanking);
+                        Log.i(TAG, "User info from database: "+groomifyUser.toString());
+                    }
+                });
+
+            }else{
+                //Toast.makeText(getContext(), "Unable to get race ranking at this moment.", Toast.LENGTH_SHORT).show();
+            }
+
+            reloadRankingList();
+        }
+    }
+
+    private void reloadRankingList(){
+        RealmResults<Ranking> rankingRealmResults = realm.where(Ranking.class).findAll();
+
+        rankings.clear();
+        rankingArrayAdapter.clear();
+        rankingArrayAdapter.addAll(rankingRealmResults);
+        rankingArrayAdapter.notifyDataSetChanged();
+        initializeMyRanking();
+        loadingProgress.setVisibility(View.GONE);
     }
 }

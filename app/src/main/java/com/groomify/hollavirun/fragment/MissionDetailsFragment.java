@@ -163,7 +163,7 @@ public class MissionDetailsFragment extends Fragment {
 
             @Override
             public void onError(FacebookException error) {
-                Toast.makeText(MissionDetailsFragment.this.getActivity(), "Failed to share facebook post: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MissionDetailsFragment.this.getActivity(), "Unable to share to facebook at this moment.", Toast.LENGTH_SHORT).show();
             }
         });
 

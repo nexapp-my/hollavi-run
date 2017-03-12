@@ -102,6 +102,7 @@ public class CouponDetailsActivity extends AppCompatActivity {
 
     public void requestQRCodeScan(View v) {
         Intent qrScanIntent = new Intent(this, QRActivity.class);
+        qrScanIntent.setClassName("com.groomify.run", "com.groomify.hollavirun.QRActivity");
         startActivityForResult(qrScanIntent, QR_REQUEST);
     }
 
@@ -113,7 +114,8 @@ public class CouponDetailsActivity extends AppCompatActivity {
             String result = "";
             if (resultCode == Activity.RESULT_OK) {
                 String qrCodeData = data.getStringExtra(QRActivity.EXTRA_QR_RESULT);
-                if(getResources().getString(R.string.coupon_validation_code).equals(qrCodeData)){
+                int resId = getResources().getIdentifier("coupon_validation_code_"+coupon.getId(), "string", getPackageName());
+                if(getResources().getString(resId).equals(qrCodeData)){
                     result = "QR Code validation success. Coupon redeemed.";
                     SharedPreferencesHelper.setCouponRedeemed(this, raceId, coupon.getId(), true);
                     redeemed = true;
@@ -121,10 +123,10 @@ public class CouponDetailsActivity extends AppCompatActivity {
                 }else{
                     result = "Invalid redemption code.";
                 }
-                Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
             } else {
                 result = "Unable to verify QR Code";
             }
+            Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
         }
     }
 

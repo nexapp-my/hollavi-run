@@ -72,8 +72,7 @@ import retrofit2.Response;
  */
 public class MainActivity extends AppCompatActivity
         implements
-        MissionListFragment.OnListFragmentInteractionListener,
-        RankingListFragment.OnFragmentInteractionListener
+        MissionListFragment.OnListFragmentInteractionListener
 {
 
     private final static String TAG = MainActivity.class.getSimpleName();
@@ -220,9 +219,9 @@ public class MainActivity extends AppCompatActivity
             alertBanner.setVisibility(View.GONE);
         }
 
-        Long raceId = SharedPreferencesHelper.getSelectedRaceId(this);
-        new GroomifyRaceInfoTask().execute(""+raceId);
-        new GroomifyMissionRankingTask().execute(""+raceId);
+        //Long raceId = SharedPreferencesHelper.getSelectedRaceId(this);
+        //new GroomifyRaceInfoTask().execute(""+raceId);
+        //new GroomifyMissionRankingTask().execute(""+raceId);
 
 
     }
@@ -451,11 +450,13 @@ public class MainActivity extends AppCompatActivity
                 boolean missionSubmitted[] = new boolean[AppUtils.getDefaultMission().length];
                 boolean missionUnlocked[] = new boolean[AppUtils.getDefaultMission().length];
                 String missionUnlockedTime[] = new String[AppUtils.getDefaultMission().length];
+                String missionFirstAttemptsTime[] = new String[AppUtils.getDefaultMission().length];
                 Mission[] missions = AppUtils.getDefaultMission();
                 for(int i = 0; i < missions.length; i++){
                     missionUnlockedTime[i] = SharedPreferencesHelper.getMissionUnlockTime(this, raceId, missions[i].getId());
                     missionSubmitted[i] = SharedPreferencesHelper.isMissionSubmitted(this, raceId, missions[i].getId());
                     missionUnlocked[i] = SharedPreferencesHelper.isMissionUnlocked(this, raceId, missions[i].getId());
+                    missionFirstAttemptsTime[i] = SharedPreferencesHelper.getMissionFirstAttemptsTime(this, raceId, missions[i].getId());
                 }
                 editor.clear();
                 // Commit the edits!
@@ -465,6 +466,7 @@ public class MainActivity extends AppCompatActivity
                     SharedPreferencesHelper.setMissionUnlocked(this, raceId, missions[i].getId(), missionUnlocked[i]);
                     SharedPreferencesHelper.setMissionSubmitted(this, raceId, missions[i].getId(), missionSubmitted[i]);
                     SharedPreferencesHelper.setMissionUnlockedTime(this, raceId, missions[i].getId(), missionUnlockedTime[i]);
+                    SharedPreferencesHelper.setMissionFirstAttemptsTime(this, raceId, missions[i].getId(),missionFirstAttemptsTime[i] );
                 }
                 SharedPreferencesHelper.setTermAndConditionAccepted(this);
                 editor.commit();
@@ -552,9 +554,6 @@ public class MainActivity extends AppCompatActivity
     public void onListFragmentInteraction(MissionContent.MissionItem item) {}
 
     @Override
-    public void onFragmentInteraction(Uri uri) {}
-
-    @Override
     public void onBackPressed() {
 
         if(getSupportFragmentManager().getBackStackEntryCount() > 0){
@@ -618,6 +617,7 @@ public class MainActivity extends AppCompatActivity
             //TODO save race info into database.
             if(raceInfoResponses != null){
 
+
                 realm.beginTransaction();
                 realm.delete(NewsFeed.class);//truncate the tables.
                 List<Info> infos = raceInfoResponses.getInfos();
@@ -628,8 +628,9 @@ public class MainActivity extends AppCompatActivity
                     NewsFeed newsFeed = realm.createObject(NewsFeed.class, i + 1);
                     newsFeed.setContent(infos.get(i).getContent());
                     newsFeed.setHeader(infos.get(i).getTitle());
-                    newsFeed.setTimeStamp("1 min ago");//TODO missing timestamp
+                    newsFeed.setTimeStamp(infos.get(i).getPostedDate());
                     newsFeed.setCoverPhotoUrl(infos.get(i).getCover().getUrl());
+                    newsFeed.setDescription(infos.get(i).getDescription());
 
                     realm.copyToRealmOrUpdate(newsFeed);
                 }
@@ -642,78 +643,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    //TODO might need a thread periodicaly pull the ranking.
-    private class GroomifyMissionRankingTask extends AsyncTask<String, String, RaceRankingResponse> {
 
-        @Override
-        protected RaceRankingResponse doInBackground(String... params) {
-            String authToken = SharedPreferencesHelper.getAuthToken(MainActivity.this);
-            String fbId = SharedPreferencesHelper.getFbId(MainActivity.this);
-            try {
-                Response<RaceRankingResponse> restResponse = client.getApiService().raceRanking(fbId, authToken, params[0]).execute();
-
-                if(restResponse.isSuccessful()){
-                    Log.i(TAG, "Calling race news api success");
-                    return restResponse.body();
-                }else{
-                    Log.i(TAG, "Calling race news api failed, race id: "+params[0]+", response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Unable to get race news.",e);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(RaceRankingResponse raceRankingResponse) {
-            super.onPostExecute(raceRankingResponse);
-
-            //TODO save race info into database.
-            if(raceRankingResponse != null){
-
-                realm.beginTransaction();
-                realm.delete(com.groomify.hollavirun.entities.Ranking.class);//truncate the tables.
-
-                Log.i(TAG, "Total ranking size: "+raceRankingResponse.getRankings().size());
-
-                for(int i =0; i < raceRankingResponse.getRankings().size(); i++){
-                    com.groomify.hollavirun.entities.Ranking ranking = realm.createObject(com.groomify.hollavirun.entities.Ranking.class, i + 1);
-                    ranking.setName(raceRankingResponse.getRankings().get(i).getRunnerName());
-
-                    ranking.setCompletionTime(raceRankingResponse.getRankings().get(i).getTotalMissionTime());
-                    ranking.setId(raceRankingResponse.getRankings().get(i).getRunnerBib());
-                    ranking.setTeamName(raceRankingResponse.getRankings().get(i).getTeam());
-
-                    Log.i(TAG, "Saving ranking into database: "+ranking.toString());
-                    realm.copyToRealmOrUpdate(ranking);
-                }
-
-
-                Log.i(TAG, "Ranking list saved into database. Saving user own ranking into database.");
-                final com.groomify.hollavirun.entities.Ranking myRanking = new Ranking();
-                myRanking.setRankNumber(raceRankingResponse.getMyRanking().getRanking());
-                myRanking.setName(raceRankingResponse.getMyRanking().getRunnerName());
-                myRanking.setCompletionTime(raceRankingResponse.getMyRanking().getTotalMissionTime());
-                myRanking.setId(raceRankingResponse.getMyRanking().getRunnerBib());
-                myRanking.setTeamName(raceRankingResponse.getMyRanking().getTeam());
-
-                final Ranking realmRanking = realm.copyToRealmOrUpdate(myRanking);
-                Log.i(TAG, "Saving user ranking into database: "+myRanking.toString());
-                realm.commitTransaction();
-
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm) {
-                        GroomifyUser groomifyUser = realm.where(GroomifyUser.class).equalTo("id", SharedPreferencesHelper.getUserId(MainActivity.this)).findFirst();
-                        groomifyUser.setMyRanking(realmRanking);
-                        Log.i(TAG, "User info from database: "+groomifyUser.toString());
-                    }
-                });
-            }else{
-                Toast.makeText(MainActivity.this, "Unable to get race ranking at this moment.", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
 
     @Override
     protected void onDestroy() {

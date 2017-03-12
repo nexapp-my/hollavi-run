@@ -120,6 +120,20 @@ public class SharedPreferencesHelper {
         editor.commit();
     }
 
+    public static void setMissionFirstAttemptsTime(Context context, Long raceId, Integer missionId, String dateTime) {
+        SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        String prefKey = AppConstant.PREFS_MISSION_FIRST_ATTEMPTS_TIME_PREFIX + "_" + raceId + "_" + missionId;
+        editor.putString(prefKey, dateTime);
+        editor.commit();
+    }
+
+    public static String getMissionFirstAttemptsTime(Context context, Long raceId, Integer missionId) {
+        SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        String prefKey = AppConstant.PREFS_MISSION_FIRST_ATTEMPTS_TIME_PREFIX + "_" + raceId + "_" + missionId;
+        return settings.getString(prefKey, null);
+    }
+
     public static void setRaceExpirationTime(Context context, Long raceId, String expirationTime) {
         SharedPreferences settings = context.getSharedPreferences(AppConstant.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();

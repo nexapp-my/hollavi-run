@@ -2,6 +2,8 @@
 package com.groomify.hollavirun.rest.models.response;
 
 import java.io.Serializable;
+import java.util.Date;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Parcelable.Creator;
@@ -26,29 +28,9 @@ public class Info implements Serializable, Parcelable
     @SerializedName("url")
     @Expose
     private String url;
-    public final static Creator<Info> CREATOR = new Creator<Info>() {
-
-
-        @SuppressWarnings({
-            "unchecked"
-        })
-        public Info createFromParcel(Parcel in) {
-            Info instance = new Info();
-            instance.title = ((String) in.readValue((String.class.getClassLoader())));
-            instance.description = ((String) in.readValue((String.class.getClassLoader())));
-            instance.content = ((String) in.readValue((String.class.getClassLoader())));
-            instance.cover = ((Cover) in.readValue((Cover.class.getClassLoader())));
-            instance.url = ((String) in.readValue((String.class.getClassLoader())));
-            return instance;
-        }
-
-        public Info[] newArray(int size) {
-            return (new Info[size]);
-        }
-
-    }
-    ;
-    private final static long serialVersionUID = -8956671277762071512L;
+    @SerializedName("posted_at")
+    @Expose
+    private Date postedDate;
 
     public String getTitle() {
         return title;
@@ -90,16 +72,52 @@ public class Info implements Serializable, Parcelable
         this.url = url;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(title);
-        dest.writeValue(description);
-        dest.writeValue(content);
-        dest.writeValue(cover);
-        dest.writeValue(url);
+    public Date getPostedDate() {
+        return postedDate;
     }
 
+    public void setPostedDate(Date postedDate) {
+        this.postedDate = postedDate;
+    }
+
+
+    @Override
     public int describeContents() {
-        return  0;
+        return 0;
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.title);
+        dest.writeString(this.description);
+        dest.writeString(this.content);
+        dest.writeParcelable(this.cover, flags);
+        dest.writeString(this.url);
+        dest.writeLong(this.postedDate != null ? this.postedDate.getTime() : -1);
+    }
+
+    public Info() {
+    }
+
+    protected Info(Parcel in) {
+        this.title = in.readString();
+        this.description = in.readString();
+        this.content = in.readString();
+        this.cover = in.readParcelable(Cover.class.getClassLoader());
+        this.url = in.readString();
+        long tmpPostedDate = in.readLong();
+        this.postedDate = tmpPostedDate == -1 ? null : new Date(tmpPostedDate);
+    }
+
+    public static final Creator<Info> CREATOR = new Creator<Info>() {
+        @Override
+        public Info createFromParcel(Parcel source) {
+            return new Info(source);
+        }
+
+        @Override
+        public Info[] newArray(int size) {
+            return new Info[size];
+        }
+    };
 }

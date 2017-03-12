@@ -2,6 +2,8 @@ package com.groomify.hollavirun.constants;
 
 import android.os.Environment;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,11 +46,13 @@ public class AppConstant {
     public static final String PREFS_MISSION_UNLOCK_PREFIX = "mission_unlock_prefix_";
     public static final String PREFS_MISSION_SUBMITTED_PREFIX = "mission_submitted_prefix_";
     public static final String PREFS_MISSION_UNLOCK_TIME_PREFIX = "mission_unlock_time_prefix_";
+    public static final String PREFS_MISSION_FIRST_ATTEMPTS_TIME_PREFIX = "mission_first_attempts_time_prefix_";
 
     public static final String PREFS_COUPON_REDEEMED_PREFIX = "coupon_redeemed_prefix_";
 
     public static final String PREFS_TERM_AND_CONDITION_ACCEPTED = "term_and_condition_accepted";
 
+    public static final String PREFS_SCAN_AND_WIN_QR_CODE = "scan_and_win_qr_code";
 
     public static final String DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
     public static final String JSON_DATE_FORMAT = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'";
@@ -65,4 +69,5 @@ public class AppConstant {
 
     public static final String CAMERA_IMAGE_DIRECTORY = "CAMERA";
 
+    public static LatLng currentLocation = null;
 }

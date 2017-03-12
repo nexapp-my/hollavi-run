@@ -6,7 +6,17 @@
     android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <TextView
+    <ImageView
+        android:id="@+id/feeds_image"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:scaleType="centerCrop"
+        android:src="@android:color/white" />
+
+    <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Welcome to Groomify Run"
@@ -14,47 +24,38 @@
             android:textColor="@android:color/black"
             android:textSize="12sp"
             android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/feeds_image"
-            android:layout_toEndOf="@+id/feeds_image"
+            android:layout_toRightOf="@id/feeds_image"
+            android:layout_toEndOf="@id/feeds_image"
             android:layout_marginTop="20dp"
             android:layout_marginLeft="16dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="4 mins ago"
-            android:id="@+id/feeds_timestamp"
-            android:textColor="@color/primaryTextColour"
-            android:textSize="10sp"
-            android:layout_below="@+id/feeds_content"
-            android:layout_toRightOf="@+id/feeds_image"
-            android:layout_toEndOf="@+id/feeds_image"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="10dp" />
-
-        <TextView
+    <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="It all begins now"
             android:id="@+id/feeds_content"
             android:textColor="@color/primaryTextColour"
             android:textSize="12sp"
-            android:layout_below="@+id/feeds_header"
-            android:layout_toRightOf="@+id/feeds_image"
-            android:layout_toEndOf="@+id/feeds_image"
+            android:layout_below="@id/feeds_header"
+            android:layout_toRightOf="@id/feeds_image"
+            android:layout_toEndOf="@id/feeds_image"
             android:layout_marginLeft="16dp"
             android:layout_marginTop="10dp" />
 
-    <ImageView
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:id="@+id/feeds_image"
-        android:src="@android:color/white"
-        android:scaleType="centerCrop"
-        android:layout_marginTop="10dp"
+    <TextView
+        android:id="@+id/feeds_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/feeds_content"
         android:layout_marginBottom="10dp"
-        android:layout_marginLeft="20dp" />
-  <!--  <View
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@id/feeds_image"
+        android:layout_toRightOf="@id/feeds_image"
+        android:textColor="@color/primaryTextColour"
+        android:textSize="10sp" />
+
+    <!--  <View
         android:layout_width="fill_parent"
         android:layout_height="0.5dp"
         android:background="@color/primaryTextColour"

@@ -1,6 +1,7 @@
 package com.groomify.hollavirun.fragment;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,10 +27,12 @@ import com.groomify.hollavirun.entities.GroomifyUser;
 import com.groomify.hollavirun.entities.Races;
 import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.request.FbUser;
+import com.groomify.hollavirun.rest.models.request.FirstAidRequest;
 import com.groomify.hollavirun.rest.models.request.LoginRequest;
 import com.groomify.hollavirun.rest.models.request.UpdateUserInfoRequest;
 import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
+import com.groomify.hollavirun.utils.DialogUtils;
 import com.groomify.hollavirun.utils.RealmUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
@@ -71,6 +74,8 @@ public class SOSFragment extends Fragment {
     private String dialogContentFirstAid;
     private String dialogContentGroomifySupport;
     private String dialogContentEmergencyContact;
+
+    private Dialog loadingDialog;
 
     public SOSFragment() {
         // Required empty public constructor
@@ -128,11 +133,16 @@ public class SOSFragment extends Fragment {
         emergencyContactPanel = view.findViewById(R.id.emergency_contact_panel);
         setupEmergencyContactPanel = view.findViewById(R.id.set_emergency_contact_panel);
 
+        loadingDialog = DialogUtils.buildLoadingDialog(getContext());
+        loadingDialog.setTitle("First Aid");
+        //TextView dialogTextView = (TextView) loadingDialog.findViewById(R.id.loading_text_view);
+        //dialogTextView.setText("Requesting first aid...");
 
         firstAidPanel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                prompCallConfirmationDialog(currentRaces.getFirstAid(), dialogContentFirstAid);
+                //prompCallConfirmationDialog(currentRaces.getFirstAid(), dialogContentFirstAid);
+                prompRequestFirstAidConfirmation();
             }
         });
 
@@ -321,7 +331,7 @@ public class SOSFragment extends Fragment {
 
         new AlertDialog.Builder(getActivity())
                 .setMessage(message)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                .setPositiveButton("CALL NOW", new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -334,6 +344,27 @@ public class SOSFragment extends Fragment {
                 })
                 .setNegativeButton("No", null)
                 .show();
+    }
+
+    private void prompRequestFirstAidConfirmation(){
+
+        new AlertDialog.Builder(getActivity())
+                .setMessage("Request for First Aid?")
+                .setPositiveButton("Request First Aid", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        loadingDialog.show();
+                        new GroomifyCallFirstAidTask().execute();
+                    }
+
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+
+        loadingDialog.show();
+        loadingDialog.dismiss();
+
     }
 
 
@@ -400,6 +431,45 @@ public class SOSFragment extends Fragment {
             }
 
 
+        }
+    }
+
+
+    private class GroomifyCallFirstAidTask extends AsyncTask<Void, Void, Response<Void>> {
+
+        @Override
+        protected Response<Void> doInBackground(Void... params) {
+            String authToken = SharedPreferencesHelper.getAuthToken(getActivity());
+            String fbId = SharedPreferencesHelper.getFbId(getActivity());
+
+            FirstAidRequest firstAidRequest = new FirstAidRequest();
+            if(AppConstant.currentLocation != null){
+                firstAidRequest.setLng(AppConstant.currentLocation.longitude);
+                firstAidRequest.setLat(AppConstant.currentLocation.latitude);
+            }else{
+                firstAidRequest.setLng(0.0);
+                firstAidRequest.setLat(0.0);
+            }
+
+            try {
+                Response<Void> restResponse = client.getApiService().callFirstAid(fbId, authToken, firstAidRequest).execute();
+                return restResponse;
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to call for first aid.", e);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Response<Void> restResponse) {
+            super.onPostExecute(restResponse);
+            loadingDialog.dismiss();
+            if(restResponse != null && restResponse.isSuccessful()){
+                Toast.makeText(getContext(), "First Aid request sent.",  Toast.LENGTH_SHORT).show();
+            }else{
+                Toast.makeText(getContext(), "Unable to call for first aid at this moment. Please try again.",  Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

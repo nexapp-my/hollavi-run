@@ -22,7 +22,7 @@ public class DebugUtils {
     public static void printKeyHash(ContextWrapper contextWrapper){
         try {
             PackageInfo info = contextWrapper.getPackageManager().getPackageInfo(
-                    "com.groomify.hollavirun",
+                    contextWrapper.getPackageName(),
                     PackageManager.GET_SIGNATURES);
             for (Signature signature : info.signatures) {
                 MessageDigest md = MessageDigest.getInstance("SHA");

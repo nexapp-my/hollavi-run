@@ -9,66 +9,66 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="-1">
+        android:layout_weight="-1"
+        android:orientation="vertical">
 
         <RelativeLayout
+            android:id="@+id/first_aid_panel"
             android:layout_width="match_parent"
             android:layout_height="141dp"
-            android:layout_weight="1"
-            android:background="@drawable/sos_border_background"
             android:layout_margin="4dp"
-            android:id="@+id/first_aid_panel">
+            android:layout_weight="1"
+            android:background="@drawable/sos_border_background">
 
             <TextView
-                android:text="FIRST AID"
+                android:id="@+id/textView8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/imageView2"
                 android:layout_centerHorizontal="true"
-                android:id="@+id/textView8"
-                android:textColor="@android:color/background_dark"
-                android:layout_marginTop="14dp" />
+                android:layout_marginTop="14dp"
+                android:text="FIRST AID"
+                android:textColor="@android:color/background_dark" />
 
             <ImageView
+                android:id="@+id/imageView2"
                 android:layout_width="72dp"
                 android:layout_height="72dp"
-                app:srcCompat="@drawable/ic_first_aid"
-                android:id="@+id/imageView2"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="18dp" />
+                android:layout_marginTop="18dp"
+                app:srcCompat="@drawable/ic_first_aid" />
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/emergency_contact_panel"
             android:layout_width="match_parent"
             android:layout_height="141dp"
-            android:layout_weight="1"
-            android:background="@drawable/sos_border_background"
             android:layout_margin="4dp"
-            android:id="@+id/emergency_contact_panel">
+            android:layout_weight="1"
+            android:background="@drawable/sos_border_background">
 
             <TextView
-                android:text="EMERGENCY CONTACT"
+                android:id="@+id/textView9"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/imageView3"
                 android:layout_centerHorizontal="true"
-                android:id="@+id/textView9"
-                android:gravity="center"
                 android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:text="EMERGENCY CONTACT"
                 android:textColor="@android:color/black" />
 
             <ImageView
+                android:id="@+id/imageView3"
                 android:layout_width="72dp"
                 android:layout_height="72dp"
-                app:srcCompat="@drawable/ic_emergency_contact"
-                android:id="@+id/imageView3"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="18dp" />
+                android:layout_marginTop="18dp"
+                app:srcCompat="@drawable/ic_emergency_contact" />
         </RelativeLayout>
     </LinearLayout>
 
@@ -78,6 +78,7 @@
         android:layout_weight="-1"
         android:background="@drawable/sos_border_background"
         android:layout_margin="4dp"
+        android:visibility="gone"
         android:id="@+id/groomify_support_panel">
 
         <ImageView

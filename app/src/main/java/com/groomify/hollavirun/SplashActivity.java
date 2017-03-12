@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,17 +27,21 @@ import com.facebook.GraphResponse;
 import com.facebook.Profile;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
+import com.google.firebase.crash.FirebaseCrash;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.GroomifyUser;
 import com.groomify.hollavirun.fragment.TermAndConditionDialogFragment;
 import com.groomify.hollavirun.rest.RestClient;
+import com.groomify.hollavirun.rest.models.response.CheckAppVersionResponse;
 import com.groomify.hollavirun.rest.models.response.RaceDetailResponse;
 import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
 import com.groomify.hollavirun.utils.ActivityUtils;
 import com.groomify.hollavirun.utils.AppUtils;
 import com.groomify.hollavirun.utils.DebugUtils;
+import com.groomify.hollavirun.utils.DialogUtils;
 import com.groomify.hollavirun.utils.RealmUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
+import com.groomify.hollavirun.utils.Version;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,6 +75,7 @@ public class SplashActivity extends AppCompatActivity implements TermAndConditio
     int totalAttemp = 0;
     boolean requireRelog = false;
 
+    int currentTask = 0; //0 = check api, 1 = login
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,7 +121,7 @@ public class SplashActivity extends AppCompatActivity implements TermAndConditio
             /* New Handler to start the Menu-Activity
             * and close this Splash-Screen after some seconds.*/
            if(SharedPreferencesHelper.isTermAndConditionAccepted(this)){
-               launchApp();
+               launchAppVersionCheck();
            }else{
                showTermAndConditionAgreementDialog();
            }
@@ -145,11 +151,14 @@ public class SplashActivity extends AppCompatActivity implements TermAndConditio
         }, SPLASH_DISPLAY_LENGTH);
     }
 
+    private void launchAppVersionCheck(){
+        new GroomifyCheckAppVersionTask().execute();
+    }
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         SharedPreferencesHelper.setTermAndConditionAccepted(this);
-        launchApp();
+        launchAppVersionCheck();
     }
 
     @Override
@@ -161,7 +170,6 @@ public class SplashActivity extends AppCompatActivity implements TermAndConditio
 
         @Override
         protected UserInfoResponse doInBackground(Void... params) {
-            showToast();
             try {
                 String authToken = SharedPreferencesHelper.getAuthToken(SplashActivity.this);
                 String fbId = SharedPreferencesHelper.getFbId(SplashActivity.this);
@@ -180,6 +188,8 @@ public class SplashActivity extends AppCompatActivity implements TermAndConditio
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Unable to call get user api.",e);
+                FirebaseCrash.logcat(Log.ERROR, TAG, "Unable to call get user api.");
+                FirebaseCrash.report(e);
             }
             return null;
         }
@@ -240,12 +250,84 @@ public class SplashActivity extends AppCompatActivity implements TermAndConditio
                 if(requireRelog){
                     launchNextScreen();
                 }else{
-                    totalAttemp++;
-                    if(totalAttemp <= 3){
-                        new GroomifyGetUserTask().execute();
-                    }
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            totalAttemp++;
+                            if (totalAttemp <= 3) {
+                                new GroomifyGetUserTask().execute();
+                            } else {
+                                promptRetryLogin();
+                            }
+                        }}, 5000);
                 }
             }
+        }
+    }
+
+    private class GroomifyCheckAppVersionTask extends AsyncTask<Void, String, CheckAppVersionResponse> {
+
+        @Override
+        protected CheckAppVersionResponse doInBackground(Void... params) {
+
+            Response<CheckAppVersionResponse> restResponse = null;
+            try {
+                restResponse = client.getApiService().checkVersion().execute();
+                if(restResponse.isSuccessful()){
+                    Log.i(TAG, "Calling check version api success");
+                    return restResponse.body();
+                }else{
+                    Log.i(TAG, "Calling check version api failed, response code: "+restResponse.code()+", error body: "+restResponse.errorBody().string());
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Calling check app version API failed.", e);
+                FirebaseCrash.logcat(Log.ERROR, TAG, "Calling check app version API failed.");
+                FirebaseCrash.report(e);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(CheckAppVersionResponse checkAppVersionResponse) {
+            super.onPostExecute(checkAppVersionResponse);
+            if(checkAppVersionResponse != null){
+                PackageManager manager = SplashActivity.this.getPackageManager();
+                PackageInfo info = null;
+                try {
+                    info = manager.getPackageInfo(getPackageName(), 0);
+                    String version = info.versionName;
+                    Log.i(TAG, "Current app version: "+version+". Minimum app version from API: "+checkAppVersionResponse.getAndroidVersion());
+                    Version currentVersion = new Version(version);
+                    Version targetVersion = new Version(checkAppVersionResponse.getAndroidVersion());
+                    if(currentVersion.compareTo(targetVersion) < 0){
+                        promptForceUpdate();
+                    }else{
+                        launchApp();
+                    }
+
+                } catch (Exception e) {
+                    Log.e(TAG, "Unable to obtain current app version.",e );
+                    FirebaseCrash.logcat(Log.ERROR, TAG, "Unable to obtain current app version.");
+                    FirebaseCrash.report(e);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            promptRetryCheckAppVersion();
+                        }
+                    }, 5000);
+
+                }
+            }else{
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        promptRetryCheckAppVersion();
+                    }
+                }, 5000);
+            }
+
+
+
         }
     }
 
@@ -286,7 +368,8 @@ public class SplashActivity extends AppCompatActivity implements TermAndConditio
             }else if(!teamSelected){
                 launchTeamSelectionScreen(SplashActivity.this, true);
             }else{
-                launchMainScreen(SplashActivity.this, true);
+                launchRaceSelectionScreen(SplashActivity.this, true);
+                //launchMainScreen(SplashActivity.this, true);
             }
         }
 
@@ -299,6 +382,72 @@ public class SplashActivity extends AppCompatActivity implements TermAndConditio
         DialogFragment dialog = new TermAndConditionDialogFragment();
         dialog.setCancelable(false);
         dialog.show(getSupportFragmentManager(), "TermAndConditionDialogFragment");
+    }
+
+    private void promptRetryLogin(){
+
+        new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setMessage("Unable to access Groomify service now. Please ensure you have internet access.")
+                .setPositiveButton("Retry", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new GroomifyGetUserTask().execute();
+                    }
+                })
+                .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.exit(0);
+                    }
+                })
+                .show();
+    }
+
+    private void promptRetryCheckAppVersion(){
+        new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setMessage("Unable to access Groomify service now. Please ensure you have internet access.")
+                .setPositiveButton("Retry", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new GroomifyCheckAppVersionTask().execute();
+                    }
+                })
+                .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.exit(0);
+                    }
+                })
+                .show();
+    }
+
+    private void promptForceUpdate(){
+
+        new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle("App update required")
+                .setMessage("This version of Groomify is no longer supported.\nPlease update to latest version.")
+                .setPositiveButton("Update", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        final String appPackageName = getPackageName(); // getPackageName() from Context or Activity object
+                        try {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                        } catch (android.content.ActivityNotFoundException anfe) {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                        }
+                    }
+                }) .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.exit(0);
+                }
+        }).show();
+
     }
 
     @Override

@@ -14,58 +14,71 @@
 
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="180dp"
-        app:srcCompat="@color/cardview_light_background"
         android:id="@+id/mission_banner_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="56dp"
         android:adjustViewBounds="false"
         android:cropToPadding="false"
         android:scaleType="centerCrop"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="56dp" />
+        app:srcCompat="@color/cardview_light_background" />
 
 
     <TextView
         android:id="@+id/mission_item_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:text="01"
-        android:textSize="40sp"
-        android:textStyle="bold"
-        android:layout_below="@+id/mission_banner_image_view"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="20dp" />
+        android:layout_below="@+id/mission_banner_image_view"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="15dp"
+        android:text="01"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:textSize="40sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/mission_item_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:text="SELFIE WITH STRANGERS"
-        android:textSize="12sp"
-        android:textStyle="bold"
         android:layout_alignTop="@+id/mission_item_number"
-        android:layout_toRightOf="@+id/mission_item_number"
-        android:layout_toEndOf="@+id/mission_item_number"
+        android:layout_marginLeft="18dp"
         android:layout_marginTop="18dp"
-        android:layout_marginLeft="17dp" />
-
-    <Button android:id="@+id/scan_qr_button" android:layout_width="201dp"
-        android:layout_height="36dp"
-        android:text="@string/mission_detail_scan_qr_btn"
-        android:background="@drawable/groomify_button_state"
-        style="@style/OnboardingFooterBar"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="14dp"
-        android:layout_marginBottom="12dp" />
+        android:layout_toEndOf="@+id/mission_item_number"
+        android:layout_toRightOf="@+id/mission_item_number"
+        android:text="SELFIE WITH STRANGERS"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:textSize="12sp"
+        android:textStyle="bold" />
 
     <View
+        android:id="@+id/mission_title_separator"
+        android:layout_width="fill_parent"
+        android:layout_height="0.5dp"
+        android:layout_alignBottom="@+id/mission_item_number"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="81dp"
+        android:layout_marginTop="7dp"
+        android:layout_weight="0"
+        android:background="@color/primaryTextColour" />
+
+    <View
+        android:id="@+id/mission_detail_separator"
+        android:layout_width="fill_parent"
+        android:layout_height="0.5dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/mission_item_desc"
+        android:layout_marginTop="20dp"
+        android:background="@color/primaryTextColour" />
+
+    <View
+        android:id="@+id/mission_footer_separator"
         android:layout_width="fill_parent"
         android:layout_height="0.5dp"
         android:background="@color/primaryTextColour"
@@ -74,55 +87,120 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
+    <RelativeLayout
+        android:id="@+id/image_selection_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/mission_detail_separator"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/add_pic_placeholder1"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_margin="20dp"
+            app:srcCompat="@drawable/ic_add_pic" />
+
+        <ImageView
+            android:id="@+id/add_pic_placeholder3"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="20dp"
+            app:srcCompat="@drawable/ic_add_pic" />
+
+        <ImageView
+            android:id="@+id/add_pic_placeholder2"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="20dp"
+            app:srcCompat="@drawable/ic_add_pic" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/question_selection_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/mission_detail_separator"
+        android:layout_toEndOf="@+id/image_selection_panel"
+        android:layout_toRightOf="@+id/image_selection_panel"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/mission_question"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="10dp"
+            android:text="Question: What does Grooton care about the most? "
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:textStyle="bold|italic" />
+
+        <Spinner
+            android:id="@+id/answer_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/mission_question"
+            android:layout_margin="10dp" />
+
+        <TextView
+            android:id="@+id/answer_hint_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/answer_spinner"
+            android:layout_centerHorizontal="true"
+            android:text="@string/mission_answer_hint"
+            android:textSize="10sp" />
+    </RelativeLayout>
+
     <TextView
         android:id="@+id/mission_item_desc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:text="It’s simple, all you need to do is take 3 selfies with your fellow runners."
-        android:textSize="12sp"
+        android:layout_below="@+id/mission_title_separator"
+        android:layout_marginLeft="18dp"
+        android:layout_marginTop="11dp"
+        android:layout_toEndOf="@+id/mission_item_number"
+        android:layout_toRightOf="@+id/mission_item_number"
         android:fontFamily="sans-serif"
-        android:paddingTop="10dp"
-        android:layout_below="@id/mission_item_title"
-        android:layout_alignLeft="@id/mission_item_title"
-        android:layout_alignStart="@id/mission_item_title" />
+        android:text="It’s simple, all you need to do is take 3 selfies with your fellow runners."
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:textSize="12sp" />
 
-    <View
-        android:id="@+id/mission_detail_separator"
-        android:layout_width="fill_parent"
-        android:layout_height="0.5dp"
-        android:background="@color/primaryTextColour"
-        android:layout_below="@+id/mission_item_desc"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="20dp" />
+    <Button
+        android:id="@+id/scan_qr_button"
+        style="@style/OnboardingFooterBar"
+        android:layout_width="201dp"
+        android:layout_height="36dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="12dp"
+        android:layout_marginTop="14dp"
+        android:background="@drawable/groomify_button_state"
+        android:text="@string/mission_detail_scan_qr_btn" />
 
-    <ImageView
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        app:srcCompat="@drawable/ic_add_pic"
-        android:id="@+id/add_pic_placeholder2"
+    <TextView
+        android:id="@+id/scan_and_win_announce_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/mission_detail_separator"
         android:layout_centerHorizontal="true"
-        android:layout_margin="20dp" />
+        android:layout_margin="15dp"
+        android:text="@string/mission_scan_and_win_announcement"
+        android:textAlignment="center"
+        android:textSize="12sp"
+        android:visibility="gone" />
 
-    <ImageView
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        app:srcCompat="@drawable/ic_add_pic"
-        android:id="@+id/add_pic_placeholder1"
-        android:layout_below="@+id/mission_detail_separator"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_margin="20dp" />
-
-    <ImageView
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        app:srcCompat="@drawable/ic_add_pic"
-        android:id="@+id/add_pic_placeholder3"
-        android:layout_below="@+id/mission_detail_separator"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_margin="20dp" />
 </RelativeLayout>

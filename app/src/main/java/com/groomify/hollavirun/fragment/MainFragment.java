@@ -39,16 +39,14 @@ import com.groomify.hollavirun.LatestUpdateActivity;
 import com.groomify.hollavirun.MissionDetailsActivity;
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.RunGalleryActivity;
+import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.Mission;
-import com.groomify.hollavirun.entities.NewsFeed;
 import com.groomify.hollavirun.entities.Team;
 import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.request.UpdateUserLocationRequest;
 import com.groomify.hollavirun.rest.models.request.UserLocation;
-import com.groomify.hollavirun.rest.models.response.Info;
 import com.groomify.hollavirun.rest.models.response.Mission_;
 import com.groomify.hollavirun.rest.models.response.RaceDetailResponse;
-import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
 import com.groomify.hollavirun.rest.models.response.RaceTrackCoordinate;
 import com.groomify.hollavirun.rest.models.response.SearchRunnerLocationResponse;
 import com.groomify.hollavirun.rest.models.response.UpdateUserLocationResponse;
@@ -56,17 +54,12 @@ import com.groomify.hollavirun.utils.AppPermissionHelper;
 import com.groomify.hollavirun.utils.AppUtils;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
-import com.groomify.hollavirun.view.ProfilePictureView;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.List;
-import java.util.Stack;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.RealmResults;
 import retrofit2.Response;
 
 /**
@@ -74,11 +67,8 @@ import retrofit2.Response;
  */
 public class MainFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
-    private final static int MAX_LATEST_NEWS_CONTENT = 50;
-
     private final static String TAG = MainFragment.class.getSimpleName();
     private static DecimalFormat decimalFormat = new DecimalFormat("00");
-    public static ProfilePictureView profilePictureView;
 
     /*private RecyclerView horizonRecyclerView;
     private ArrayList<MissionCard> missionCards;
@@ -391,6 +381,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
         Log.i(TAG, "onDestroy, map destroyed.");
         if(googleMap != null){
             googleMap.setMyLocationEnabled(false);
+            googleMap = null;
             //googleMap.clear();
         }
         mMapView.onDestroy();
@@ -510,6 +501,7 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
         @Override
         public void onMyLocationChange(Location location) {
             Log.i(TAG, "Detected user location changed. Fire update event.");
+            AppConstant.currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
             new GroomifyUpdateLocationTask().execute(location);
 
         }

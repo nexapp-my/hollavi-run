@@ -17,9 +17,9 @@ public class DialogUtils {
     public static AlertDialog buildLoadingDialog(Context context){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setView(R.layout.dialog_loading).setCancelable(false);
-
         return builder.create();
-
     }
+
+
 
 }

@@ -3,6 +3,8 @@ package com.groomify.hollavirun.entities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
+
 import io.realm.Realm;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -15,18 +17,17 @@ public class NewsFeed extends RealmObject implements Parcelable {
     @PrimaryKey
     private int id;
     private String header;
+    private String description;
     private String content;
-    private String timeStamp;
+    private Date timeStamp;
     private String coverPhotoUrl;
 
-    public NewsFeed(){}
+    public int getId() {
+        return id;
+    }
 
-    public NewsFeed(int id, String header, String content, String timeStamp, String coverPhotoUrl) {
+    public void setId(int id) {
         this.id = id;
-        this.header = header;
-        this.content = content;
-        this.timeStamp = timeStamp;
-        this.coverPhotoUrl = coverPhotoUrl;
     }
 
     public String getHeader() {
@@ -37,6 +38,14 @@ public class NewsFeed extends RealmObject implements Parcelable {
         this.header = header;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getContent() {
         return content;
     }
@@ -45,20 +54,12 @@ public class NewsFeed extends RealmObject implements Parcelable {
         this.content = content;
     }
 
-    public String getTimeStamp() {
+    public Date getTimeStamp() {
         return timeStamp;
     }
 
-    public void setTimeStamp(String timeStamp) {
+    public void setTimeStamp(Date timeStamp) {
         this.timeStamp = timeStamp;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getCoverPhotoUrl() {
@@ -67,17 +68,6 @@ public class NewsFeed extends RealmObject implements Parcelable {
 
     public void setCoverPhotoUrl(String coverPhotoUrl) {
         this.coverPhotoUrl = coverPhotoUrl;
-    }
-
-    @Override
-    public String toString() {
-        return "NewsFeed{" +
-                "id=" + id +
-                ", header='" + header + '\'' +
-                ", content='" + content + '\'' +
-                ", timeStamp='" + timeStamp + '\'' +
-                ", coverPhotoUrl='" + coverPhotoUrl + '\'' +
-                '}';
     }
 
 
@@ -90,20 +80,26 @@ public class NewsFeed extends RealmObject implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(this.id);
         dest.writeString(this.header);
+        dest.writeString(this.description);
         dest.writeString(this.content);
-        dest.writeString(this.timeStamp);
+        dest.writeLong(this.timeStamp != null ? this.timeStamp.getTime() : -1);
         dest.writeString(this.coverPhotoUrl);
+    }
+
+    public NewsFeed() {
     }
 
     protected NewsFeed(Parcel in) {
         this.id = in.readInt();
         this.header = in.readString();
+        this.description = in.readString();
         this.content = in.readString();
-        this.timeStamp = in.readString();
+        long tmpTimeStamp = in.readLong();
+        this.timeStamp = tmpTimeStamp == -1 ? null : new Date(tmpTimeStamp);
         this.coverPhotoUrl = in.readString();
     }
 
-    public static final Parcelable.Creator<NewsFeed> CREATOR = new Parcelable.Creator<NewsFeed>() {
+    public static final Creator<NewsFeed> CREATOR = new Creator<NewsFeed>() {
         @Override
         public NewsFeed createFromParcel(Parcel source) {
             return new NewsFeed(source);

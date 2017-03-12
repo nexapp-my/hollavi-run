@@ -225,7 +225,7 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         }
         Collections.sort(countries, String.CASE_INSENSITIVE_ORDER);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, countries);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.layout.spinner_item_layout, countries);
         countrySpinner.setAdapter(adapter);
     }
 

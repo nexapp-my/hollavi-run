@@ -11,15 +11,17 @@ import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.entities.Ranking;
 import com.groomify.hollavirun.utils.AppUtils;
 
+import java.util.List;
+
 /**
  * Created by Valkyrie1988 on 10/23/2016.
  */
 
 public class RankingArrayAdapter extends ArrayAdapter<Ranking> {
     private final Context context;
-    private final Ranking[] values;
+    private List<Ranking> values;
 
-    public RankingArrayAdapter(Context context, Ranking[] values) {
+    public RankingArrayAdapter(Context context, List<Ranking> values) {
         super(context, R.layout.item_mission, values);
         this.context = context;
         this.values = values;
@@ -38,8 +40,8 @@ public class RankingArrayAdapter extends ArrayAdapter<Ranking> {
         TextView itemRankingUserIdTextView = (TextView) rowView.findViewById(R.id.item_ranking_user_id);
         TextView itemRankingTimeTextView = (TextView) rowView.findViewById(R.id.item_ranking_time);
 
-        if(values != null && values[position] != null){
-            Ranking ranking = values[position];
+        if(values != null && values.get(position) != null){
+            Ranking ranking = values.get(position);
             itemRankingNoTextView.setText(ranking.getRankNumber()+".");
             itemRankingNameTextView.setText(ranking.getName());
             itemRankingTimeTextView.setText(ranking.getCompletionTime() == null ? "" : AppUtils.getFormattedTimeFromSeconds(ranking.getCompletionTime()));
@@ -48,6 +50,5 @@ public class RankingArrayAdapter extends ArrayAdapter<Ranking> {
 
         return rowView;
     }
-
 
 }

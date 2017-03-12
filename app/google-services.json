@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "931072926332",
+    "firebase_url": "https://groomify-run-1489336291228.firebaseio.com",
+    "project_id": "groomify-run-1489336291228",
+    "storage_bucket": "groomify-run-1489336291228.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:931072926332:android:c1e5ea694a0f0904",
+        "android_client_info": {
+          "package_name": "com.groomify.run"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "931072926332-6osjul9arh58glv2ou9m0tb0gh31r0cb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.groomify.run",
+            "certificate_hash": "7124a580fcb540121cc0480b1992cccf84722906"
+          }
+        },
+        {
+          "client_id": "931072926332-rkk2lp5d5go742vb81diubbl2p0la6pf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1M3wwCqCDnt2sT0E8d1Dazl5jQvc9RVk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "931072926332-rkk2lp5d5go742vb81diubbl2p0la6pf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

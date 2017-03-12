@@ -1,71 +1,57 @@
 package com.groomify.hollavirun;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Vibrator;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.login.widget.LoginButton;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareHashtag;
-import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.Mission;
-import com.groomify.hollavirun.fragment.MissionDetailsFragment;
-import com.groomify.hollavirun.fragment.MissionFragment;
-import com.groomify.hollavirun.fragment.MissionListFragment;
-import com.groomify.hollavirun.fragment.RankingListFragment;
+import com.groomify.hollavirun.entities.Team;
 import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.request.MissionTransaction;
 import com.groomify.hollavirun.rest.models.request.MissionTransactionRequest;
 import com.groomify.hollavirun.rest.models.request.PhotosAttribute;
 import com.groomify.hollavirun.rest.models.response.MissionSubmissionResponse;
 import com.groomify.hollavirun.utils.AppPermissionHelper;
+import com.groomify.hollavirun.utils.AppUtils;
 import com.groomify.hollavirun.utils.BitmapUtils;
 import com.groomify.hollavirun.utils.DialogUtils;
-import com.groomify.hollavirun.utils.ProfileImageUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.sromku.simple.storage.SimpleStorage;
 import com.sromku.simple.storage.Storage;
 import com.sromku.simple.storage.helpers.OrderType;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -100,6 +86,12 @@ public class MissionDetailsActivity extends AppCompatActivity {
     private TextView missionDescTxtView;
     private AlertDialog loadingDialog;
     private Button scanQRButton;
+    private View imageSelectionPanel;
+    private View questionSelectionpanel;
+    private TextView missionQuestionTextView;
+    private Spinner answerSpinner;
+    private TextView scanAndWinAnnouncerTextView;
+    private TextView missionAnswerHint;
 
     private boolean unlocked = false;
     private boolean submitted = false;
@@ -121,6 +113,12 @@ public class MissionDetailsActivity extends AppCompatActivity {
     private Long userId;
 
     private String[] submittedPhotoLocation = new String[3];
+
+    private Team selectedTeam = null;
+
+    private String qrScanned = null;
+
+    private int answer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,7 +149,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
         fileNameTwo = "MISSION_"+mission.getId()+"_2.jpg";
         fileNameThree = "MISSION_"+mission.getId()+"_3.jpg";
         directoryName = "Groomify_"+userId+"_Mission_"+mission.getId();
-        
+
         verificationCode = new String[]{
                 getResources().getString(R.string.mission1_validation_code),
                 getResources().getString(R.string.mission2_validation_code),
@@ -166,6 +164,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Sharer.Result result) {
                 Toast.makeText(MissionDetailsActivity.this, "Your photo has been shared to facebook.", Toast.LENGTH_SHORT).show();
+                submitted = SharedPreferencesHelper.isMissionSubmitted(MissionDetailsActivity.this, raceId, mission.getId());
             }
 
             @Override
@@ -182,8 +181,20 @@ public class MissionDetailsActivity extends AppCompatActivity {
         });
 
         storage = SimpleStorage.getInternalStorage(this);
-        createView();
+
         loadingDialog = DialogUtils.buildLoadingDialog(this);
+
+        String sharePrefSelectedTeam = SharedPreferencesHelper.getTeamId(this);
+        Log.i(TAG, "Selected team: "+sharePrefSelectedTeam);
+        for(Team team: AppUtils.getDefaultTeam()){
+            if(team.getTeamName().equals(sharePrefSelectedTeam)){
+                selectedTeam = team;
+                Log.i(TAG, "Selected team found: "+selectedTeam);
+                break;
+            }
+        }
+
+        createView();
     }
 
     private void createView(){
@@ -193,9 +204,18 @@ public class MissionDetailsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(unlocked){
-                    if(checkIsMissionReadyToSubmit()){
-                        Log.i(TAG, "Preparing to submit the mission.");
-                        new GroomifySubmitMissionTask().execute();
+                    if(mission.getType() != Mission.MISSION_TYPE_SCAN_AND_ANSWER_QUESTION){
+                        if(checkIsMissionReadyToSubmit()){
+                            Log.i(TAG, "Preparing to submit the mission.");
+                            new GroomifySubmitMissionTask().execute();
+                        }
+                    }else{
+                        if(answerSpinner.getSelectedItemPosition() == answer){
+                            Toast.makeText(MissionDetailsActivity.this, getResources().getString(R.string.mission_toast_answer_correct), Toast.LENGTH_SHORT).show();
+                            new GroomifySubmitMissionTask().execute();
+                        }else{
+                            Toast.makeText(MissionDetailsActivity.this, getResources().getString(R.string.mission_toast_answer_wrong), Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }else{
                     Toast.makeText(MissionDetailsActivity.this, "Scan QR to unlock mission.", Toast.LENGTH_SHORT).show();
@@ -278,6 +298,39 @@ public class MissionDetailsActivity extends AppCompatActivity {
         missionTitleTxtView.setText(mission.getTitle());
         missionDescTxtView.setText(mission.getDescription());
 
+        answerSpinner = (Spinner) findViewById(R.id.answer_spinner);
+        imageSelectionPanel = findViewById(R.id.image_selection_panel);
+        questionSelectionpanel = findViewById(R.id.question_selection_panel);
+        missionQuestionTextView = (TextView) findViewById(R.id.mission_question);
+        scanAndWinAnnouncerTextView = (TextView) findViewById(R.id.scan_and_win_announce_text_view);
+        missionAnswerHint = (TextView) findViewById(R.id.answer_hint_text_view);
+
+        String[] answerList;
+        String question;
+        //TODO populate the answer.
+        if(selectedTeam.getPrefixAlphabet().equals("G")){
+            answerList = getResources().getStringArray(R.array.grooton_answers);
+            question = getResources().getString(R.string.mission_question_grooton);
+            answer = getResources().getInteger(R.integer.mission_answer_grooton);
+        }else if(selectedTeam.getPrefixAlphabet().equals("M")){
+            answerList = getResources().getStringArray(R.array.miki_answers);
+            question = getResources().getString(R.string.mission_question_miki);
+            answer = getResources().getInteger(R.integer.mission_answer_miki);
+        }else{
+            answerList = getResources().getStringArray(R.array.fyre_answers);
+            question = getResources().getString(R.string.mission_question_fyre);
+            answer = getResources().getInteger(R.integer.mission_answer_fyre);
+        }
+
+        Log.i(TAG, "Answer List: "+ Arrays.toString(answerList));
+        Log.i(TAG, "Question: "+ question);
+        Log.i(TAG, "Correct answer: "+ question);
+
+        missionQuestionTextView.setText(question);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.layout.spinner_item_layout, answerList);
+        answerSpinner.setAdapter(adapter);
+
         toggleMissionPanel();
 
     }
@@ -285,16 +338,105 @@ public class MissionDetailsActivity extends AppCompatActivity {
 
 
     private void toggleMissionPanel() {
-        if (!unlocked) {
+
+        imageSelectionPanel.setVisibility(View.GONE);
+        questionSelectionpanel.setVisibility(View.GONE);
+        imgPlaceHolderOne.setVisibility(View.INVISIBLE);
+        imgPlaceHolderTwo.setVisibility(View.INVISIBLE);
+        imgPlaceHolderThree.setVisibility(View.INVISIBLE);
+
+        if(!unlocked) {
             imgPlaceHolderOne.setVisibility(View.INVISIBLE);
             imgPlaceHolderTwo.setVisibility(View.INVISIBLE);
             imgPlaceHolderThree.setVisibility(View.INVISIBLE);
-            scanQRButton.setText("SCAN QR TO ACTIVE");
+            if(mission.getType() == Mission.MISSION_TYPE_SCAN_ONLY){
+                scanQRButton.setText("SCAN QR TO COMPLETE");
+            }else{
+                scanQRButton.setText("SCAN QR TO ACTIVE");
+            }
+            scanQRButton.setEnabled(true);
+        }
+        else if(submitted){
+            scanQRButton.setText("MISSION COMPLETED");
+            scanQRButton.setEnabled(false);
+
+            //TODO populate the shit back.
+
+            File missionImageOne = storage.getFile(directoryName, fileNameOne);
+            File missionImageTwo = storage.getFile(directoryName, fileNameTwo);
+            File missionImageThree = storage.getFile(directoryName, fileNameThree);
+
+            if(missionImageOne.exists()){
+                renderThumnailFromBitmap(missionImageOne.getAbsolutePath(), 1);
+                submittedPhotoLocation[0] = missionImageOne.getAbsolutePath();
+            }
+
+            if(missionImageTwo.exists()){
+                renderThumnailFromBitmap(missionImageTwo.getAbsolutePath(), 2);
+                submittedPhotoLocation[1] = missionImageTwo.getAbsolutePath();
+            }
+
+            if(missionImageThree.exists()){
+                renderThumnailFromBitmap(missionImageThree.getAbsolutePath(), 3);
+                submittedPhotoLocation[2] = missionImageThree.getAbsolutePath();
+            }
+
+            if(mission.getType() == Mission.MISSION_TYPE_SCAN_ONLY){
+                scanAndWinAnnouncerTextView.setVisibility(View.VISIBLE);
+            }else if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_ANSWER_QUESTION){
+                questionSelectionpanel.setVisibility(View.VISIBLE);
+                answerSpinner.setSelection(answer);
+                answerSpinner.setEnabled(false);
+                missionAnswerHint.setVisibility(View.INVISIBLE);
+            }else if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_UPLOAD_ONE_PHOTO){
+                imageSelectionPanel.setVisibility(View.VISIBLE);
+                imgPlaceHolderTwo.setVisibility(View.VISIBLE);
+            }else{
+                imageSelectionPanel.setVisibility(View.VISIBLE);
+                imgPlaceHolderOne.setVisibility(View.VISIBLE);
+                imgPlaceHolderTwo.setVisibility(View.VISIBLE);
+                imgPlaceHolderThree.setVisibility(View.VISIBLE);
+            }
+
+        }
+        else{
+            if(mission.getType() == Mission.MISSION_TYPE_SCAN_ONLY){
+                scanQRButton.setText("MISSION COMPLETED");
+            }else if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_ANSWER_QUESTION){
+                questionSelectionpanel.setVisibility(View.VISIBLE);
+                scanQRButton.setText("MISSION COMPLETE");
+            }else if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_UPLOAD_ONE_PHOTO){
+                imageSelectionPanel.setVisibility(View.VISIBLE);
+                imgPlaceHolderTwo.setVisibility(View.VISIBLE);
+                scanQRButton.setText("MISSION COMPLETE");
+            }else{
+                imageSelectionPanel.setVisibility(View.VISIBLE);
+                imgPlaceHolderOne.setVisibility(View.VISIBLE);
+                imgPlaceHolderTwo.setVisibility(View.VISIBLE);
+                imgPlaceHolderThree.setVisibility(View.VISIBLE);
+                scanQRButton.setText("MISSION COMPLETE");
+            }
+            if(checkIsMissionReadyToSubmit()){
+                scanQRButton.setEnabled(true);
+            }else{
+                scanQRButton.setEnabled(false);
+            }
+        }
+
+
+        /*if (!unlocked) {
+            imgPlaceHolderOne.setVisibility(View.INVISIBLE);
+            imgPlaceHolderTwo.setVisibility(View.INVISIBLE);
+            imgPlaceHolderThree.setVisibility(View.INVISIBLE);
+            if(mission.getType() == Mission.MISSION_TYPE_SCAN_ONLY){
+                scanQRButton.setText("SCAN QR TO COMPLETE");
+            }else{
+                scanQRButton.setText("SCAN QR TO ACTIVE");
+            }
             scanQRButton.setEnabled(true);
         }else if(submitted){
             scanQRButton.setText("MISSION COMPLETED");
             scanQRButton.setEnabled(false);
-            //scanQRButton.setVisibility(View.GONE);
 
             File missionImageOne = storage.getFile(directoryName, fileNameOne);
             File missionImageTwo = storage.getFile(directoryName, fileNameTwo);
@@ -307,8 +449,6 @@ public class MissionDetailsActivity extends AppCompatActivity {
             submittedPhotoLocation[1] = missionImageTwo.getAbsolutePath();
             submittedPhotoLocation[2] = missionImageThree.getAbsolutePath();
 
-
-
         }else{
             imgPlaceHolderOne.setVisibility(View.VISIBLE);
             imgPlaceHolderTwo.setVisibility(View.VISIBLE);
@@ -320,12 +460,12 @@ public class MissionDetailsActivity extends AppCompatActivity {
                 scanQRButton.setEnabled(false);
             }
 
-        }
+        }*/
     }
 
     public void requestQRCodeScan(View v) {
         Intent qrScanIntent = new Intent(this, QRActivity.class);
-        qrScanIntent.setClassName("com.groomify.hollavirun", "com.groomify.hollavirun.QRActivity");
+        qrScanIntent.setClassName("com.groomify.run", "com.groomify.hollavirun.QRActivity");
         startActivityForResult(qrScanIntent, QR_REQUEST);
     }
 
@@ -337,17 +477,10 @@ public class MissionDetailsActivity extends AppCompatActivity {
         if (requestCode == QR_REQUEST) {
             if (resultCode == Activity.RESULT_OK) {
                 String qrCodeResult = data.getStringExtra(QRActivity.EXTRA_QR_RESULT);
-                String message = "";
-                if(verificationCode[mission.getSequenceNumber() - 1].equals(qrCodeResult)){
-                    Log.i(TAG, "Mission verification code match. Mission unlocked.");
-                    unlocked = true;
-                    SharedPreferencesHelper.setMissionUnlocked(MissionDetailsActivity.this, raceId, mission.getId(), true);
-                    SharedPreferencesHelper.setMissionUnlockedTime(MissionDetailsActivity.this, raceId, mission.getId(), sdf.format(new Date()));
+                String message;
+                if(validateQRCode(qrCodeResult)){
+                    handleQRValidationSuccess();
                     message = "Valid verification code. Mission unlocked";
-                    toggleMissionPanel();
-                    Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-                    // Vibrate for 500 milliseconds
-                    v.vibrate(500);
                 }else{
                     Log.i(TAG, "Mission verification code not match.");
                     message = "Invalid verification code. Please try again.";
@@ -390,6 +523,41 @@ public class MissionDetailsActivity extends AppCompatActivity {
 
     }
 
+    private boolean validateQRCode(String qrCodeResult){
+        if(mission.getType() == Mission.MISSION_TYPE_SCAN_ONLY){
+            Log.i(TAG, "Scan and win mission: QR Code: "+qrCodeResult);
+            SharedPreferencesHelper.setMissionFirstAttemptsTime(MissionDetailsActivity.this, raceId, mission.getId(), sdf.format(new Date()));
+            String teamVerificationCode = verificationCode[mission.getSequenceNumber() - 1] + "-"+ selectedTeam.getPrefixAlphabet();
+
+            Log.i(TAG, "Scan and win mission: Team QR Code: "+teamVerificationCode);
+
+            if(qrCodeResult.startsWith(teamVerificationCode)){
+                qrScanned = qrCodeResult;
+                SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_SCAN_AND_WIN_QR_CODE, qrScanned);
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return verificationCode[mission.getSequenceNumber() - 1].equals(qrCodeResult);
+        }
+    }
+
+    private void handleQRValidationSuccess(){
+        Log.i(TAG, "Mission verification code match. Mission unlocked.");
+        unlocked = true;
+        SharedPreferencesHelper.setMissionUnlocked(MissionDetailsActivity.this, raceId, mission.getId(), true);
+        SharedPreferencesHelper.setMissionUnlockedTime(MissionDetailsActivity.this, raceId, mission.getId(), sdf.format(new Date()));
+
+        toggleMissionPanel();
+        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+        // Vibrate for 500 milliseconds
+        v.vibrate(500);
+
+        if(mission.getType() == Mission.MISSION_TYPE_SCAN_ONLY){
+            new GroomifySubmitMissionTask().execute();
+        }
+    }
 
     private void onPhotosReturned(File imageFile){
 
@@ -400,7 +568,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
     }
 
     private void saveImagesToStorage(){
-        
+
         if(!storage.isDirectoryExists(directoryName)){
             storage.createDirectory(directoryName, true);
             Log.i(TAG, "Directory not exists, creating directory.");
@@ -412,33 +580,44 @@ public class MissionDetailsActivity extends AppCompatActivity {
             }
         }
 
-        byte[] imageOneByte = BitmapUtils.loadFileToJpegByte(600, 800, originalMissionImagePath[0]);
-        byte[] imageTwoByte = BitmapUtils.loadFileToJpegByte(600, 800, originalMissionImagePath[1]);
-        byte[] imageThreeByte = BitmapUtils.loadFileToJpegByte(600, 800, originalMissionImagePath[2]);
-        /*missionBase64[0] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[0]);
-        missionBase64[1] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[1]);
-        missionBase64[2] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[2]);*/
-
-        if(!storage.createFile(directoryName, fileNameOne, imageOneByte)){
-            Log.i(TAG, "Unable to write first mission image file");
+        if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_UPLOAD_THREE_PHOTO){
+            byte[] imageOneByte = BitmapUtils.loadFileToJpegByte(600, 800, originalMissionImagePath[0]);
+            byte[] imageThreeByte = BitmapUtils.loadFileToJpegByte(600, 800, originalMissionImagePath[2]);
+            if(!storage.createFile(directoryName, fileNameOne, imageOneByte)){
+                Log.i(TAG, "Unable to write first mission image file");
+            }
+            if(!storage.createFile(directoryName, fileNameThree, imageThreeByte)){
+                Log.i(TAG, "Unable to write third mission image file");
+            }
         }
+
+        byte[] imageTwoByte = BitmapUtils.loadFileToJpegByte(600, 800, originalMissionImagePath[1]);
 
         if(!storage.createFile(directoryName, fileNameTwo, imageTwoByte)){
             Log.i(TAG, "Unable to write second mission image file");
         }
-
-        if(!storage.createFile(directoryName, fileNameThree, imageThreeByte)){
-            Log.i(TAG, "Unable to write third mission image file");
-        }
-
         Log.i(TAG, "Writing file to storage complete.");
     }
 
     private boolean checkIsMissionReadyToSubmit(){
-        if(missionFilled[0] &&  missionFilled[1] && missionFilled[2]){
+        Log.i(TAG, "checkIsMissionReadyToSubmit, type:"+mission.getType());
+
+        if(mission.getType() == Mission.MISSION_TYPE_SCAN_ONLY){
+            return false; // scan only will auto submit mission
+        }else if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_ANSWER_QUESTION){
             return true;
-        }else{
-            return false;
+        }else if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_UPLOAD_ONE_PHOTO){
+            if(missionFilled[1]){
+                return true;
+            }else{
+                return false;
+            }
+        }else {
+            if(missionFilled[0] &&  missionFilled[1] && missionFilled[2]){
+                return true;
+            }else{
+                return false;
+            }
         }
     }
 
@@ -455,10 +634,8 @@ public class MissionDetailsActivity extends AppCompatActivity {
 
                         if(which == OPTION_CAMERA){
                             EasyImage.openCamera(MissionDetailsActivity.this, 0);
-                            //dispatchTakePictureIntent();
                         }else if(which == OPTION_GALLERY){
                             EasyImage.openGallery(MissionDetailsActivity.this, 0);
-                            //dispatchSelectPhotoIntent();
                         }
                     }
                 });
@@ -470,16 +647,18 @@ public class MissionDetailsActivity extends AppCompatActivity {
         ImageView missionSubmissionImageView;
 
         if(selectedImage == 1){
+            Log.i(TAG, "Image 1 filled");
             missionSubmissionImageView = imgPlaceHolderOne;
             missionFilled[0] = true;
         }else if(selectedImage == 2){
+            Log.i(TAG, "Image 2 filled");
             missionSubmissionImageView = imgPlaceHolderTwo;
             missionFilled[1] = true;
         }else{
+            Log.i(TAG, "Image 3 filled");
             missionSubmissionImageView = imgPlaceHolderThree;
             missionFilled[2] = true;
         }
-        //TODO update the thumbnail
         int targetW = missionSubmissionImageView.getWidth();
         int targetH = missionSubmissionImageView.getHeight();
         Log.i(TAG, "H/W of view: "+targetH+"/"+targetW);
@@ -511,7 +690,6 @@ public class MissionDetailsActivity extends AppCompatActivity {
 
     private class GroomifySubmitMissionTask extends AsyncTask<Void, String, MissionSubmissionResponse> {
 
-
         @Override
         protected MissionSubmissionResponse doInBackground(Void... params) {
             changeLoadingState(true);
@@ -520,6 +698,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
             String facebookId = SharedPreferencesHelper.getFbId(MissionDetailsActivity.this);
             String authToken = SharedPreferencesHelper.getAuthToken(MissionDetailsActivity.this);
             String missionUnlockedTime = SharedPreferencesHelper.getMissionUnlockTime(MissionDetailsActivity.this, raceId, mission.getId());
+            String missionFirstAttemptTime = SharedPreferencesHelper.getMissionFirstAttemptsTime(MissionDetailsActivity.this, raceId, mission.getId());
 
             MissionTransactionRequest missionTransactionRequest = new MissionTransactionRequest();
             MissionTransaction missionTransaction = new MissionTransaction();
@@ -527,24 +706,42 @@ public class MissionDetailsActivity extends AppCompatActivity {
             missionTransaction.setRunnerId(Integer.parseInt(runnerId));
             Long missionTime = 300L;
             try {
-                if(missionUnlockedTime != null){
-                    Date unlockedTime = sdf.parse(missionUnlockedTime);
-                    missionTime = (new Date().getTime() - unlockedTime.getTime()) / 1000;
+                if(mission.getType() == Mission.MISSION_TYPE_SCAN_ONLY){
+                    if(missionFirstAttemptTime != null) {
+                        Date unlockedTime = sdf.parse(missionFirstAttemptTime);
+                        missionTime = (new Date().getTime() - unlockedTime.getTime()) / 1000;
+                    }
+                }else{
+                    if(missionUnlockedTime != null){
+                        Date unlockedTime = sdf.parse(missionUnlockedTime);
+                        missionTime = (new Date().getTime() - unlockedTime.getTime()) / 1000;
+                    }
                 }
+
             }catch (Exception e){
                 Log.i(TAG, "Failed to parse mission unlocked time.");
             }
             missionTransaction.setMissionTime(missionTime.intValue());
-            //Photo attribute
-            missionBase64[0] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[0]);
-            missionBase64[1] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[1]);
-            missionBase64[2] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[2]);
 
-            List<PhotosAttribute> photosAttributeList = new ArrayList<PhotosAttribute>();
-            photosAttributeList.add(new PhotosAttribute(missionBase64[0], raceId, Long.parseLong(runnerId)));
-            photosAttributeList.add(new PhotosAttribute(missionBase64[1], raceId, Long.parseLong(runnerId)));
-            photosAttributeList.add(new PhotosAttribute(missionBase64[2], raceId, Long.parseLong(runnerId)));
-            missionTransaction.setPhotosAttributes(photosAttributeList);
+            List<PhotosAttribute> photosAttributeList = new ArrayList<>();
+
+            if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_UPLOAD_ONE_PHOTO){
+                //Photo attribute
+                missionBase64[1] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[1]);
+                photosAttributeList.add(new PhotosAttribute(missionBase64[1], raceId, Long.parseLong(runnerId)));
+                missionTransaction.setPhotosAttributes(photosAttributeList);
+            }else if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_UPLOAD_THREE_PHOTO){
+                //Photo attribute
+                missionBase64[0] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[0]);
+                missionBase64[1] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[1]);
+                missionBase64[2] = BitmapUtils.loadFileToJpegBase64(600, 800, originalMissionImagePath[2]);
+                photosAttributeList.add(new PhotosAttribute(missionBase64[0], raceId, Long.parseLong(runnerId)));
+                photosAttributeList.add(new PhotosAttribute(missionBase64[1], raceId, Long.parseLong(runnerId)));
+                photosAttributeList.add(new PhotosAttribute(missionBase64[2], raceId, Long.parseLong(runnerId)));
+                missionTransaction.setPhotosAttributes(photosAttributeList);
+            }else if(mission.getType() == Mission.MISSION_TYPE_SCAN_ONLY){
+                missionTransaction.setRemark(qrScanned);
+            }
 
             missionTransactionRequest.setMissionTransaction(missionTransaction);
 
@@ -570,14 +767,25 @@ public class MissionDetailsActivity extends AppCompatActivity {
             changeLoadingState(false);
             if(missionSubmissionResponse == null){
                 Toast.makeText(MissionDetailsActivity.this, "Unable to submit mission at this moment. Please try again.", Toast.LENGTH_SHORT).show();
+
+                if(mission.getType() == Mission.MISSION_TYPE_SCAN_ONLY){
+                    SharedPreferencesHelper.setMissionUnlocked(MissionDetailsActivity.this, raceId, mission.getId(), false);
+                    SharedPreferencesHelper.setMissionUnlockedTime(MissionDetailsActivity.this, raceId, mission.getId(), null);
+                    unlocked = false;
+                    toggleMissionPanel();
+                }
             }else{
-                //TODO update mission submitted.
-                saveImagesToStorage();
+
                 Toast.makeText(MissionDetailsActivity.this, "Well done fella. Mission submitted.", Toast.LENGTH_SHORT).show();
                 SharedPreferencesHelper.setMissionSubmitted(MissionDetailsActivity.this, raceId, mission.getId(), true);
                 submitted = true;
                 toggleMissionPanel();
-                promptShareToFaceBook();
+
+                if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_UPLOAD_ONE_PHOTO || mission.getType() == Mission.MISSION_TYPE_SCAN_AND_UPLOAD_THREE_PHOTO){
+                    saveImagesToStorage();
+                    promptShareToFaceBook();
+                }
+
             }
         }
     }
@@ -586,12 +794,8 @@ public class MissionDetailsActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if(loading){
-                    //progressBar.setVisibility(View.VISIBLE);
-                    //proceedTextView.setVisibility(View.GONE);
                     loadingDialog.show();
                 }else{
-                    //progressBar.setVisibility(View.GONE);
-                    //proceedTextView.setVisibility(View.VISIBLE);
                     loadingDialog.hide();
                 }
             }
@@ -608,25 +812,37 @@ public class MissionDetailsActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (ShareDialog.canShow(SharePhotoContent.class)){
-                            SharePhoto photo_0 = new SharePhoto.Builder()
-                                    .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[0]))
-                                    .build();
-                            SharePhoto photo_1 = new SharePhoto.Builder()
-                                    .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[1]))
-                                    .build();
-                            SharePhoto photo_2 = new SharePhoto.Builder()
-                                    .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[2]))
-                                    .build();
 
-                            String hashtag =  MissionDetailsActivity.this.getResources().getString(R.string.facebook_hashtag);
-                            SharePhotoContent content = new SharePhotoContent.Builder()
-                                    .addPhoto(photo_0)
-                                    .addPhoto(photo_1)
-                                    .addPhoto(photo_2)
-                                    .setShareHashtag(new ShareHashtag.Builder().setHashtag(hashtag).build())
-                                    .build();
+                            SharePhotoContent content = null;
 
+                            if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_UPLOAD_ONE_PHOTO){
+                                SharePhoto photo_1 = new SharePhoto.Builder()
+                                        .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[1]))
+                                        .build();
+                                String hashtag =  MissionDetailsActivity.this.getResources().getString(R.string.facebook_hashtag);
+                                content = new SharePhotoContent.Builder()
+                                        .addPhoto(photo_1)
+                                        .setShareHashtag(new ShareHashtag.Builder().setHashtag(hashtag).build())
+                                        .build();
+                            }else{
+                                SharePhoto photo_0 = new SharePhoto.Builder()
+                                        .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[0]))
+                                        .build();
+                                SharePhoto photo_1 = new SharePhoto.Builder()
+                                        .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[1]))
+                                        .build();
+                                SharePhoto photo_2 = new SharePhoto.Builder()
+                                        .setBitmap(BitmapUtils.loadBitmapFromFile(800, 600, originalMissionImagePath[2]))
+                                        .build();
 
+                                String hashtag =  MissionDetailsActivity.this.getResources().getString(R.string.facebook_hashtag);
+                                content = new SharePhotoContent.Builder()
+                                        .addPhoto(photo_0)
+                                        .addPhoto(photo_1)
+                                        .addPhoto(photo_2)
+                                        .setShareHashtag(new ShareHashtag.Builder().setHashtag(hashtag).build())
+                                        .build();
+                            }
                             shareDialog.show(content);
 
                         }else{

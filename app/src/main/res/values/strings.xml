@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Groomify</string>
-    <string name="google_map_api_key">AIzaSyB-zS7hKTYU5GrmbQxjx1vxXqn3VSjDghM</string>
+    <!--<string name="google_map_api_key">AIzaSyB-zS7hKTYU5GrmbQxjx1vxXqn3VSjDghM</string>-->
+    <string name="google_map_api_key">AIzaSyA1M3wwCqCDnt2sT0E8d1Dazl5jQvc9RVk</string>
+
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -54,12 +56,32 @@
     <string name="dialog_loading_text">Loading ...</string>
 
 
-    <string name="coupon_validation_code">0000</string>
-    <string name="mission1_validation_code">0000</string>
-    <string name="mission2_validation_code">0000</string>
-    <string name="mission3_validation_code">0000</string>
-    <string name="mission4_validation_code">0000</string>
-    <string name="mission5_validation_code">8888</string>
+    <string name="coupon_validation_code_1">GMF-RUN-2017-04-16-C1</string>
+    <string name="coupon_validation_code_2">GMF-RUN-2017-04-16-C2</string>
+    <string name="coupon_validation_code_3">GMF-RUN-2017-04-16-C3</string>
+    <string name="coupon_validation_code_4">GMF-RUN-2017-04-16-C4</string>
+    <string name="coupon_validation_code_5">GMF-RUN-2017-04-16-C5</string>
+    <string name="coupon_validation_code_6">GMF-RUN-2017-04-16-C6</string>
+    <string name="coupon_validation_code_7">GMF-RUN-2017-04-16-C7</string>
+    <string name="coupon_validation_code_8">GMF-RUN-2017-04-16-C8</string>
+    <string name="coupon_validation_code_9">GMF-RUN-2017-04-16-C9</string>
+    <string name="coupon_validation_code_10">GMF-RUN-2017-04-16-C10</string>
+    <string name="coupon_validation_code_11">GMF-RUN-2017-04-16-C11</string>
+    <string name="coupon_validation_code_12">GMF-RUN-2017-04-16-C12</string>
+    <string name="coupon_validation_code_13">GMF-RUN-2017-04-16-C13</string>
+    <string name="coupon_validation_code_14">GMF-RUN-2017-04-16-C14</string>
+    <string name="coupon_validation_code_15">GMF-RUN-2017-04-16-C15</string>
+    <string name="coupon_validation_code_16">GMF-RUN-2017-04-16-C16</string>
+    <string name="coupon_validation_code_17">GMF-RUN-2017-04-16-C17</string>
+    <string name="coupon_validation_code_18">GMF-RUN-2017-04-16-C18</string>
+    <string name="coupon_validation_code_19">GMF-RUN-2017-04-16-C19</string>
+    <string name="coupon_validation_code_20">GMF-RUN-2017-04-16-C20</string>
+
+    <string name="mission1_validation_code">GMF-RUN-2017-04-16-M1</string>
+    <string name="mission2_validation_code">GMF-RUN-2017-04-16-M2</string>
+    <string name="mission3_validation_code">GMF-RUN-2017-04-16-M3</string>
+    <string name="mission4_validation_code">GMF-RUN-2017-04-16-M4</string>
+    <string name="mission5_validation_code">GMF-RUN-2017-04-16-M5</string>
 
     <integer name="ranking_refresh_interval">300000</integer> <!-- every 5 min -->
     <integer name="location_update_interval">10000</integer> <!-- every 5 min -->
@@ -70,6 +92,18 @@
 
     <string name="tnc_dialog_content">By using Groomify Run app, you agree to the </string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="mission_question_grooton">What does Grooton care about the most?</string>
+    <string name="mission_question_miki">What does Miki likes to do during her free time?</string>
+    <string name="mission_question_fyre">What is the nature element of Fyre</string>
+    <string name="mission_answer_hint">(Not sure? Visit Groomify Facebook now for hints!)</string>
+
+    <integer name="mission_answer_grooton">2</integer>
+    <integer name="mission_answer_miki">2</integer>
+    <integer name="mission_answer_fyre">0</integer>
+
+    <string name="mission_toast_answer_correct">Well done, the answer is correct.</string>
+    <string name="mission_toast_answer_wrong">Wrong answer, please try again.</string>
+
+    <string name="mission_scan_and_win_announcement">Mission cleared! Stay tuned for more surprises! Follow us on our Facebook!</string>
+
 </resources>

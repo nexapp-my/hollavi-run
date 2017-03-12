@@ -19,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.crash.FirebaseCrash;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.GroomifyUser;
 import com.groomify.hollavirun.entities.Mission;
@@ -290,6 +291,8 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Unable to get race details.",e);
+                FirebaseCrash.logcat(Log.ERROR, TAG, "Unable to get race details.");
+                FirebaseCrash.report(e);
             }
             return null;
         }
@@ -305,7 +308,8 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                     Date endDate =  jsonSdf.parse(raceDetail.getEndTime());
                     endDateString = sdf.format(endDate);
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    FirebaseCrash.logcat(Log.ERROR, TAG, "Failed to parse race end date.");
+                    FirebaseCrash.report(e);
                 }
 
                 SharedPreferencesHelper.setRaceExpirationTime(SelectRaceActivity.this, races[currentPosition].getId(), endDateString);
@@ -328,13 +332,13 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
 
                             for (int i = 0; i < raceDetail.getMissions().size(); i++) {
                                 Mission_ missionResponse = raceDetail.getMissions().get(i);
-                                Mission mission = new Mission(missionResponse.getCoverPhoto(),
+                                Mission mission = new Mission(missionResponse.getCoverPhoto().getUrl(),
                                         0,
                                         missionResponse.getDescription(),
                                         i + 1,
                                         missionResponse.getLat(),
                                         missionResponse.getLng(),
-                                        i + 1, missionResponse.getTitle(), false , "0000");
+                                        i + 1, missionResponse.getTitle(), false , "0000", -1);
                                 //public Mission(String coverPhotoBase64, String description, int id, String latitude, String longitude, int sequenceNumber, String title, boolean unlocked, String validationCode) {
                                 Log.i(TAG, "Adding mission into database. " + mission.toString());
 
@@ -404,6 +408,8 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Unable to call join race api.",e);
+                FirebaseCrash.logcat(Log.ERROR, TAG, "Unable to call join race api.");
+                FirebaseCrash.report(e);
             }
             return null;
         }
@@ -487,6 +493,8 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Unable to call update runner api.",e);
+                FirebaseCrash.logcat(Log.ERROR, TAG, "Unable to call update runner api.");
+                FirebaseCrash.report(e);
             }
             return null;
         }
@@ -538,6 +546,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                       ActivityUtils.launchTeamSelectionScreen(SelectRaceActivity.this, true);
                   }else{
                       ActivityUtils.launchMainScreen(SelectRaceActivity.this, true);
+                      SharedPreferencesHelper.savePreferences(SelectRaceActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_FIRST_TIME_SETUP_COMPLETE, true);
                   }
               }
         });

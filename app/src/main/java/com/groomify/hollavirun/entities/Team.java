@@ -12,6 +12,7 @@ public class Team implements Parcelable {
     private String teamName;
     private int resourceId;
     private int resrouceIdForFB;
+    private String prefixAlphabet;
 
     public int getResourceId() {
         return resourceId;
@@ -37,10 +38,19 @@ public class Team implements Parcelable {
         this.teamName = teamName;
     }
 
-    public Team(int resourceId, int resrouceIdForFB, String teamName) {
+    public void setPrefixAlphabet(String prefixAlphabet) {
+        this.prefixAlphabet = prefixAlphabet;
+    }
+
+    public String getPrefixAlphabet() {
+        return prefixAlphabet;
+    }
+
+    public Team(int resourceId, int resrouceIdForFB, String teamName, String prefixAlphabet) {
         this.resourceId = resourceId;
         this.resrouceIdForFB = resrouceIdForFB;
         this.teamName = teamName;
+        this.prefixAlphabet = prefixAlphabet;
     }
 
 
@@ -54,12 +64,14 @@ public class Team implements Parcelable {
         dest.writeString(this.teamName);
         dest.writeInt(this.resourceId);
         dest.writeInt(this.resrouceIdForFB);
+        dest.writeString(this.prefixAlphabet);
     }
 
     protected Team(Parcel in) {
         this.teamName = in.readString();
         this.resourceId = in.readInt();
         this.resrouceIdForFB = in.readInt();
+        this.prefixAlphabet = in.readString();
     }
 
     public static final Creator<Team> CREATOR = new Creator<Team>() {

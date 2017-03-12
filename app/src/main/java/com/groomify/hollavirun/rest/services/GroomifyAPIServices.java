@@ -1,7 +1,9 @@
 package com.groomify.hollavirun.rest.services;
 
+import com.groomify.hollavirun.rest.models.request.FirstAidRequest;
 import com.groomify.hollavirun.rest.models.request.MissionTransactionRequest;
 import com.groomify.hollavirun.rest.models.request.UpdateUserInfoRequest;
+import com.groomify.hollavirun.rest.models.response.CheckAppVersionResponse;
 import com.groomify.hollavirun.rest.models.response.RaceGalleryResponse;
 import com.groomify.hollavirun.rest.models.response.RaceInfoResponse;
 import com.groomify.hollavirun.rest.models.response.RaceRankingResponse;
@@ -35,6 +37,9 @@ import retrofit2.http.Query;
  */
 
 public interface GroomifyAPIServices {
+
+    @GET("version")
+    Call<CheckAppVersionResponse> checkVersion();
 
     @POST("fb_users")
     Call<UserInfoResponse> loginUser(@Body LoginRequest loginRequest);
@@ -88,6 +93,12 @@ public interface GroomifyAPIServices {
             @Header("fb_id") String facebookId,
             @Header("auth_token") String authToken,
             @Path("id") String id);
+
+    @POST("races/support")
+    Call<Void> callFirstAid(
+            @Header("fb_id") String facebookId,
+            @Header("auth_token") String authToken,
+            @Body  FirstAidRequest firstAidRequest);
 
 
     @POST("fb_transactions")

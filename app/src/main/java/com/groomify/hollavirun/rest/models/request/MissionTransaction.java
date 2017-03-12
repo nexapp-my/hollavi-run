@@ -24,28 +24,10 @@ public class MissionTransaction implements Serializable, Parcelable
     @SerializedName("photos_attributes")
     @Expose
     private List<PhotosAttribute> photosAttributes = null;
-    public final static Creator<MissionTransaction> CREATOR = new Creator<MissionTransaction>() {
+    @SerializedName("remark")
+    @Expose
+    private String remark;
 
-
-        @SuppressWarnings({
-            "unchecked"
-        })
-        public MissionTransaction createFromParcel(Parcel in) {
-            MissionTransaction instance = new MissionTransaction();
-            instance.missionId = ((Integer) in.readValue((Integer.class.getClassLoader())));
-            instance.missionTime = ((Integer) in.readValue((Integer.class.getClassLoader())));
-            instance.runnerId = ((Integer) in.readValue((Integer.class.getClassLoader())));
-            in.readList(instance.photosAttributes, (com.groomify.hollavirun.rest.models.request.PhotosAttribute.class.getClassLoader()));
-            return instance;
-        }
-
-        public MissionTransaction[] newArray(int size) {
-            return (new MissionTransaction[size]);
-        }
-
-    }
-    ;
-    private final static long serialVersionUID = 54226719163284370L;
 
     public Integer getMissionId() {
         return missionId;
@@ -79,15 +61,49 @@ public class MissionTransaction implements Serializable, Parcelable
         this.photosAttributes = photosAttributes;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(missionId);
-        dest.writeValue(missionTime);
-        dest.writeValue(runnerId);
-        dest.writeList(photosAttributes);
+    public String getRemark() {
+        return remark;
     }
 
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+
+    @Override
     public int describeContents() {
-        return  0;
+        return 0;
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeValue(this.missionId);
+        dest.writeValue(this.missionTime);
+        dest.writeValue(this.runnerId);
+        dest.writeTypedList(this.photosAttributes);
+        dest.writeString(this.remark);
+    }
+
+    public MissionTransaction() {
+    }
+
+    protected MissionTransaction(Parcel in) {
+        this.missionId = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.missionTime = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.runnerId = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.photosAttributes = in.createTypedArrayList(PhotosAttribute.CREATOR);
+        this.remark = in.readString();
+    }
+
+    public static final Creator<MissionTransaction> CREATOR = new Creator<MissionTransaction>() {
+        @Override
+        public MissionTransaction createFromParcel(Parcel source) {
+            return new MissionTransaction(source);
+        }
+
+        @Override
+        public MissionTransaction[] newArray(int size) {
+            return new MissionTransaction[size];
+        }
+    };
 }

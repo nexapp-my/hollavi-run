@@ -16,7 +16,7 @@ public class Mission_ extends RealmObject {
     private String description;
     @SerializedName("cover_photo")
     @Expose
-    private String coverPhoto;
+    private Cover coverPhoto;
     @SerializedName("lat")
     @Expose
     private String lat;
@@ -43,11 +43,11 @@ public class Mission_ extends RealmObject {
         this.description = description;
     }
 
-    public String getCoverPhoto() {
+    public Cover getCoverPhoto() {
         return coverPhoto;
     }
 
-    public void setCoverPhoto(String coverPhoto) {
+    public void setCoverPhoto(Cover coverPhoto) {
         this.coverPhoto = coverPhoto;
     }
 

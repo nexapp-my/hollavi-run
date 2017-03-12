@@ -7,4 +7,23 @@
     </string-array>
 
 
+    <string-array name="grooton_answers">
+        <item>A: Politics</item>
+        <item>B: Finance</item>
+        <item>C: Environment Protection</item>
+    </string-array>
+
+    <string-array name="miki_answers">
+        <item>A: Singing</item>
+        <item>B: Reading</item>
+        <item>C: Dancing</item>
+    </string-array>
+
+    <string-array name="fyre_answers">
+        <item>A: Fire</item>
+        <item>B: Wind</item>
+        <item>C: Water</item>
+    </string-array>
+
+
 </resources>

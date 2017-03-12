@@ -8,7 +8,9 @@ import android.os.Parcelable.Creator;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Cover implements Serializable, Parcelable
+import io.realm.RealmObject;
+
+public class Cover extends RealmObject implements Serializable, Parcelable
 {
 
     @SerializedName("url")

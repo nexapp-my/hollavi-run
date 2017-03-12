@@ -50,14 +50,48 @@ public class AppUtils {
         seconds = totalSecs % 60;
 
         if(hours != 0){
-            timeString += hours+" h ";
+            timeString += hours+"h ";
         }
 
         if(minutes != 0){
-            timeString += minutes+" m ";
+            timeString += minutes+"m ";
         }
 
-        timeString += seconds+" s";
+        timeString += seconds+"s";
+
+        return timeString;
+    }
+
+
+    public static String getFormattedHoursAndMinsFromSeconds(int totalSecs){
+        String timeString = "";
+        int hours = 0;
+        int minutes = 0;
+        int seconds = 0;
+
+        hours = totalSecs / 3600;
+        minutes = (totalSecs % 3600) / 60;
+        seconds = totalSecs % 60;
+
+        if(seconds < 60){
+            minutes++; //round up.
+        }
+
+        if(hours != 0){
+            if(hours > 1){
+                timeString += hours+" hours";
+            }else{
+                timeString += hours+" hour";
+            }
+        }
+
+        if(hours <= 0 && minutes != 0){
+            if(minutes > 1){
+                timeString += minutes+" minutes";
+            }else{
+                timeString += minutes+" minute";
+            }
+        }
 
         return timeString;
     }
@@ -89,19 +123,27 @@ public class AppUtils {
     private static int totalMission = 5;
 
     private static String missionTitle[] = {
-            "SELFIE WITH STRANGERS",
-            "POKEMON GO",
-            "INFLATABLE CASTLE OF HERO",
-            "THE 3D JOURNEY",
-            "UPSIDE DOWN WORLD"
+            "Let's go, GMF!",
+            "Hunt the GEMS!",
+            "Welcome to Planet Groomify!",
+            "Are you the All-Round Champion?",
+            "Hop on into the 3D World !"
     };
 
     private static String missionDesc[] = {
-            "Take 3 selfies with your fellow runners",
-            "Spot the real Pikachu",
-            "Prepare to be mindblown",
-            "Meet your favourite Superheroes.",
-            "Mindboggling fun awaits."
+            "Take a selfie together with any one of your team member! EG: If you are in team Grooton, take a selfie with another runner in the same team.",
+            "Follow your 6th sense and scan your desired QR CODE & you will stand a chance to win hidden gems.",
+            "Home to our three leaders, GMF, a place where the virtual and reality world meets. Snap a picture in front of the green screen to reveal your very own Planet Groomify!",
+            "Be smart like GROOTON, Be calm like MIKI, Be fast like FYRE! Challenge the Groomify Trivia & you are almost there to the last Pit Stop!",
+            "Explore the 3D wall of fame with GMF"
+    };
+
+    private static int missionType[] = {
+        Mission.MISSION_TYPE_SCAN_AND_UPLOAD_THREE_PHOTO,
+                Mission.MISSION_TYPE_SCAN_ONLY,
+                Mission.MISSION_TYPE_SCAN_AND_UPLOAD_ONE_PHOTO,
+                Mission.MISSION_TYPE_SCAN_AND_ANSWER_QUESTION,
+                Mission.MISSION_TYPE_SCAN_AND_UPLOAD_THREE_PHOTO
     };
 
     private static int missionCoverResourceId[] = {
@@ -121,16 +163,16 @@ public class AppUtils {
                     i + 1,
                     "",
                     "",
-                    i + 1, missionTitle[i], false, "0000");
+                    i + 1, missionTitle[i], false, "0000", missionType[i]);
         }
         return missions;
     }
 
     public static Team[] getDefaultTeam(){
         Team[] teams = new Team[3];
-        teams[0] = new Team(R.drawable.team_3_ambassador, R.drawable.team_grooton_for_fb, "Grooton");
-        teams[1] = new Team(R.drawable.team_1_ambassador, R.drawable.team_miki_for_fb,"Miki");
-        teams[2] = new Team(R.drawable.team_2_ambassador, R.drawable.team_fyre_for_fb, "Fyre");
+        teams[0] = new Team(R.drawable.team_3_ambassador, R.drawable.team_grooton_for_fb, "Grooton", "G");
+        teams[1] = new Team(R.drawable.team_1_ambassador, R.drawable.team_miki_for_fb,"Miki", "M");
+        teams[2] = new Team(R.drawable.team_2_ambassador, R.drawable.team_fyre_for_fb, "Fyre", "F");
         return teams;
     }
 

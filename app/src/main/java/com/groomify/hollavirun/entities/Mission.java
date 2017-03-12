@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import io.realm.RealmObject;
+import io.realm.annotations.Ignore;
 import io.realm.annotations.PrimaryKey;
 
 /**
@@ -17,15 +18,25 @@ public class Mission extends RealmObject implements Parcelable {
     private int sequenceNumber;
     private String title;
     private String description;
-    private String coverPhotoBase64;
+    private String coverPhotoUrl;
     private int coverPhotoDefaultResourceId;
     private String validationCode = "0000";
     private boolean unlocked;
     private String latitude;
     private String longitude;
+    private int type;
 
-    public Mission(String coverPhotoBase64, int coverPhotoDefaultResourceId,String description, int id, String latitude, String longitude, int sequenceNumber, String title, boolean unlocked, String validationCode) {
-        this.coverPhotoBase64 = coverPhotoBase64;
+    @Ignore
+    public final static int MISSION_TYPE_SCAN_ONLY = 1;
+    @Ignore
+    public final static int MISSION_TYPE_SCAN_AND_UPLOAD_ONE_PHOTO = 2;
+    @Ignore
+    public final static int MISSION_TYPE_SCAN_AND_UPLOAD_THREE_PHOTO = 3;
+    @Ignore
+    public final static int MISSION_TYPE_SCAN_AND_ANSWER_QUESTION = 4;
+
+    public Mission(String coverPhotoUrl, int coverPhotoDefaultResourceId,String description, int id, String latitude, String longitude, int sequenceNumber, String title, boolean unlocked, String validationCode, int type) {
+        this.coverPhotoUrl = coverPhotoUrl;
         this.coverPhotoDefaultResourceId = coverPhotoDefaultResourceId;
         this.description = description;
         this.id = id;
@@ -35,14 +46,15 @@ public class Mission extends RealmObject implements Parcelable {
         this.title = title;
         this.unlocked = unlocked;
         this.validationCode = validationCode;
+        this.type = type;
     }
 
     public String getCoverPhotoBase64() {
-        return coverPhotoBase64;
+        return coverPhotoUrl;
     }
 
     public void setCoverPhotoBase64(String coverPhotoBase64) {
-        this.coverPhotoBase64 = coverPhotoBase64;
+        this.coverPhotoUrl = coverPhotoBase64;
     }
 
     public String getDescription() {
@@ -117,8 +129,17 @@ public class Mission extends RealmObject implements Parcelable {
         this.coverPhotoDefaultResourceId = coverPhotoDefaultResourceId;
     }
 
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
     public Mission() {
     }
+
 
     @Override
     public int describeContents() {
@@ -131,12 +152,13 @@ public class Mission extends RealmObject implements Parcelable {
         dest.writeInt(this.sequenceNumber);
         dest.writeString(this.title);
         dest.writeString(this.description);
-        dest.writeString(this.coverPhotoBase64);
+        dest.writeString(this.coverPhotoUrl);
         dest.writeInt(this.coverPhotoDefaultResourceId);
         dest.writeString(this.validationCode);
         dest.writeByte(this.unlocked ? (byte) 1 : (byte) 0);
         dest.writeString(this.latitude);
         dest.writeString(this.longitude);
+        dest.writeInt(this.type);
     }
 
     protected Mission(Parcel in) {
@@ -144,12 +166,13 @@ public class Mission extends RealmObject implements Parcelable {
         this.sequenceNumber = in.readInt();
         this.title = in.readString();
         this.description = in.readString();
-        this.coverPhotoBase64 = in.readString();
+        this.coverPhotoUrl = in.readString();
         this.coverPhotoDefaultResourceId = in.readInt();
         this.validationCode = in.readString();
         this.unlocked = in.readByte() != 0;
         this.latitude = in.readString();
         this.longitude = in.readString();
+        this.type = in.readInt();
     }
 
     public static final Creator<Mission> CREATOR = new Creator<Mission>() {
