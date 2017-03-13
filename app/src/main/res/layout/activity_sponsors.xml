@@ -164,6 +164,7 @@
                     android:layout_below="@+id/partner_label"
                     android:layout_margin="10dp"
                     android:layout_weight="1"
+                    android:visibility="gone"
                     app:srcCompat="@drawable/sponsors_ricsources" />
 
                 <ImageView

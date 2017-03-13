@@ -40,5 +40,7 @@
 
     <color name="black">#000000</color>
 
+    <color name="touch_state">#e3e3e3</color>
+
     <!-- old ui end  here -->
 </resources>

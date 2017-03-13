@@ -157,32 +157,32 @@
             android:id="@+id/select_edit_my_profile"
             android:layout_width="match_parent"
             android:layout_height="44dp"
-            android:layout_weight="-1"
-            android:background="@drawable/drawable_profile_edit_bg"
-
             android:layout_centerHorizontal="true"
+
             android:layout_marginTop="25dp"
-            android:layout_marginLeft="16dp">
+            android:layout_weight="-1"
+            android:background="@drawable/drawable_profile_edit_button_state"
+            android:paddingLeft="16dp">
 
             <TextView
-                android:text="Edit my profile"
+                android:id="@+id/textView11"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:id="@+id/textView11"
+                android:layout_centerVertical="true"
+                android:text="Edit my profile"
                 android:textColor="@android:color/black" />
 
             <ImageView
+                android:id="@+id/imageView5"
                 android:layout_width="13dp"
                 android:layout_height="13dp"
-                app:srcCompat="@drawable/ic_arrow_right"
-                android:layout_centerVertical="true"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:id="@+id/imageView5"
-                android:layout_marginRight="16dp" />
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp"
+                app:srcCompat="@drawable/ic_arrow_right" />
         </RelativeLayout>
 
 
@@ -190,67 +190,67 @@
             android:id="@+id/select_select_a_run"
             android:layout_width="match_parent"
             android:layout_height="44dp"
-            android:layout_weight="-1"
-            android:background="@drawable/drawable_profile_edit_bg"
-            android:layout_below="@id/select_edit_my_profile"
-            android:layout_alignLeft="@id/select_edit_my_profile"
-            android:layout_alignStart="@id/select_edit_my_profile"
-            android:layout_alignRight="@id/select_edit_my_profile"
             android:layout_alignEnd="@id/select_edit_my_profile"
+            android:layout_alignLeft="@id/select_edit_my_profile"
+            android:layout_alignRight="@id/select_edit_my_profile"
+            android:layout_alignStart="@id/select_edit_my_profile"
+            android:layout_below="@id/select_edit_my_profile"
             android:layout_marginTop="2dp"
-            android:layout_marginLeft="16dp">
+            android:layout_weight="-1"
+            android:background="@drawable/drawable_profile_edit_button_state"
+            android:paddingLeft="16dp">
 
             <TextView
-                android:text="Select a run"
+                android:id="@+id/textView16"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:id="@+id/textView16"
+                android:layout_centerVertical="true"
+                android:text="Select a run"
                 android:textColor="@android:color/black" />
 
             <ImageView
                 android:layout_width="13dp"
                 android:layout_height="13dp"
-                app:srcCompat="@drawable/ic_arrow_right"
-                android:layout_centerVertical="true"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginRight="16dp" />
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp"
+                app:srcCompat="@drawable/ic_arrow_right" />
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/select_sponsors_and_partner"
             android:layout_width="match_parent"
             android:layout_height="44dp"
-            android:layout_weight="-1"
-            android:background="@drawable/drawable_profile_edit_bg"
-            android:layout_below="@id/select_select_a_run"
-            android:layout_alignLeft="@id/select_select_a_run"
-            android:layout_alignStart="@id/select_select_a_run"
-            android:layout_alignRight="@id/select_select_a_run"
             android:layout_alignEnd="@id/select_select_a_run"
+            android:layout_alignLeft="@id/select_select_a_run"
+            android:layout_alignRight="@id/select_select_a_run"
+            android:layout_alignStart="@id/select_select_a_run"
+            android:layout_below="@id/select_select_a_run"
             android:layout_marginTop="2dp"
-            android:layout_marginLeft="16dp">
+            android:layout_weight="-1"
+            android:background="@drawable/drawable_profile_edit_button_state"
+            android:paddingLeft="16dp">
 
             <TextView
-                android:text="@string/sponsors_partners"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:text="@string/sponsors_partners"
                 android:textColor="@android:color/black" />
 
             <ImageView
                 android:layout_width="13dp"
                 android:layout_height="13dp"
-                app:srcCompat="@drawable/ic_arrow_right"
-                android:layout_centerVertical="true"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginRight="16dp" />
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp"
+                app:srcCompat="@drawable/ic_arrow_right" />
         </RelativeLayout>
 
 
@@ -258,97 +258,99 @@
             android:id="@+id/select_terms_of_use"
             android:layout_width="match_parent"
             android:layout_height="44dp"
-            android:layout_weight="-1"
-            android:background="@drawable/drawable_profile_edit_bg"
-            android:layout_below="@id/select_sponsors_and_partner"
-            android:layout_alignLeft="@id/select_sponsors_and_partner"
-            android:layout_alignStart="@id/select_sponsors_and_partner"
-            android:layout_alignRight="@id/select_sponsors_and_partner"
             android:layout_alignEnd="@id/select_sponsors_and_partner"
+            android:layout_alignLeft="@id/select_sponsors_and_partner"
+            android:layout_alignRight="@id/select_sponsors_and_partner"
+            android:layout_alignStart="@id/select_sponsors_and_partner"
+            android:layout_below="@id/select_sponsors_and_partner"
             android:layout_marginTop="2dp"
-            android:layout_marginLeft="16dp">
+            android:layout_weight="-1"
+            android:background="@drawable/drawable_profile_edit_button_state"
+            android:paddingLeft="16dp">
 
             <TextView
-                android:text="Terms of Use"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:text="Terms of Use"
                 android:textColor="@android:color/black" />
 
             <ImageView
                 android:layout_width="13dp"
                 android:layout_height="13dp"
-                app:srcCompat="@drawable/ic_arrow_right"
-                android:layout_centerVertical="true"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginRight="16dp" />
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp"
+                app:srcCompat="@drawable/ic_arrow_right" />
         </RelativeLayout>
+
         <RelativeLayout
             android:id="@+id/select_privacy_policy"
             android:layout_width="match_parent"
             android:layout_height="44dp"
-            android:layout_weight="-1"
-            android:background="@drawable/drawable_profile_edit_bg"
-            android:layout_below="@id/select_sponsors_and_partner"
-            android:layout_alignLeft="@id/select_sponsors_and_partner"
-            android:layout_alignStart="@id/select_sponsors_and_partner"
-            android:layout_alignRight="@id/select_sponsors_and_partner"
             android:layout_alignEnd="@id/select_sponsors_and_partner"
+            android:layout_alignLeft="@id/select_sponsors_and_partner"
+            android:layout_alignRight="@id/select_sponsors_and_partner"
+            android:layout_alignStart="@id/select_sponsors_and_partner"
+            android:layout_below="@id/select_sponsors_and_partner"
             android:layout_marginTop="2dp"
-            android:layout_marginLeft="16dp">
+            android:layout_weight="-1"
+            android:background="@drawable/drawable_profile_edit_button_state"
+            android:paddingLeft="16dp">
 
             <TextView
-                android:text="Privacy Policy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:text="Privacy Policy"
                 android:textColor="@android:color/black" />
 
             <ImageView
                 android:layout_width="13dp"
                 android:layout_height="13dp"
-                app:srcCompat="@drawable/ic_arrow_right"
-                android:layout_centerVertical="true"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginRight="16dp" />
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp"
+                app:srcCompat="@drawable/ic_arrow_right" />
         </RelativeLayout>
+
         <RelativeLayout
             android:id="@+id/select_logout"
             android:layout_width="match_parent"
             android:layout_height="44dp"
-            android:layout_weight="-1"
-            android:background="@drawable/drawable_profile_edit_bg"
-            android:layout_below="@id/select_sponsors_and_partner"
-            android:layout_alignLeft="@id/select_sponsors_and_partner"
-            android:layout_alignStart="@id/select_sponsors_and_partner"
-            android:layout_alignRight="@id/select_sponsors_and_partner"
             android:layout_alignEnd="@id/select_sponsors_and_partner"
+            android:layout_alignLeft="@id/select_sponsors_and_partner"
+            android:layout_alignRight="@id/select_sponsors_and_partner"
+            android:layout_alignStart="@id/select_sponsors_and_partner"
+            android:layout_below="@id/select_sponsors_and_partner"
             android:layout_marginTop="2dp"
-            android:layout_marginLeft="16dp">
+            android:layout_weight="-1"
+            android:background="@drawable/drawable_profile_edit_button_state"
+            android:paddingLeft="16dp">
 
             <TextView
-                android:text="Log out"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:text="Log out"
                 android:textColor="@android:color/black" />
 
             <ImageView
                 android:layout_width="13dp"
                 android:layout_height="13dp"
-                app:srcCompat="@drawable/ic_arrow_right"
-                android:layout_centerVertical="true"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginRight="16dp" />
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp"
+                app:srcCompat="@drawable/ic_arrow_right" />
         </RelativeLayout>
 
 
