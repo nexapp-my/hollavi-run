@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.groomify.hollavirun.CouponDetailsActivity;
@@ -49,6 +50,7 @@ public class CouponsListFragment extends ListFragment {
     private final static String TAG = CouponsListFragment.class.getSimpleName();
 
     private ProgressBar loadingProgress ;
+    private TextView listEmptryTextView;
 
 
     List<Coupon> coupons = new ArrayList<>();
@@ -101,7 +103,12 @@ public class CouponsListFragment extends ListFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_coupons_list, container, false);
         loadingProgress = (ProgressBar) view.findViewById(R.id.coupon_loading_progress);
-        loadingProgress.setVisibility(View.VISIBLE);
+        if(coupons.size() == 0){
+            loadingProgress.setVisibility(View.VISIBLE);
+        }
+
+        listEmptryTextView = (TextView) view.findViewById(R.id.list_empty_text_view);
+        listEmptryTextView.setVisibility(View.INVISIBLE);
         new GroomifyCouponListTask().execute(raceId.toString());
 
         return view;
@@ -189,7 +196,7 @@ public class CouponsListFragment extends ListFragment {
     }
 
     private void reloadCouponList(){
-
+        loadingProgress.setVisibility(View.GONE);
         RealmResults<Coupon> couponRealmResults = realm.where(Coupon.class).findAll();
 
         coupons.clear();
@@ -197,7 +204,10 @@ public class CouponsListFragment extends ListFragment {
         coupons.addAll(couponRealmResults);
         couponArrayAdapter.notifyDataSetChanged();
 
-        loadingProgress.setVisibility(View.GONE);
+        if(coupons.size() == 0){
+            listEmptryTextView.setVisibility(View.VISIBLE);
+        }
+
 
     }
 }

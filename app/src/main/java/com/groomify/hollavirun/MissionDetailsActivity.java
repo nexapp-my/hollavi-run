@@ -290,8 +290,18 @@ public class MissionDetailsActivity extends AppCompatActivity {
             missionBannerImgView.setImageBitmap(bitmap);
             //ImageLoader.getInstance().displayImage(mission.getCoverPhotoUrl(), missionBannerImgView, ImageLoadUtils.getDisplayImageOptions());
         }else if(mission.getCoverPhotoDefaultResourceId() > 0){
-            Bitmap bm = BitmapFactory.decodeResource(getResources(), mission.getCoverPhotoDefaultResourceId());
-            missionBannerImgView.setImageBitmap(bm);
+            if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_UPLOAD_ONE_PHOTO){
+                if(selectedTeam.getPrefixAlphabet().equals("G")){
+                    missionBannerImgView.setImageResource(R.drawable.mission_banner_03_grooton);
+                }else if(selectedTeam.getPrefixAlphabet().equals("M")){
+                    missionBannerImgView.setImageResource(R.drawable.mission_banner_03_miki);
+                }else{
+                    missionBannerImgView.setImageResource(R.drawable.mission_banner_03_fyre);
+                }
+            }else{
+                Bitmap bm = BitmapFactory.decodeResource(getResources(), mission.getCoverPhotoDefaultResourceId());
+                missionBannerImgView.setImageBitmap(bm);
+            }
         }
 
         missionNumberTxtView.setText(decimalFormat.format(+mission.getSequenceNumber()));

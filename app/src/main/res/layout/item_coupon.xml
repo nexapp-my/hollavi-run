@@ -28,16 +28,17 @@
         android:textSize="12sp" />
 
     <TextView
-        android:text="Item Description"
+        android:id="@+id/coupon_desc_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/coupon_title_text_view"
-        android:layout_toRightOf="@id/coupon_image_view"
-        android:layout_toEndOf="@id/coupon_image_view"
-        android:id="@+id/coupon_desc_text_view"
         android:layout_marginBottom="11dp"
-        android:textSize="12sp"
-        android:textColor="@color/primaryTextColour" />
+        android:layout_toEndOf="@id/coupon_image_view"
+        android:layout_toRightOf="@id/coupon_image_view"
+        android:singleLine="true"
+        android:text="Item Description"
+        android:textColor="@color/primaryTextColour"
+        android:textSize="12sp" />
 
     <TextView
         android:id="@+id/coupon_expiration_text_view"

@@ -44,20 +44,21 @@
             android:layout_marginTop="56dp" />
 
         <TextView
-            android:id="@id/android:empty"
+            android:id="@+id/list_empty_text_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="56dp"
             android:gravity="fill_vertical|center_horizontal"
             android:text="Ranking not available at this moment"
-            android:visibility="invisible" />
+            android:visibility="gone" />
 
         <ProgressBar
             android:id="@+id/ranking_loading_progress"
             style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true" />
+            android:layout_centerInParent="true"
+            android:visibility="invisible" />
     </RelativeLayout>
 
 

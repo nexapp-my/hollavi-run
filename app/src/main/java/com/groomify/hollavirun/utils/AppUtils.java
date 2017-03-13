@@ -150,7 +150,7 @@ public class AppUtils {
             R.drawable.mission_banner_01,
             R.drawable.mission_banner_02,
             R.drawable.mission_banner_04,
-            R.drawable.mission_banner_05,
+            R.drawable.mission_banner_04,
             R.drawable.mission_banner_06
     };
 

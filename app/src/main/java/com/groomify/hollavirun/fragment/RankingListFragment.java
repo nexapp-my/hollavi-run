@@ -36,12 +36,13 @@ public class RankingListFragment extends ListFragment {
 
     private final static String TAG = RankingListFragment.class.getSimpleName();
 
-    TextView myRankingNoTextView = null;
-    TextView myRankingNameTextView = null;
-    TextView myRankingUserIdTextView = null;
-    TextView myRankingTimeTextView = null;
-    View myRankingPanel = null;
-    ProgressBar loadingProgress;
+    private TextView myRankingNoTextView = null;
+    private TextView myRankingNameTextView = null;
+    private TextView myRankingUserIdTextView = null;
+    private TextView myRankingTimeTextView = null;
+    private TextView listEmptryTextView;
+    private View myRankingPanel = null;
+    private ProgressBar loadingProgress;
 
     private Realm realm;
 
@@ -53,6 +54,9 @@ public class RankingListFragment extends ListFragment {
 
 
     List<Ranking> rankings = new ArrayList<>();
+
+    Long raceId;
+    Long userId;
 
     public RankingListFragment() {
         // Required empty public constructor
@@ -73,8 +77,10 @@ public class RankingListFragment extends ListFragment {
         rankingArrayAdapter = new RankingArrayAdapter(this.getContext(), rankings);
         setListAdapter(rankingArrayAdapter);
 
-        Long raceId = SharedPreferencesHelper.getSelectedRaceId(getContext());
-        new GroomifyMissionRankingTask().execute(""+raceId);
+        raceId = SharedPreferencesHelper.getSelectedRaceId(getContext());
+
+        userId = SharedPreferencesHelper.getUserId(getContext());
+
 /*
         // set up a Realm change listener
         realmChangeListener = new RealmChangeListener<RealmResults<Ranking>>() {
@@ -107,8 +113,17 @@ public class RankingListFragment extends ListFragment {
         myRankingNameTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_name);
         myRankingUserIdTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_user_id);
         myRankingTimeTextView = (TextView) parentView.findViewById(R.id.item_user_ranking_time);
+        listEmptryTextView = (TextView) view.findViewById(R.id.list_empty_text_view);
+        listEmptryTextView.setVisibility(View.INVISIBLE);
         myRankingPanel = parentView;
         initializeMyRanking();
+
+        if(rankings.size() == 0){
+            loadingProgress.setVisibility(View.VISIBLE);
+        }
+
+        new GroomifyMissionRankingTask().execute(""+raceId);
+
         return view;
     }
 
@@ -163,44 +178,42 @@ public class RankingListFragment extends ListFragment {
         }
 
         @Override
-        protected void onPostExecute(RaceRankingResponse raceRankingResponse) {
+        protected void onPostExecute(final RaceRankingResponse raceRankingResponse) {
             super.onPostExecute(raceRankingResponse);
 
             if(raceRankingResponse != null){
 
-                realm.beginTransaction();
-                realm.delete(com.groomify.hollavirun.entities.Ranking.class);//truncate the tables.
-
-                Log.i(TAG, "Total ranking size: "+raceRankingResponse.getRankings().size());
-
-                for(int i =0; i < raceRankingResponse.getRankings().size(); i++){
-                    com.groomify.hollavirun.entities.Ranking ranking = realm.createObject(com.groomify.hollavirun.entities.Ranking.class, i + 1);
-                    ranking.setName(raceRankingResponse.getRankings().get(i).getRunnerName());
-
-                    ranking.setCompletionTime(raceRankingResponse.getRankings().get(i).getTotalMissionTime());
-                    ranking.setId(raceRankingResponse.getRankings().get(i).getRunnerBib());
-                    ranking.setTeamName(raceRankingResponse.getRankings().get(i).getTeam());
-
-                    Log.i(TAG, "Saving ranking into database: "+ranking.toString());
-                    realm.copyToRealmOrUpdate(ranking);
-                }
-
-                Log.i(TAG, "Ranking list saved into database. Saving user own ranking into database.");
-                final com.groomify.hollavirun.entities.Ranking myRanking = new Ranking();
-                myRanking.setRankNumber(raceRankingResponse.getMyRanking().getRanking());
-                myRanking.setName(raceRankingResponse.getMyRanking().getRunnerName());
-                myRanking.setCompletionTime(raceRankingResponse.getMyRanking().getTotalMissionTime());
-                myRanking.setId(raceRankingResponse.getMyRanking().getRunnerBib());
-                myRanking.setTeamName(raceRankingResponse.getMyRanking().getTeam());
-
-                final Ranking realmRanking = realm.copyToRealmOrUpdate(myRanking);
-                Log.i(TAG, "Saving user ranking into database: "+myRanking.toString());
-                realm.commitTransaction();
-
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        GroomifyUser groomifyUser = realm.where(GroomifyUser.class).equalTo("id", SharedPreferencesHelper.getUserId(getContext())).findFirst();
+                        realm.delete(com.groomify.hollavirun.entities.Ranking.class);//truncate the tables.
+
+                        Log.i(TAG, "Total ranking size: "+raceRankingResponse.getRankings().size());
+
+                        for(int i =0; i < raceRankingResponse.getRankings().size(); i++){
+                            com.groomify.hollavirun.entities.Ranking ranking = realm.createObject(com.groomify.hollavirun.entities.Ranking.class, i + 1);
+                            ranking.setName(raceRankingResponse.getRankings().get(i).getRunnerName());
+
+                            ranking.setCompletionTime(raceRankingResponse.getRankings().get(i).getTotalMissionTime());
+                            ranking.setId(raceRankingResponse.getRankings().get(i).getRunnerBib());
+                            ranking.setTeamName(raceRankingResponse.getRankings().get(i).getTeam());
+
+                            Log.i(TAG, "Saving ranking into database: "+ranking.toString());
+                            realm.copyToRealmOrUpdate(ranking);
+                        }
+
+                        Log.i(TAG, "Ranking list saved into database. Saving user own ranking into database.");
+                        final com.groomify.hollavirun.entities.Ranking myRanking = new Ranking();
+                        myRanking.setRankNumber(raceRankingResponse.getMyRanking().getRanking());
+                        myRanking.setName(raceRankingResponse.getMyRanking().getRunnerName());
+                        myRanking.setCompletionTime(raceRankingResponse.getMyRanking().getTotalMissionTime());
+                        myRanking.setId(raceRankingResponse.getMyRanking().getRunnerBib());
+                        myRanking.setTeamName(raceRankingResponse.getMyRanking().getTeam());
+
+                        final Ranking realmRanking = realm.copyToRealmOrUpdate(myRanking);
+                        Log.i(TAG, "Saving user ranking into database: "+myRanking.toString());
+
+                        GroomifyUser groomifyUser = realm.where(GroomifyUser.class).equalTo("id", userId).findFirst();
                         groomifyUser.setMyRanking(realmRanking);
                         Log.i(TAG, "User info from database: "+groomifyUser.toString());
                     }
@@ -215,6 +228,7 @@ public class RankingListFragment extends ListFragment {
     }
 
     private void reloadRankingList(){
+        loadingProgress.setVisibility(View.GONE);
         RealmResults<Ranking> rankingRealmResults = realm.where(Ranking.class).findAll();
 
         rankings.clear();
@@ -222,6 +236,10 @@ public class RankingListFragment extends ListFragment {
         rankingArrayAdapter.addAll(rankingRealmResults);
         rankingArrayAdapter.notifyDataSetChanged();
         initializeMyRanking();
-        loadingProgress.setVisibility(View.GONE);
+
+        if(rankings.size() == 0){
+            listEmptryTextView.setVisibility(View.VISIBLE);
+        }
+
     }
 }

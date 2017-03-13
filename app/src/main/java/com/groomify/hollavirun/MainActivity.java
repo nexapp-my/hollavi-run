@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -18,6 +19,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -167,6 +169,31 @@ public class MainActivity extends AppCompatActivity
             pictureView = (ImageView) findViewById(R.id.menu_bar_profile_picture);
 
 
+        pictureView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        ImageView view = (ImageView) v;
+                        //overlay is black with transparency of 0x77 (119)
+                        view.getDrawable().setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                        view.invalidate();
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL: {
+                        ImageView view = (ImageView) v;
+                        //clear the overlay
+                        view.getDrawable().clearColorFilter();
+                        view.invalidate();
+                        break;
+                    }
+                }
+
+                return false;
+            }
+        });
+
         if(topMenuBar == null){
             topMenuBar = findViewById(R.id.main_menu_bar_top);
         }
@@ -263,7 +290,7 @@ public class MainActivity extends AppCompatActivity
                 public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 
                     //Log.i(TAG, "LoadedImage: "+loadedImage.getConfig().toString());
-                    int pixel = AppUtils.getPixelFromDIP(MainActivity.this, 30);
+                    int pixel = AppUtils.getPixelFromDIP(MainActivity.this, 35);
                     Bitmap processedBitmap = ProfileImageUtils.processOptimizedRoundBitmap(pixel,pixel, loadedImage);
                     pictureView.setImageBitmap(processedBitmap);
                 }

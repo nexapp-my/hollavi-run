@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -36,7 +37,7 @@ import io.realm.Realm;
 public class ProfileActivity extends AppCompatActivity {
     private ImageView pictureView;
     private TextView userDisplayNameTextView;
-    private ImageView closeProfileButton;
+    //private ImageView closeProfileButton;
     private TextView countryTextView;
     private TextView numberOfRunsTextView;
     private TextView userBibNoTextView;
@@ -62,6 +63,7 @@ public class ProfileActivity extends AppCompatActivity {
     private boolean profileUpdated = false;
     private int totalMissionCompleted = 0;
     private Long raceId;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,12 +150,21 @@ public class ProfileActivity extends AppCompatActivity {
             countryTextView.setVisibility(View.INVISIBLE);
         }
 
-        if(closeProfileButton == null){
+        /*if(closeProfileButton == null){
             closeProfileButton = (ImageView) findViewById(R.id.close_profile_button);
         }
         closeProfileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                onBackPressed();
+            }
+        });*/
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "Back press triggered.");
                 onBackPressed();
             }
         });

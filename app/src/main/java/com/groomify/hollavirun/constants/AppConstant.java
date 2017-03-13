@@ -41,7 +41,7 @@ public class AppConstant {
 
     public static final String PREFS_FIRST_TIME_SETUP_COMPLETE = "first_time_setup_completed";
 
-    public static final String DEFAULT_BIB_NO = "-99999";
+    public static final String DEFAULT_BIB_NO = "-9999";
 
     public static final String PREFS_MISSION_UNLOCK_PREFIX = "mission_unlock_prefix_";
     public static final String PREFS_MISSION_SUBMITTED_PREFIX = "mission_submitted_prefix_";

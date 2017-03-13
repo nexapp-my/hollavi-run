@@ -7,6 +7,15 @@
     android:layout_height="match_parent"
     tools:context="com.groomify.hollavirun.ProfileActivity">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        app:navigationIcon="@drawable/ic_action_close"
+        android:layout_width="56dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
     <TextView
         android:text="Profile"
         android:layout_width="wrap_content"
@@ -20,21 +29,21 @@
         android:layout_marginLeft="20dp" />
 
     <TextView
-        android:text="ID: A717"
+        android:id="@+id/user_bib_no_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tool_bar_title"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:id="@+id/user_bib_no_text_view"
-        android:layout_marginRight="20dp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/toolbar"
+        android:layout_marginRight="30dp"
+        android:text="ID: A717"
         android:textColor="@color/primaryTextColour" />
 
     <ImageView
         android:id="@+id/profile_picture_image_view"
         android:layout_width="72dp"
         android:layout_height="72dp"
-        android:layout_below="@id/user_bib_no_text_view"
+        android:layout_alignTop="@+id/user_bib_no_text_view"
         android:layout_centerHorizontal="true" />
 
     <TextView
@@ -71,15 +80,16 @@
         android:layout_height="0.5dp" />-->
 
     <ImageView
-        app:srcCompat="@drawable/ic_close"
         android:id="@+id/close_profile_button"
-        android:padding="5dp"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_alignParentEnd="true"
-        android:layout_margin="15dp" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="15dp"
+        android:padding="5dp"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_action_close" />
 
     <LinearLayout
         android:orientation="horizontal"
