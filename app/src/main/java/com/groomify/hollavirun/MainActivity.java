@@ -106,7 +106,6 @@ public class MainActivity extends AppCompatActivity
     private View alertBanner;
 
     private View.OnClickListener granPermissionListener = null;
-    private View.OnClickListener updateProfileListener = null;
 
     private final String ALERT_TEXT_REQUIRE_PERMISSION = "Location permission is required.";
     private final String ALERT_UPDATE_PROFILE = "Please update your profile";
@@ -260,13 +259,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 AppPermissionHelper.requestLocationPermission(MainActivity.this);
-            }
-        };
-
-        updateProfileListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Update profile", Toast.LENGTH_SHORT).show();
             }
         };
     }

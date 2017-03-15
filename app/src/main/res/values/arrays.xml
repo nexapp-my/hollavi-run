@@ -20,8 +20,8 @@
     </string-array>
 
     <string-array name="fyre_answers">
-        <item>A: Fire</item>
-        <item>B: Wind</item>
+        <item>A: Wind</item>
+        <item>B: Fire</item>
         <item>C: Water</item>
     </string-array>
 

@@ -99,7 +99,7 @@
 
     <integer name="mission_answer_grooton">2</integer>
     <integer name="mission_answer_miki">2</integer>
-    <integer name="mission_answer_fyre">0</integer>
+    <integer name="mission_answer_fyre">1</integer>
 
     <string name="mission_toast_answer_correct">Well done, the answer is correct.</string>
     <string name="mission_toast_answer_wrong">Wrong answer, please try again.</string>
