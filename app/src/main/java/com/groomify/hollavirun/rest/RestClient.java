@@ -1,6 +1,6 @@
 package com.groomify.hollavirun.rest;
 
-import com.github.simonpercic.oklog3.OkLogInterceptor;
+//import com.github.simonpercic.oklog3.OkLogInterceptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.groomify.hollavirun.rest.services.GroomifyAPIServices;
@@ -53,15 +53,15 @@ public class RestClient {
         // add logging as last interceptor
         httpClient.addInterceptor(logging);  // <-- this is the important line!
 
-        OkLogInterceptor okLogInterceptor = OkLogInterceptor.builder()
+        /*OkLogInterceptor okLogInterceptor = OkLogInterceptor.builder()
                 .withRequestContentType(true)
                 .withRequestHeaders(true)
                 .withResponseHeaders(true)
                 // set desired custom options
                 .withAllLogData()
                 .build();
-
-        httpClient.addInterceptor(okLogInterceptor);
+        */
+        //httpClient.addInterceptor(okLogInterceptor);
 
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'")

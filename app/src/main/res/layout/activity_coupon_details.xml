@@ -56,13 +56,13 @@
         android:textColor="@android:color/black" />
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="60dp"
-        app:srcCompat="@drawable/ic_groomify_support"
+        android:id="@+id/sponsor_brand_image_view"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_below="@+id/label_brough_you_by"
         android:layout_centerHorizontal="true"
-        android:id="@+id/sponsor_brand_image_view"
-        android:layout_margin="24dp" />
+        android:layout_margin="24dp"
+        app:srcCompat="@drawable/race_logo" />
 
 
     <Button android:id="@+id/scan_qr_button" android:layout_width="201dp"

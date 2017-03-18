@@ -129,13 +129,9 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
     private void joinRace(boolean asGuest){
         Races race = SelectRaceActivity.races[currentPosition];
 
-        if(asGuest){
-            runAsGuest = true;
-            //SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, AppConstant.DEFAULT_BIB_NO);
-        }else{
-            runAsGuest = false;
-            //SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, bibNo);
-        }
+        //SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, AppConstant.DEFAULT_BIB_NO);
+//SharedPreferencesHelper.savePreferences(this, SharedPreferencesHelper.PreferenceValueType.STRING, AppConstant.PREFS_BIB_NO, bibNo);
+        runAsGuest = asGuest;
         changeViewState(true);
         new GroomifyJoinRaceTask().execute(""+race.getId());
     }
@@ -187,10 +183,10 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
             public void afterTextChanged(Editable s) {
                 // Check if edittext is empty
                 if (TextUtils.isEmpty(s)) {
-                    ((AlertDialog) alertDialog).getButton(
+                    alertDialog.getButton(
                             AlertDialog.BUTTON_POSITIVE).setEnabled(false);
                 } else {
-                    ((AlertDialog) alertDialog).getButton(
+                    alertDialog.getButton(
                             AlertDialog.BUTTON_POSITIVE).setEnabled(true);
                 }
 

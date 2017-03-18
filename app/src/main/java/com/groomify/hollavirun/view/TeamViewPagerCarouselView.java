@@ -157,7 +157,7 @@ public class TeamViewPagerCarouselView extends RelativeLayout {
 
 
     public interface OnPageScrolledListener{
-        public void onPageScrolled(int currentPosition);
+        void onPageScrolled(int currentPosition);
     }
 
     public void setCarouselSlideInterval(long carouselSlideInterval) {

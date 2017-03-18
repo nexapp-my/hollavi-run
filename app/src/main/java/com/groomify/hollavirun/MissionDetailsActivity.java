@@ -617,17 +617,9 @@ public class MissionDetailsActivity extends AppCompatActivity {
         }else if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_ANSWER_QUESTION){
             return true;
         }else if(mission.getType() == Mission.MISSION_TYPE_SCAN_AND_UPLOAD_ONE_PHOTO){
-            if(missionFilled[1]){
-                return true;
-            }else{
-                return false;
-            }
+            return missionFilled[1];
         }else {
-            if(missionFilled[0] &&  missionFilled[1] && missionFilled[2]){
-                return true;
-            }else{
-                return false;
-            }
+            return missionFilled[0] && missionFilled[1] && missionFilled[2];
         }
     }
 

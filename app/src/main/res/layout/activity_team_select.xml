@@ -9,8 +9,9 @@
     tools:context=".TeamSelectActivity"
     android:id="@+id/parent_layout">
 
-    <include layout="@layout/menu_bar_top"
-        android:id="@+id/include"></include>
+    <include
+        layout="@layout/menu_bar_top"
+        android:id="@+id/include" />
 
     <TextView
         android:layout_width="wrap_content"

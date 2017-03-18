@@ -404,11 +404,7 @@ public class MissionDetailsFragment extends Fragment {
     }
 
     private boolean checkIsMissionReadyToSubmit(){
-        if(missionFilled[0] &&  missionFilled[1] && missionFilled[2]){
-            return true;
-        }else{
-            return false;
-        }
+        return missionFilled[0] && missionFilled[1] && missionFilled[2];
     }
 
     // TODO: Rename method, update argument and hook method into UI event

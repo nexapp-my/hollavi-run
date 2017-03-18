@@ -8,7 +8,7 @@ import android.view.View;
  */
 
 public class CustomViewPageTransformer implements ViewPager.PageTransformer {
-    static enum TransformType {
+    enum TransformType {
         FLOW,
         DEPTH,
         ZOOM,

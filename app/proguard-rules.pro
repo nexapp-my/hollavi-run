@@ -16,7 +16,7 @@
 #   public *;
 #}
 # Retrofit
--dontwarn retrofit.**
+-dontwarn retrofit2.**
 -keep class retrofit.** { *; }
 -keepattributes Signature
 -keepattributes Exceptions
@@ -40,7 +40,7 @@
 -keep class com.google.gson.stream.** { *; }
 
 # Parcels
-keep class * implements android.os.Parcelable {
+-keep class * implements android.os.Parcelable {
   public static final android.os.Parcelable$Creator *;
 }
 

@@ -155,6 +155,6 @@ public class ViewPagerCarouselView extends RelativeLayout {
 
 
     public interface OnPageScrolledListener{
-        public void onPageScrolled(int currentPosition);
+        void onPageScrolled(int currentPosition);
     }
 }

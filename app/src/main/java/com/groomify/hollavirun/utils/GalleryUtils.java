@@ -28,11 +28,8 @@ public class GalleryUtils {
         String ext = filePath.substring((filePath.lastIndexOf(".") + 1),
                 filePath.length());
 
-        if (AppConstant.FILE_EXTN
-                .contains(ext.toLowerCase(Locale.getDefault())))
-            return true;
-        else
-            return false;
+        return AppConstant.FILE_EXTN
+                .contains(ext.toLowerCase(Locale.getDefault()));
 
     }
 

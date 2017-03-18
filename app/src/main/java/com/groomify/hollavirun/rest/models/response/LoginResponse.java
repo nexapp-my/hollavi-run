@@ -58,15 +58,15 @@ public class LoginResponse implements Serializable, Parcelable
             instance.id = ((Long) in.readValue((Long.class.getClassLoader())));
             instance.fbId = ((Long) in.readValue((Long.class.getClassLoader())));
             instance.name = ((String) in.readValue((String.class.getClassLoader())));
-            instance.email = ((Object) in.readValue((Object.class.getClassLoader())));
-            instance.country = ((Object) in.readValue((Object.class.getClassLoader())));
+            instance.email = in.readValue((Object.class.getClassLoader()));
+            instance.country = in.readValue((Object.class.getClassLoader()));
             instance.authToken = ((String) in.readValue((String.class.getClassLoader())));
-            instance.phoneNo = ((Object) in.readValue((Object.class.getClassLoader())));
+            instance.phoneNo = in.readValue((Object.class.getClassLoader()));
             instance.profilePicture = ((ProfilePicture) in.readValue((ProfilePicture.class.getClassLoader())));
             instance.emergencyContactPerson = ((String) in.readValue((String.class.getClassLoader())));
-            instance.emergencyContactPhone = ((Object) in.readValue((Object.class.getClassLoader())));
+            instance.emergencyContactPhone = in.readValue((Object.class.getClassLoader()));
             instance.numberOfRuns = ((Long) in.readValue((Long.class.getClassLoader())));
-            instance.lastRank = ((Object) in.readValue((Object.class.getClassLoader())));
+            instance.lastRank = in.readValue((Object.class.getClassLoader()));
             return instance;
         }
 

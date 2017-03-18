@@ -177,7 +177,7 @@ public class FullScreenImageActivity extends AppCompatActivity {
 
     private void loadImageFromUrl(){
 
-        imageLoader.getInstance().loadImage(imageUrl,ImageLoadUtils.getDisplayImageOptions() ,new ImageLoadingListener() {
+        ImageLoader.getInstance().loadImage(imageUrl,ImageLoadUtils.getDisplayImageOptions() ,new ImageLoadingListener() {
             @Override
             public void onLoadingStarted(String imageUri, View view) {
                 Log.i(TAG,"On loading started.");
