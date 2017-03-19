@@ -20,6 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.crash.FirebaseCrash;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.GroomifyUser;
 import com.groomify.hollavirun.entities.Mission;
@@ -365,6 +367,8 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         }
     }
 
+    private boolean isRaceLocked = false;
+
     private class GroomifyJoinRaceTask extends AsyncTask<String, String, JoinRaceResponse> {
 
         @Override
@@ -373,7 +377,7 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
             String fbId = SharedPreferencesHelper.getFbId(SelectRaceActivity.this);
             try {
                 Response<JoinRaceResponse> joinRaceResponse = client.getApiService().joinRace(fbId, authToken, params[0]).execute();
-
+                isRaceLocked = false;
                 if(joinRaceResponse.isSuccessful()){
                     Log.i(TAG, "Calling join race api success");
                     String  runnerId = ""+joinRaceResponse.body().getRunnerId();
@@ -399,7 +403,12 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                     }
 
                 }else{
+
                     Log.i(TAG, "Calling join race api failed, race id: "+params[0]+", response code: "+joinRaceResponse.code()+", error body: "+joinRaceResponse.errorBody().string());
+                    if(joinRaceResponse.code() == 403){
+                        isRaceLocked = true;
+                    }
+
                     return null;
                 }
             } catch (Exception e) {
@@ -450,7 +459,11 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
                     innerRealm.close();
                 }
             }else{
-                Toast.makeText(SelectRaceActivity.this, "Unable to join race. Please try again.", Toast.LENGTH_SHORT).show();
+                if(isRaceLocked){
+                    Toast.makeText(SelectRaceActivity.this, "This race is not available at this moment. Please check back in a while.", Toast.LENGTH_LONG).show();
+                }else{
+                    Toast.makeText(SelectRaceActivity.this, "Unable to join race. Please try again.", Toast.LENGTH_SHORT).show();
+                }
                 changeViewState(false);
             }
 
