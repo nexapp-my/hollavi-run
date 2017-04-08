@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>use_default_map_coordinate</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>use_default_coupon_list</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>use_api_for_sos</key>
+        <value>false</value>
+    </entry>
+    <entry>
+        <key>first_aid_contact_no</key>
+        <value>601117572773</value>
+    </entry>
+</defaultsMap>

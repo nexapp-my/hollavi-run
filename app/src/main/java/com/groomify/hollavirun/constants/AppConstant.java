@@ -70,4 +70,10 @@ public class AppConstant {
     public static final String CAMERA_IMAGE_DIRECTORY = "CAMERA";
 
     public static LatLng currentLocation = null;
+
+    public static final String FIREBASE_REMOTE_CONF_USE_DEFAULT_MAP_COORDINATE = "use_default_map_coordinate";
+    public static final String FIREBASE_REMOTE_CONF_USE_DEFAULT_COUPON_LIST = "use_default_coupon_list";
+    public static final String FIREBASE_REMOTE_CONF_USE_API_FOR_SOS = "use_api_for_sos";
+    public static final String FIREBASE_REMOTE_CONF_FIRSTAID_CONTACT_NUMBER = "first_aid_contact_no";
+
 }

@@ -16,6 +16,7 @@ import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,7 @@ public class CouponArrayAdapter extends ArrayAdapter<Coupon> {
     private final Context context;
     private final List<Coupon> values;
 
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
     public CouponArrayAdapter(Context context, List<Coupon> values) {
         super(context, R.layout.item_coupon, values);
         this.context = context;
@@ -55,8 +57,18 @@ public class CouponArrayAdapter extends ArrayAdapter<Coupon> {
             long millisDiff = coupon.getExpirationTime().getTime() - Calendar.getInstance().getTime().getTime();
 
             if(millisDiff > 0){
-                long hours = TimeUnit.MICROSECONDS.toHours(millisDiff);
-                couponExpirationTextView.setText("Expires in "+hours+" hours");
+                long hours = TimeUnit.MILLISECONDS.toHours(millisDiff);
+                if(hours > 24){
+                    couponExpirationTextView.setText("Expiry Date: "+sdf.format(coupon.getExpirationTime()));
+                }else{
+                    if(hours > 0){
+                        couponExpirationTextView.setText("Expires in "+hours+" hours");
+                    }else{
+                        long minutes = TimeUnit.MILLISECONDS.toMinutes(millisDiff);
+                        couponExpirationTextView.setText("Expires in "+minutes+" minutes");
+                    }
+                }
+
             }else{
                 couponExpirationTextView.setText("Expired");
             }

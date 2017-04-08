@@ -22,10 +22,13 @@ import com.groomify.hollavirun.utils.ImageLoadUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 public class CouponDetailsActivity extends AppCompatActivity {
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
 
     Coupon coupon;
 
@@ -35,6 +38,7 @@ public class CouponDetailsActivity extends AppCompatActivity {
     private ImageView couponImageHeader;
     private TextView couponName;
     private TextView expirationTime;
+    private TextView couponDesc;
 
 
     private final static String TAG = CouponDetailsActivity.class.getSimpleName();
@@ -72,19 +76,35 @@ public class CouponDetailsActivity extends AppCompatActivity {
         couponImageHeader = (ImageView) findViewById(R.id.coupon_header_image_view);
         couponName = (TextView) findViewById(R.id.coupon_detail_title_text_view);
         expirationTime = (TextView) findViewById(R.id.coupon_details_expiration_text_view);
+        couponDesc = (TextView) findViewById(R.id.coupon_detail_desc_text_view);
 
-        ImageLoader.getInstance().displayImage(coupon.getCoverPhotoUrl(), couponImageHeader, ImageLoadUtils.getDisplayImageOptions());
+        if(coupon.getResourceId() > 0){
+            couponImageHeader.setImageResource(coupon.getResourceId());
+        }else{
+            ImageLoader.getInstance().displayImage(coupon.getCoverPhotoUrl(), couponImageHeader, ImageLoadUtils.getDisplayImageOptions());
+        }
 
         couponName.setText(coupon.getName());
+        couponDesc.setText(coupon.getDescription());
+
 
         long millisDiff = coupon.getExpirationTime().getTime() - Calendar.getInstance().getTime().getTime();
 
         if(millisDiff > 0){
-            long hours = TimeUnit.MICROSECONDS.toHours(millisDiff);
-            expirationTime.setText("Expires in "+hours+" hours");
+            long hours = TimeUnit.MILLISECONDS.toHours(millisDiff);
+            if(hours > 24){
+                expirationTime.setText("Expiry Date: "+sdf.format(coupon.getExpirationTime()));
+            }else{
+                if(hours > 0){
+                    expirationTime.setText("Expires in "+hours+" hours");
+                }else{
+                    long minutes = TimeUnit.MILLISECONDS.toMinutes(millisDiff);
+                    expirationTime.setText("Expires in "+minutes+" minutes");
+                }
+            }
+
         }else{
             expirationTime.setText("Expired");
-            expired = true;
         }
 
         toggleButton();

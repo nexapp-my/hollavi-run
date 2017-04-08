@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.util.TypedValue;
@@ -17,6 +18,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.crash.FirebaseCrash;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.groomify.hollavirun.BuildConfig;
 import com.groomify.hollavirun.CouponDetailsActivity;
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.adapter.CouponArrayAdapter;
@@ -27,6 +34,7 @@ import com.groomify.hollavirun.entities.Ranking;
 import com.groomify.hollavirun.rest.RestClient;
 import com.groomify.hollavirun.rest.models.response.CouponsResponse;
 import com.groomify.hollavirun.rest.models.response.RaceRankingResponse;
+import com.groomify.hollavirun.utils.AppUtils;
 import com.groomify.hollavirun.utils.BitmapUtils;
 import com.groomify.hollavirun.utils.RealmUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
@@ -35,6 +43,7 @@ import java.io.ByteArrayOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +51,9 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import retrofit2.Response;
+
+import static com.groomify.hollavirun.constants.AppConstant.FIREBASE_REMOTE_CONF_USE_DEFAULT_COUPON_LIST;
+import static com.groomify.hollavirun.constants.AppConstant.FIREBASE_REMOTE_CONF_USE_DEFAULT_MAP_COORDINATE;
 
 
 public class CouponsListFragment extends ListFragment {
@@ -64,6 +76,10 @@ public class CouponsListFragment extends ListFragment {
 
     private  CouponArrayAdapter couponArrayAdapter;
     private Long raceId;
+
+    private FirebaseRemoteConfig mFirebaseRemoteConfig;
+
+    boolean useDefaultCouponList = true;
 
     public CouponsListFragment() {
 
@@ -92,9 +108,46 @@ public class CouponsListFragment extends ListFragment {
                 new Coupon(4, "Groomify T-Shirt", "Signature T-Shirt", raceFinishDate, false, R.drawable.t_shirt)
         };*/
 
+        fetchRemoteConfig();
+
         couponArrayAdapter = new CouponArrayAdapter(this.getContext(), coupons);
         setListAdapter(couponArrayAdapter);
 
+    }
+
+    private void fetchRemoteConfig(){
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                .build();
+
+        mFirebaseRemoteConfig.setConfigSettings(configSettings);
+
+        mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
+
+        useDefaultCouponList = mFirebaseRemoteConfig.getBoolean(FIREBASE_REMOTE_CONF_USE_DEFAULT_COUPON_LIST);
+        long cacheExpiration = 3600; // 1 hour in seconds.
+        // If your app is using developer mode, cacheExpiration is set to 0, so each fetch will
+        // retrieve values from the service.
+        if (mFirebaseRemoteConfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
+            cacheExpiration = 0;
+        }
+
+        mFirebaseRemoteConfig.fetch(cacheExpiration)
+                .addOnCompleteListener(this.getActivity(), new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.i(TAG, "Firebase remote config fetched.");
+                            mFirebaseRemoteConfig.activateFetched();
+                        } else {
+                            Log.i(TAG, "Unable to fetch Firebase remote config.");
+                            FirebaseCrash.log("Unable to fetch Firebase remote config.");
+                        }
+
+                    }
+                });
     }
 
     @Override
@@ -197,11 +250,19 @@ public class CouponsListFragment extends ListFragment {
 
     private void reloadCouponList(){
         loadingProgress.setVisibility(View.GONE);
-        RealmResults<Coupon> couponRealmResults = realm.where(Coupon.class).findAll();
-
         coupons.clear();
         couponArrayAdapter.clear();
-        coupons.addAll(couponRealmResults);
+
+        if(!useDefaultCouponList){
+            RealmResults<Coupon> couponRealmResults = realm.where(Coupon.class).findAll();
+            coupons.addAll(couponRealmResults);
+        }else{
+            coupons.addAll(Arrays.asList(AppUtils.getDefaultCoupon()));
+
+        }
+
+
+
         couponArrayAdapter.notifyDataSetChanged();
 
         if(coupons.size() == 0){

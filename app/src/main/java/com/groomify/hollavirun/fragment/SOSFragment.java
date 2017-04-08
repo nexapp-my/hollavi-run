@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
@@ -20,6 +21,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.crash.FirebaseCrash;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.groomify.hollavirun.BuildConfig;
 import com.groomify.hollavirun.R;
 import com.groomify.hollavirun.SOSActivity;
 import com.groomify.hollavirun.constants.AppConstant;
@@ -43,10 +50,16 @@ import java.util.List;
 import io.realm.Realm;
 import retrofit2.Response;
 
+import static com.groomify.hollavirun.constants.AppConstant.FIREBASE_REMOTE_CONF_FIRSTAID_CONTACT_NUMBER;
+import static com.groomify.hollavirun.constants.AppConstant.FIREBASE_REMOTE_CONF_USE_API_FOR_SOS;
+import static com.groomify.hollavirun.constants.AppConstant.FIREBASE_REMOTE_CONF_USE_DEFAULT_MAP_COORDINATE;
+
 public class SOSFragment extends Fragment {
 
     private RestClient client = new RestClient();
     private final static String TAG = SOSFragment.class.getSimpleName();
+
+    private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
     private View firstAidPanel;
     private View emergencyContactPanel;
@@ -77,6 +90,8 @@ public class SOSFragment extends Fragment {
 
     private Dialog loadingDialog;
 
+    private boolean useAPIForSOS = false;
+    private String sosNumber = "+601117572773";
     public SOSFragment() {
         // Required empty public constructor
     }
@@ -105,8 +120,45 @@ public class SOSFragment extends Fragment {
         dialogContentFirstAid = getResources().getString(R.string.sos_call_dialog_first_aid);
         dialogContentGroomifySupport = getResources().getString(R.string.sos_call_dialog_support);
         dialogContentEmergencyContact = getResources().getString(R.string.sos_call_dialog_emergency_contact);
-
+        fetchRemoteConfig();
         super.onCreate(savedInstanceState);
+    }
+
+    private void fetchRemoteConfig(){
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                .build();
+
+        mFirebaseRemoteConfig.setConfigSettings(configSettings);
+
+        mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
+
+        useAPIForSOS = mFirebaseRemoteConfig.getBoolean(FIREBASE_REMOTE_CONF_USE_API_FOR_SOS);
+        sosNumber = mFirebaseRemoteConfig.getString(FIREBASE_REMOTE_CONF_FIRSTAID_CONTACT_NUMBER);
+
+        long cacheExpiration = 3600; // 1 hour in seconds.
+        // If your app is using developer mode, cacheExpiration is set to 0, so each fetch will
+        // retrieve values from the service.
+        if (mFirebaseRemoteConfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
+            cacheExpiration = 0;
+        }
+
+        mFirebaseRemoteConfig.fetch(cacheExpiration)
+                .addOnCompleteListener(this.getActivity(), new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.i(TAG, "Firebase remote config fetched.");
+                            mFirebaseRemoteConfig.activateFetched();
+                        } else {
+                            Log.i(TAG, "Unable to fetch Firebase remote config.");
+                            FirebaseCrash.log("Unable to fetch Firebase remote config.");
+                        }
+
+                    }
+                });
     }
 
     private void setupEmergencyContact(){
@@ -141,8 +193,11 @@ public class SOSFragment extends Fragment {
         firstAidPanel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //prompCallConfirmationDialog(currentRaces.getFirstAid(), dialogContentFirstAid);
-                prompRequestFirstAidConfirmation();
+                if(useAPIForSOS){
+                    prompRequestFirstAidConfirmation();
+                }else{
+                    prompCallConfirmationDialog(sosNumber, dialogContentFirstAid);
+                }
             }
         });
 

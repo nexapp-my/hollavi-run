@@ -104,13 +104,13 @@
     </RelativeLayout>
 
     <ImageView
+        android:id="@+id/mini_map_image_view"
         android:layout_width="183dp"
         android:layout_height="183dp"
-        app:srcCompat="@drawable/ic_map_mini"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:id="@+id/mini_map_image_view"
-        android:layout_marginTop="25dp" />
+        android:layout_marginTop="25dp"
+        app:srcCompat="@drawable/race_logo" />
 
     <TextView
         android:text="GROOMIFY RUN 2016"

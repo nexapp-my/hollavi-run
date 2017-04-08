@@ -5,11 +5,15 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.widget.Spinner;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.groomify.hollavirun.R;
+import com.groomify.hollavirun.entities.Coupon;
 import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.entities.Team;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -143,7 +147,7 @@ public class AppUtils {
                 Mission.MISSION_TYPE_SCAN_ONLY,
                 Mission.MISSION_TYPE_SCAN_AND_UPLOAD_ONE_PHOTO,
                 Mission.MISSION_TYPE_SCAN_AND_ANSWER_QUESTION,
-                Mission.MISSION_TYPE_SCAN_AND_UPLOAD_THREE_PHOTO
+                Mission.MISSION_TYPE_SCAN_AND_UPLOAD_ONE_PHOTO
     };
 
     private static int missionCoverResourceId[] = {
@@ -178,5 +182,113 @@ public class AppUtils {
 
     public static int getPixelFromDIP(Context context, float targetDIP){
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, targetDIP, context.getResources().getDisplayMetrics());
+    }
+
+
+    public static LatLng[] getDefaultRaceTrack(){
+        return new LatLng[]{
+                new LatLng(3.0198028,101.579475),
+
+                new LatLng(3.019686,101.579285),
+                new LatLng(3.0206833,101.57884),
+                new LatLng(3.0215333,101.57869),
+                new LatLng(3.0216527,101.579414),
+                new LatLng(3.021661,101.58014),
+                new LatLng(3.021661,101.58098),
+                new LatLng(3.0212166,101.5811),
+                new LatLng(3.0208473,101.581116),
+                new LatLng(3.020461,101.581154),
+
+
+                new LatLng(3.0203333,101.58103),
+                new LatLng(3.0199916,101.580864),
+                new LatLng(3.0198028,101.579475),
+                new LatLng(3.017464,101.5805),
+                new LatLng(3.0159805,101.582115),
+                new LatLng(3.01505,101.58224),
+                new LatLng(3.0109973,101.582115),
+                new LatLng(3.0094972,101.58172),
+                new LatLng(3.0083194,101.5793),
+                new LatLng(3.009175,101.57844),
+                new LatLng(3.0112,101.577484),
+                new LatLng(3.013125,101.57732),
+                new LatLng(3.0153527,101.5773),
+                new LatLng(3.016675,101.57679),
+                new LatLng(3.0180361,101.57577),
+                /*new LatLng(3.0183055,101.57535),
+                new LatLng(3.016825,101.576866),
+                new LatLng(3.0146167,101.57743),
+                new LatLng(3.0122056,101.57744),
+                new LatLng(3.0085778,101.5789),
+                new LatLng(3.0089056,101.58036),
+                new LatLng(3.010089,101.58182),
+                new LatLng(3.0134306,101.58211),
+                new LatLng(3.0157027,101.58215),
+                new LatLng(3.019686,101.579285),
+                new LatLng(3.0206833,101.57884),
+                new LatLng(3.0215333,101.57869),
+                new LatLng(3.0216527,101.579414),
+                new LatLng(3.021661,101.58014),
+                new LatLng(3.021661,101.58098),
+                new LatLng(3.0208473,101.581116),
+                new LatLng(3.020461,101.581154),*/
+        };
+    }
+
+    public static LatLng[] getDefaultMisionLatLng(){
+        return new LatLng[]{
+                new LatLng(3.0203333,101.58103),
+                new LatLng(3.0198028,101.579475),
+                new LatLng(3.0180361,101.57577),
+                new LatLng(3.0146167,101.57743),
+                new LatLng(3.0212166,101.5811)
+        };
+    }
+
+    public static Coupon[] getDefaultCoupon(){
+
+        Coupon[] coupons =new Coupon[4];
+
+        Coupon talentsTechCoupon = new Coupon();
+        talentsTechCoupon.setName("Your Talents Discovering Center");
+        talentsTechCoupon.setDescription("Talents Assessment 20% Discount Voucher\nContact: 012-2926228\nVenue: Bandar Kinrara, Puchong");
+        talentsTechCoupon.setExpirationTime(new GregorianCalendar(2017, 11, 31, 23, 59, 59).getTime());
+        talentsTechCoupon.setRedeemed(false);
+        talentsTechCoupon.setId(1);
+        talentsTechCoupon.setResourceId(R.drawable.coupon_talents_tech);
+
+        coupons[0] = talentsTechCoupon;
+
+        Coupon elitezCoupon = new Coupon();
+        elitezCoupon.setName("Mixed Martial Arts Fitness Academy");
+        elitezCoupon.setDescription("Discount Voucher of 30% for Any Membership package purchase with Free Limited Edition Elitez Fight Tee worth RM80\n*Terms & Conditions applied.\nContact: 017-3699999\nVenue: Sg. Jati Klang, Setia Alam, Kelana Jaya PJ");
+        elitezCoupon.setExpirationTime(new GregorianCalendar(2017,6, 31, 23, 59, 59).getTime());
+        elitezCoupon.setRedeemed(false);
+        elitezCoupon.setId(2);
+        elitezCoupon.setResourceId(R.drawable.coupon_elitez);
+
+        coupons[1] = elitezCoupon;
+
+        Coupon unClubCoupon = new Coupon();
+        unClubCoupon.setName("Street Dance Fitness & Dance Academy");
+        unClubCoupon.setDescription("RM99/month for Unlimited Street Dance Fitness classes\n*Terms & Conditions applied.\nContact: 017-4021115\nVenue: Jalan Puteri, Puchong");
+        unClubCoupon.setExpirationTime(new GregorianCalendar(2017, 3, 30, 23, 59, 59).getTime());
+        unClubCoupon.setRedeemed(false);
+        unClubCoupon.setId(3);
+        unClubCoupon.setResourceId(R.drawable.coupon_un_club);
+
+        coupons[2] = unClubCoupon;
+
+        Coupon coffee1986Coupon = new Coupon();
+        coffee1986Coupon.setName("Coffee Shop. Restaurant. Espresso Bar");
+        coffee1986Coupon.setDescription("Cash Voucher RM10\n*Terms & Conditions applied.\nContact: 03-33592809\nVenue: Botanic & Setia Alam");
+        coffee1986Coupon.setExpirationTime(new GregorianCalendar(2017, 4, 30, 23, 59, 59).getTime());
+        coffee1986Coupon.setRedeemed(false);
+        coffee1986Coupon.setId(4);
+        coffee1986Coupon.setResourceId(R.drawable.coupon_1986_coffee);
+
+        coupons[3] = coffee1986Coupon;
+
+        return coupons;
     }
 }

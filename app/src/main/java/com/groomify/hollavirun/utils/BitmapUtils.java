@@ -55,7 +55,7 @@ public class BitmapUtils {
     }
 
     public static Bitmap cropBitmap(int targetW, int targetH, String path){
-        Bitmap bitmap = BitmapFactory.decodeFile(path);
+        Bitmap bitmap = loadBitmapFromFile(targetH, targetW, path);
         return cropBitmap(targetW, targetH, bitmap);
     }
 

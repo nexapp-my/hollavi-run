@@ -7,6 +7,7 @@ import android.graphics.PorterDuff;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
 import android.text.InputFilter;
@@ -37,6 +38,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.crash.FirebaseCrash;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.groomify.hollavirun.BuildConfig;
 import com.groomify.hollavirun.LatestUpdateActivity;
 import com.groomify.hollavirun.MissionDetailsActivity;
 import com.groomify.hollavirun.R;
@@ -64,6 +71,8 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import retrofit2.Response;
 
+import static com.groomify.hollavirun.constants.AppConstant.FIREBASE_REMOTE_CONF_USE_DEFAULT_MAP_COORDINATE;
+
 /**
  * Created by Valkyrie1988 on 9/18/2016.
  */
@@ -77,6 +86,8 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
     private HorizontalAdapter horizontalAdapter;*/
 
     //public boolean isFirstTimeInitialized = true;
+
+    private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
     private View latestNewsFloatPane = null;
     private TextView latestNewsTitle= null;
@@ -110,6 +121,8 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
 
     int previousClickedMarker = -1;
 
+    boolean useDefaultMapCoordinate = true;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "On create view");
@@ -124,6 +137,8 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
                 .build();
 
         realm = Realm.getInstance(config);
+        fetchRemoteConfig();
+
         // Create global configuration and initialize ImageLoader with this config
         ImageLoadUtils.initImageLoader(this.getContext());
         maxBibNo = getResources().getInteger(R.integer.max_bib_no);
@@ -221,17 +236,21 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN: {
                         ImageView view = (ImageView) v;
-                        //overlay is black with transparency of 0x77 (119)
-                        view.getDrawable().setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
-                        view.invalidate();
+                        if(view != null) {
+                            //overlay is black with transparency of 0x77 (119)
+                            view.getDrawable().setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                            view.invalidate();
+                        }
                         break;
                     }
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL: {
                         ImageView view = (ImageView) v;
-                        //clear the overlay
-                        view.getDrawable().clearColorFilter();
-                        view.invalidate();
+                        if(view  != null) {
+                            //clear the overlay
+                            view.getDrawable().clearColorFilter();
+                            view.invalidate();
+                        }
                         break;
                     }
                 }
@@ -296,6 +315,41 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
         }*/
     }
 
+    private void fetchRemoteConfig(){
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                .build();
+
+        mFirebaseRemoteConfig.setConfigSettings(configSettings);
+
+        mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
+
+        useDefaultMapCoordinate = mFirebaseRemoteConfig.getBoolean(FIREBASE_REMOTE_CONF_USE_DEFAULT_MAP_COORDINATE);
+        long cacheExpiration = 3600; // 1 hour in seconds.
+        // If your app is using developer mode, cacheExpiration is set to 0, so each fetch will
+        // retrieve values from the service.
+        if (mFirebaseRemoteConfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
+            cacheExpiration = 0;
+        }
+
+        mFirebaseRemoteConfig.fetch(cacheExpiration)
+                .addOnCompleteListener(this.getActivity(), new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.i(TAG, "Firebase remote config fetched.");
+                            mFirebaseRemoteConfig.activateFetched();
+                        } else {
+                            Log.i(TAG, "Unable to fetch Firebase remote config.");
+                            FirebaseCrash.log("Unable to fetch Firebase remote config.");
+                        }
+
+                    }
+                });
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -316,14 +370,23 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
 
     @Override
     public void onMapReady(GoogleMap map) {
+        googleMap = map;
 
+        if(useDefaultMapCoordinate){
+            renderDefaultMapDetail();
+        }else{
+            renderMapDetailFromRaceDetail();
+        }
 
+    }
+
+    private void renderMapDetailFromRaceDetail(){
         try {
-            googleMap = map;
-            // Constrain the camera target to the Adelaide bounds.
-            map.setLatLngBoundsForCameraTarget(MALAYSIA);
 
-            boolean success = map.setMapStyle(
+            // Constrain the camera target to the Adelaide bounds.
+            googleMap.setLatLngBoundsForCameraTarget(MALAYSIA);
+
+            boolean success = googleMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
                             getContext(), R.raw.style_json));
 
@@ -331,18 +394,18 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
                 Log.e(TAG, "Style parsing failed.");
             }
 
-            map.getUiSettings().setZoomGesturesEnabled(true);
+            googleMap.getUiSettings().setZoomGesturesEnabled(true);
             if (!AppPermissionHelper.isLocationPermissionGranted(context)) {
                 Log.i(TAG,"Location permission is not granted.");
             }else{
-                map.setMyLocationEnabled(true);
+                googleMap.setMyLocationEnabled(true);
             }
 
             int i = 0;
             for(Mission_ mission_: raceDetailResponse.getMissions()){
                 Double missionLat = Double.parseDouble(mission_.getLat());
                 Double missionLng = Double.parseDouble(mission_.getLng());
-                Marker marker = map.addMarker(new MarkerOptions()
+                Marker marker = googleMap.addMarker(new MarkerOptions()
                         .position(new LatLng(missionLat, missionLng))
                         .title("Mission "+decimalFormat.format((i + 1))+": "+mission_.getTitle())
                         .snippet(mission_.getDescription())
@@ -381,9 +444,71 @@ public class MainFragment extends Fragment implements OnMapReadyCallback, Google
             Log.i(TAG, "Zoom center : "+zoomCenterLat+","+zoomCenterLng);
             Log.i(TAG, "Zoom level: "+zoomLevel);
 
-             // Get back the mutable Polyline
-            Polyline polyline = map.addPolyline(rectOptions);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(zoomCenterLat, zoomCenterLng), zoomLevel));
+
+
+            // Get back the mutable Polyline
+            Polyline polyline = googleMap.addPolyline(rectOptions);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(zoomCenterLat, zoomCenterLng), zoomLevel));
+
+            googleMap.setOnMyLocationChangeListener(myLocationChangeListener);
+            googleMap.setOnMarkerClickListener(this);
+
+        } catch (Resources.NotFoundException e) {
+            Log.e(TAG, "Can't find style. Error: ", e);
+        } catch ( java.lang.SecurityException e){
+            Log.w(TAG, "Application does not have location permission.", e);
+        } catch (Exception ex){
+            Log.e(TAG, "Failed to instantiate google map.", ex);
+        }
+
+    }
+
+    private void renderDefaultMapDetail(){
+        try {
+
+            // Constrain the camera target to the Adelaide bounds.
+            googleMap.setLatLngBoundsForCameraTarget(MALAYSIA);
+
+            boolean success = googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            getContext(), R.raw.style_json));
+
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.");
+            }
+
+            googleMap.getUiSettings().setZoomGesturesEnabled(true);
+            if (!AppPermissionHelper.isLocationPermissionGranted(context)) {
+                Log.i(TAG,"Location permission is not granted.");
+            }else{
+                googleMap.setMyLocationEnabled(true);
+            }
+
+            /*LatLng[] defaultMissionCoordinate = AppUtils.getDefaultMisionLatLng();
+            int i = 0;
+            for(Mission_ mission_: raceDetailResponse.getMissions()){
+
+                Marker marker = googleMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(defaultMissionCoordinate[i].latitude, defaultMissionCoordinate[i].longitude))
+                        .title("Mission "+decimalFormat.format((i + 1))+": "+mission_.getTitle())
+                        .snippet(mission_.getDescription())
+                );
+                marker.setTag(i);
+                i++;
+            }*/
+
+            PolylineOptions rectOptions = new PolylineOptions().color(ResourcesCompat.getColor(getResources(), R.color.rustyRed, null));
+
+            LatLng[] defaultRaceTrackCoordinate = AppUtils.getDefaultRaceTrack();
+
+            for(LatLng latLng: defaultRaceTrackCoordinate){
+                rectOptions.add(latLng);
+            }
+            int zoomLevel = raceDetailResponse.getMapInfo().getZoomLevel();
+
+            // Get back the mutable Polyline
+            Polyline polyline = googleMap.addPolyline(rectOptions);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(3.014813, 101.579825), 15));
 
             googleMap.setOnMyLocationChangeListener(myLocationChangeListener);
             googleMap.setOnMarkerClickListener(this);
