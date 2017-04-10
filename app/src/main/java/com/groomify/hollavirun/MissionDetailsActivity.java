@@ -30,6 +30,7 @@ import com.facebook.share.model.ShareHashtag;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
+import com.google.firebase.crash.FirebaseCrash;
 import com.groomify.hollavirun.constants.AppConstant;
 import com.groomify.hollavirun.entities.Mission;
 import com.groomify.hollavirun.entities.Team;
@@ -165,6 +166,7 @@ public class MissionDetailsActivity extends AppCompatActivity {
             public void onSuccess(Sharer.Result result) {
                 Toast.makeText(MissionDetailsActivity.this, "Your photo has been shared to facebook.", Toast.LENGTH_SHORT).show();
                 submitted = SharedPreferencesHelper.isMissionSubmitted(MissionDetailsActivity.this, raceId, mission.getId());
+                toggleMissionPanel();
             }
 
             @Override
@@ -196,6 +198,8 @@ public class MissionDetailsActivity extends AppCompatActivity {
 
         createView();
     }
+
+
 
     private void createView(){
         scanQRButton = (Button) findViewById(R.id.scan_qr_button);
@@ -855,5 +859,18 @@ public class MissionDetailsActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Maybe Later", null)
                 .show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            unlocked = SharedPreferencesHelper.isMissionUnlocked(this, raceId, mission.getId());
+            submitted = SharedPreferencesHelper.isMissionSubmitted(this, raceId, mission.getId());
+            toggleMissionPanel();
+        }catch (Exception e){
+            FirebaseCrash.logcat(Log.ERROR, TAG, "Exception onResume for mission detail activity.");
+            FirebaseCrash.report(e);
+        }
     }
 }
