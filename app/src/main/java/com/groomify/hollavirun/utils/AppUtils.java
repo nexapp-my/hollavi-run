@@ -215,6 +215,8 @@ public class AppUtils {
                 new LatLng(3.0153527,101.5773),
                 new LatLng(3.016675,101.57679),
                 new LatLng(3.0180361,101.57577),
+                new LatLng(3.018279, 101.574645),
+
                 /*new LatLng(3.0183055,101.57535),
                 new LatLng(3.016825,101.576866),
                 new LatLng(3.0146167,101.57743),
