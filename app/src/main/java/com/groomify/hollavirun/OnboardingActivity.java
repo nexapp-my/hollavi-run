@@ -29,6 +29,7 @@ import com.groomify.hollavirun.rest.models.request.FbUser;
 import com.groomify.hollavirun.rest.models.request.LoginRequest;
 import com.groomify.hollavirun.rest.models.response.LoginResponse;
 import com.groomify.hollavirun.rest.models.response.UserInfoResponse;
+import com.groomify.hollavirun.utils.RealmUtils;
 import com.groomify.hollavirun.utils.SharedPreferencesHelper;
 
 import io.realm.Realm;
@@ -54,7 +55,7 @@ public class OnboardingActivity extends AppCompatActivity {
 
     Context context;
 
-    private Realm realm;
+    //private Realm realm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +68,7 @@ public class OnboardingActivity extends AppCompatActivity {
                 .deleteRealmIfMigrationNeeded()
                 .build();
 
-        realm = Realm.getInstance(config);
+
 
 
         if(getSupportActionBar() != null)
@@ -209,33 +210,45 @@ public class OnboardingActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(UserInfoResponse userInfoResponse) {
+        protected void onPostExecute(final UserInfoResponse userInfoResponse) {
             if(userInfoResponse != null){
                 loginButton.setVisibility(View.GONE);
 
-                realm.beginTransaction();
-                GroomifyUser groomifyUser = new GroomifyUser();
-                groomifyUser.setAuthToken(userInfoResponse.getAuthToken());
-                groomifyUser.setCountry(userInfoResponse.getCountry());
-                groomifyUser.setEmail(userInfoResponse.getEmail());
-                groomifyUser.setEmergencyContactName(userInfoResponse.getEmergencyContactPerson());
-                groomifyUser.setEmergencyContactPhoneNo(userInfoResponse.getEmergencyContactPhone());
-                groomifyUser.setFacebookId(userInfoResponse.getFbId());
-                groomifyUser.setId(new Long(userInfoResponse.getId())); //Unsafe if user id null.
-                groomifyUser.setLastRank(userInfoResponse.getLastRank());
-                groomifyUser.setName(userInfoResponse.getName());
-                groomifyUser.setPhoneNo(userInfoResponse.getPhoneNo());
-                groomifyUser.setTotalRuns(userInfoResponse.getNumberOfRuns());
-                groomifyUser.setProfilePictureUrl(userInfoResponse.getProfilePicture().getUrl());
-                if(userInfoResponse.getProfilePicture() != null && userInfoResponse.getProfilePicture().getUrl() != null  &&userInfoResponse.getProfilePicture().getUrl().trim().length() > 0){
-                    SharedPreferencesHelper.savePreferences(OnboardingActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_PROFILE_PIC_UPDATED, true);
+                Realm innerRealm = Realm.getInstance(RealmUtils.getRealmConfiguration());
+
+                try {
+                    innerRealm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            GroomifyUser groomifyUser = new GroomifyUser();
+                            groomifyUser.setAuthToken(userInfoResponse.getAuthToken());
+                            groomifyUser.setCountry(userInfoResponse.getCountry());
+                            groomifyUser.setEmail(userInfoResponse.getEmail());
+                            groomifyUser.setEmergencyContactName(userInfoResponse.getEmergencyContactPerson());
+                            groomifyUser.setEmergencyContactPhoneNo(userInfoResponse.getEmergencyContactPhone());
+                            groomifyUser.setFacebookId(userInfoResponse.getFbId());
+                            groomifyUser.setId(new Long(userInfoResponse.getId())); //Unsafe if user id null.
+                            groomifyUser.setLastRank(userInfoResponse.getLastRank());
+                            groomifyUser.setName(userInfoResponse.getName());
+                            groomifyUser.setPhoneNo(userInfoResponse.getPhoneNo());
+                            groomifyUser.setTotalRuns(userInfoResponse.getNumberOfRuns());
+                            groomifyUser.setProfilePictureUrl(userInfoResponse.getProfilePicture().getUrl());
+                            if(userInfoResponse.getProfilePicture() != null && userInfoResponse.getProfilePicture().getUrl() != null  &&userInfoResponse.getProfilePicture().getUrl().trim().length() > 0){
+                                SharedPreferencesHelper.savePreferences(OnboardingActivity.this, SharedPreferencesHelper.PreferenceValueType.BOOLEAN, AppConstant.PREFS_PROFILE_PIC_UPDATED, true);
+                            }
+                            groomifyUser.setFacebookId(userInfoResponse.getFbId());
+                            realm.copyToRealmOrUpdate(groomifyUser);
+                            SharedPreferencesHelper.savePreferences(OnboardingActivity.this, SharedPreferencesHelper.PreferenceValueType.LONG, AppConstant.PREFS_USER_ID, new Long(userInfoResponse.getId()));
+                            Log.i(TAG, "User info saved into realm. "+groomifyUser);
+
+                        }
+                    });
+                }finally {
+                    innerRealm.close();
                 }
-                groomifyUser.setFacebookId(userInfoResponse.getFbId());
-                realm.copyToRealmOrUpdate(groomifyUser);
-                realm.commitTransaction();
-                SharedPreferencesHelper.savePreferences(OnboardingActivity.this, SharedPreferencesHelper.PreferenceValueType.LONG, AppConstant.PREFS_USER_ID, new Long(userInfoResponse.getId()));
-                Log.i(TAG, "User info saved into realm. "+groomifyUser);
+
                 launchRaceSelectionScreen();
+
             }else{
                 loginButton.setEnabled(true);
                 Toast.makeText(OnboardingActivity.this, "Failed to login to groomify services", Toast.LENGTH_SHORT).show();
@@ -276,6 +289,5 @@ public class OnboardingActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        realm.close();
     }
 }

@@ -57,6 +57,8 @@ public class RankingListFragment extends ListFragment {
 
     Long raceId;
     Long userId;
+    String authToken;
+    String fbId;
 
     public RankingListFragment() {
         // Required empty public constructor
@@ -81,6 +83,9 @@ public class RankingListFragment extends ListFragment {
 
         userId = SharedPreferencesHelper.getUserId(getContext());
 
+
+        authToken = SharedPreferencesHelper.getAuthToken(getContext());
+        fbId = SharedPreferencesHelper.getFbId(getContext());
 /*
         // set up a Realm change listener
         realmChangeListener = new RealmChangeListener<RealmResults<Ranking>>() {
@@ -160,8 +165,7 @@ public class RankingListFragment extends ListFragment {
 
         @Override
         protected RaceRankingResponse doInBackground(String... params) {
-            String authToken = SharedPreferencesHelper.getAuthToken(getContext());
-            String fbId = SharedPreferencesHelper.getFbId(getContext());
+
             try {
                 Response<RaceRankingResponse> restResponse = client.getApiService().raceRanking(fbId, authToken, params[0]).execute();
 

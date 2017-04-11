@@ -89,16 +89,6 @@ public class SelectRaceActivity extends AppCompatActivity implements ViewPagerCa
         setContentView(R.layout.activity_select_race);
 
         maxBibNo = getResources().getInteger(R.integer.max_bib_no);
-        //TODO Currently API does not return badge and minimap, waiting API to enhance.
-        Bitmap miniMap = BitmapUtils.cropBitmap(183, 183, BitmapFactory.decodeResource(getResources(), R.drawable.ic_map_mini));
-        Bitmap badge = BitmapUtils.cropBitmap(183, 183, BitmapFactory.decodeResource(getResources(), R.drawable.ic_finisher_badge));
-
-        ByteArrayOutputStream miniMapByteArr = new ByteArrayOutputStream();
-        ByteArrayOutputStream badgeByteArr = new ByteArrayOutputStream();
-
-        miniMap.compress(Bitmap.CompressFormat.PNG, 50, miniMapByteArr);
-        badge.compress(Bitmap.CompressFormat.PNG, 50, badgeByteArr);
-
         viewPagerCarouselView = (ViewPagerCarouselView) findViewById(R.id.carousel_view);
         joinRaceButton = findViewById(R.id.join_race_button);
         runAsGuestButton = (TextView) findViewById(R.id.run_as_guest_button);

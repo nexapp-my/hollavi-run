@@ -81,6 +81,9 @@ public class CouponsListFragment extends ListFragment {
 
     boolean useDefaultCouponList = true;
 
+    String authToken;
+    String fbId;
+
     public CouponsListFragment() {
 
     }
@@ -91,6 +94,9 @@ public class CouponsListFragment extends ListFragment {
 
         raceId = SharedPreferencesHelper.getSelectedRaceId(this.getContext());
         String raceEndTime = SharedPreferencesHelper.getRaceExpirationTime(this.getContext(), raceId);
+
+        authToken = SharedPreferencesHelper.getAuthToken(getContext());
+        fbId = SharedPreferencesHelper.getFbId(getContext());
 
         try {
             raceFinishDate = sdf.parse(raceEndTime);
@@ -200,8 +206,7 @@ public class CouponsListFragment extends ListFragment {
 
         @Override
         protected CouponsResponse doInBackground(String... params) {
-            String authToken = SharedPreferencesHelper.getAuthToken(getContext());
-            String fbId = SharedPreferencesHelper.getFbId(getContext());
+
             try {
                 Response<CouponsResponse> restResponse = client.getApiService().getCoupons(fbId, authToken, params[0]).execute();
 
