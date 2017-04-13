@@ -100,7 +100,7 @@ public class CouponsListFragment extends ListFragment {
 
         try {
             raceFinishDate = sdf.parse(raceEndTime);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             Log.e(TAG, "Unable to parse race expiration date.");
         }
 
